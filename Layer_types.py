@@ -7,7 +7,7 @@ Created on Wed Jul 23 13:09:24 2025
 
 import numpy as np, matplotlib.pyplot as plt
 
-class Layer_excitatory:
+class Leaky_units_exc:
 
     def __init__(self, N, alpha: float, threshold: float, baseline: float):
         """Initializes the neural model.
@@ -64,7 +64,7 @@ class Layer_excitatory:
         self.output = np.maximum(0, self.activity.copy())
         return self.output
     
-class Layer_inhibit(Layer_excitatory):
+class Leaky_units_inh(Leaky_units_exc):
     
     def step(self, inputs):
         """Runs a single timestep, updating activity.
@@ -75,11 +75,11 @@ class Layer_inhibit(Layer_excitatory):
         Returns:
             np.ndarray: negative Updated activity vector.
         """
-        self.activity = super(Layer_inhibit, self).step(inputs)
+        self.activity = super(Leaky_units_inh, self).step(inputs)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         return - self.output
     
-class Layer_excitatory_DA_sensitive(Layer_excitatory):
+class Leaky_units_exc_DA_sensitive(Leaky_units_exc):
     
     def __init__(self, N, alpha: float, threshold: float, baseline: float, ö: float):
         """
@@ -110,7 +110,7 @@ class Layer_excitatory_DA_sensitive(Layer_excitatory):
         self.output = np.maximum(0, self.activity)
         return self.output
     
-class Layer_inhibitory_DA_sensitive(Layer_excitatory_DA_sensitive):
+class Leaky_units_inh_DA_sensitive(Leaky_units_exc_DA_sensitive):
     
     def step(self, inputs):
         """
@@ -122,9 +122,13 @@ class Layer_inhibitory_DA_sensitive(Layer_excitatory_DA_sensitive):
             
             - Returns: negative output given inputs and dopaminergic influences
         """
-        self.activity = super(Layer_inhibitory_DA_sensitive, self).step(inputs, da = 0.0)
+        self.activity = super(Leaky_units_inh_DA_sensitive, self).step(inputs, da = 0.0)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         return - self.output
+
+class Leaky_onset_units():
+    
+    pass
     
 class Basal_Ganglia:
     
@@ -140,9 +144,9 @@ class Basal_Ganglia:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Layer_inhibit(N, alpha, threshold, baseline)
-        self.STNdl = Layer_excitatory(N, alpha, threshold, baseline)
-        self.GPi = Layer_excitatory(N, alpha, threshold, baseline = 0.8)
+        self.DLS = Leaky_units_inh(N, alpha, threshold, baseline)
+        self.STNdl = Leaky_units_exc(N, alpha, threshold, baseline)
+        self.GPi = Leaky_units_inh(N, alpha, threshold, baseline = 0.8)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.matrices = {
