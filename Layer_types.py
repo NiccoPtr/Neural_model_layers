@@ -64,7 +64,7 @@ class Layer_excitatory:
         net_input = np.dot(self.W, self.activity) + inputs
         updated_activity = np.tanh(net_input)
         self.activity += self.alpha * (updated_activity + self.baseline - self.activity)
-        self.output = np.maximum(0, np.tanh(self.activity.copy()))
+        self.output = np.maximum(0, self.activity)
         return self.output
 
     

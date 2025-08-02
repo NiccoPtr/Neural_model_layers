@@ -1,3 +1,5 @@
+import numpy as np
+
 def create_input_levels(input_level_1,
                         input_level_2
                         ) -> list[np.ndarray]:
