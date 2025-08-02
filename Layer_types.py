@@ -57,21 +57,72 @@ class Layer_excitatory:
 
         Returns:
             np.ndarray: Updated activity vector.
-
-        Raises:
-            ValueError: If weights are not set or input vector length is not N.
         """
         net_input = np.dot(self.W, self.activity) + inputs
         updated_activity = np.tanh(net_input)
         self.activity += self.alpha * (updated_activity + self.baseline - self.activity)
-        self.output = np.maximum(0, self.activity)
+        self.output = np.maximum(0, self.activity.copy())
         return self.output
-
     
 class Layer_inhibit(Layer_excitatory):
     
     def step(self, inputs):
+        """Runs a single timestep, updating activity.
+
+        Args:
+            inputs (np.ndarray): Input vector of length N.
+
+        Returns:
+            np.ndarray: negative Updated activity vector.
+        """
         self.activity = super(Layer_inhibit, self).step(inputs)
+        self.output = np.maximum(0, np.tanh(self.activity.copy()))
+        return - self.output
+    
+class Layer_excitatory_DA_sensitive(Layer_excitatory):
+    
+    def __init__(self, N, alpha: float, threshold: float, baseline: float, ö: float):
+        """
+        Initialize layer's sensitivity to dopaminergic influences
+        
+            - Args: N: Number of neurons
+                    alpha: Integration factor
+                    threshold: Firing threshold
+                    baseline: Baseline activity
+                    ö: Dopaminergic sensitivity
+        """
+        super().__init__(N, alpha, threshold, baseline)
+        self.ö = ö
+    
+    def step(self, inputs, da = 0.0):
+        """
+        Runs a single timestep:
+            
+            - Args: np.array() as inputs
+                    np.array() as dopamine input
+                    ö parameter weighting the layer's sensitivity to dopamine, as a float
+            
+            - Returns: output given inputs and dopaminergic influences
+        """
+        net_input = np.dot(self.W, self.activity) + (inputs + (self.ö * da))
+        updated_activity = np.tanh(net_input)
+        self.activity += self.alpha * (updated_activity + self.baseline - self.activity)
+        self.output = np.maximum(0, self.activity)
+        return self.output
+    
+class Layer_inhibitory_DA_sensitive(Layer_excitatory_DA_sensitive):
+    
+    def step(self, inputs):
+        """
+        Runs a single timestep:
+            
+            - Args: np.array() as inputs
+                    np.array() as dopamine input
+                    ö parameter weighting the layer's sensitivity to dopamine, as a float
+            
+            - Returns: negative output given inputs and dopaminergic influences
+        """
+        self.activity = super(Layer_inhibitory_DA_sensitive, self).step(inputs, da = 0.0)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         return - self.output
     
