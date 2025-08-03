@@ -9,8 +9,8 @@ import numpy as np, matplotlib.pyplot as plt
 
 class Leaky_units_exc:
 
-    def __init__(self, N, alpha: float, threshold: float, baseline: float):
-        """Initializes the neural model.
+    def __init__(self, N: int, alpha: float, threshold: float, baseline: float):
+        """Initializes the neural unit.
 
         Args:
             N (int): Number of neurons in the model (must be 2).
@@ -22,7 +22,7 @@ class Leaky_units_exc:
         self.W = np.zeros((N, N))
         self.alpha = alpha
         self.threshold = threshold
-        self.baseline = baseline
+        self.baseline = 0.0
 
     def update_weights(self, W: np.ndarray):
         """Updates the weight matrix.
@@ -126,9 +126,75 @@ class Leaky_units_inh_DA_sensitive(Leaky_units_exc_DA_sensitive):
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         return - self.output
 
-class Leaky_onset_units():
+class Leaky_onset_units_exc():
     
-    pass
+    def __init__(self, W_uo: np.array(), W_ui: np.array(), alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
+        """
+        Initialize values for both uo and ui components
+        
+        Args:
+            W_uo - W_ui: weights for intraconnection for each component.
+            alpha_uo - alpha_ui (float): Learning rate for activity update for each component.
+            baseline_uo - baseline_ui: resting state activity level for each component
+        """
+        
+        self.W_uo = None
+        self.W_ui = None
+        self.alpha_uo = alpha_uo
+        self.alpha_ui = alpha_ui
+        self.baseline_uo = 0.0
+        self.baseline_ui = 0.0
+        
+    def update_weights(self, W: np.array()):
+        """ 
+        Update weight matrix for both uo and ui components
+        
+        Args:
+            - np.array() single value: intraconnection within each component (uo, ui)
+        """
+        self.W = W
+        
+    def reset_activity(self):
+        """Resets neuron activity.
+
+        Args:
+            start_activity (np.ndarray): Initial activity vector of length N.
+
+        Raises:
+            ValueError: If the start activity vector does not have N elements.
+        """
+        self.activity_uo = np.array([self.baseline_uo])
+        self.activity_ui = np.array([self.baseline_ui])
+        
+    def step(self, inputs):
+        """
+        Set inhibitory component ui activity:
+            
+            - activity_ui will be used as inhibition for input income in uo
+        """
+        if self.W is not None:
+            net_input_ui = np.dot(self.W, self.activity_ui) + inputs
+            updated_activity_ui = np.tanh(net_input_ui)
+        else:
+            updated_activity_ui = np.tanh(inputs)
+        
+        self.activity_ui += self.alpha_ui * (updated_activity_ui + self.baseline_ui - self.activity_ui)
+        
+        """
+        Set  component uo activity:
+            
+            - activity_uo will be used as output of the onset unit
+        """
+        if self.W is not None:
+            net_input_uo = np.dot(self.W, self.activity_uo) + np.maximum(0, (inputs - self.activity_ui.copy()))
+            updated_activity_uo = np.tanh(net_input_uo)
+        else:
+            updated_activity_uo = np.tanh(np.maximum(0, (inputs - self.activity_ui.copy())))
+            
+        self.activity_uo += self.alpha_uo * (updated_activity_uo + self.baseline_uo - self.activity_uo)
+        
+        self.output = np.maximum(0, self.activity_uo.copy())
+        return self.output
     
 class Basal_Ganglia:
     
