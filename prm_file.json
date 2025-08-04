@@ -1,0 +1,8 @@
+{
+    "N": 2,
+    "alpha": 0.2,
+    "threshold": null,
+    "Δ": 0.3,
+    "alpha_uo": 0.5,
+    "alpha_ui": 0.2
+}
