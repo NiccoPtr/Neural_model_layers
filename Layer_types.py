@@ -9,7 +9,7 @@ import numpy as np, matplotlib.pyplot as plt
 
 class Leaky_units_exc:
 
-    def __init__(self, N: int, alpha: float, threshold: float, baseline: float):
+    def __init__(self, N: int, alpha: float, baseline: float):
         """Initializes the neural unit.
 
         Args:
@@ -21,10 +21,11 @@ class Leaky_units_exc:
         self.N = N
         self.W = np.zeros((N, N))
         self.alpha = alpha
-        self.threshold = threshold
-        self.baseline = 0.0
+        self.baseline = np.zeros(N)
+        self.activity = np.full(self.N, self.baseline)
+        self.output = 0.0
 
-    def update_weights(self, W: np.ndarray):
+    def update_weights(self, W: np.array):
         """Updates the weight matrix.
 
         Args:
@@ -47,7 +48,10 @@ class Leaky_units_exc:
         Raises:
             ValueError: If the start activity vector does not have N elements.
         """
-        self.activity = np.full(self.N, self.baseline)
+        self.activity *= 0
+        self.activity += np.full(self.N, self.baseline)
+        self.output *= 0
+        
 
     def step(self, inputs):
         """Runs a single timestep, updating activity.
@@ -58,10 +62,9 @@ class Leaky_units_exc:
         Returns:
             np.ndarray: Updated activity vector.
         """
-        net_input = np.dot(self.W, self.activity) + inputs
-        updated_activity = np.tanh(net_input)
-        self.activity += self.alpha * (updated_activity + self.baseline - self.activity)
-        self.output = np.maximum(0, self.activity.copy())
+        net_input = np.dot(self.W, self.output) + inputs
+        self.activity += self.alpha * (net_input + self.baseline - self.activity)
+        self.output = np.maximum(0, np.tanh(self.activity.copy()))
         return self.output
     
 class Leaky_units_inh(Leaky_units_exc):
@@ -75,60 +78,11 @@ class Leaky_units_inh(Leaky_units_exc):
         Returns:
             np.ndarray: negative Updated activity vector.
         """
-        self.activity = super(Leaky_units_inh, self).step(inputs)
-        self.output = np.maximum(0, np.tanh(self.activity.copy()))
-        return - self.output
-    
-class Leaky_units_exc_DA_sensitive(Leaky_units_exc):
-    
-    def __init__(self, N, alpha: float, threshold: float, baseline: float, ö: float):
-        """
-        Initialize layer's sensitivity to dopaminergic influences
-        
-            - Args: N: Number of neurons
-                    alpha: Integration factor
-                    threshold: Firing threshold
-                    baseline: Baseline activity
-                    ö: Dopaminergic sensitivity
-        """
-        super().__init__(N, alpha, threshold, baseline)
-        self.ö = ö
-    
-    def step(self, inputs, da = 0.0):
-        """
-        Runs a single timestep:
-            
-            - Args: np.array() as inputs
-                    np.array() as dopamine input
-                    ö parameter weighting the layer's sensitivity to dopamine, as a float
-            
-            - Returns: output given inputs and dopaminergic influences
-        """
-        net_input = np.dot(self.W, self.activity) + (inputs + (self.ö * da))
-        updated_activity = np.tanh(net_input)
-        self.activity += self.alpha * (updated_activity + self.baseline - self.activity)
-        self.output = np.maximum(0, self.activity)
-        return self.output
-    
-class Leaky_units_inh_DA_sensitive(Leaky_units_exc_DA_sensitive):
-    
-    def step(self, inputs):
-        """
-        Runs a single timestep:
-            
-            - Args: np.array() as inputs
-                    np.array() as dopamine input
-                    ö parameter weighting the layer's sensitivity to dopamine, as a float
-            
-            - Returns: negative output given inputs and dopaminergic influences
-        """
-        self.activity = super(Leaky_units_inh_DA_sensitive, self).step(inputs, da = 0.0)
-        self.output = np.maximum(0, np.tanh(self.activity.copy()))
-        return - self.output
+        return - super(Leaky_units_inh, self).step(inputs)
 
 class Leaky_onset_units_exc():
     
-    def __init__(self, W_uo: np.array(), W_ui: np.array(), alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
+    def __init__(self, N, W, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
         """
         Initialize values for both uo and ui components
         
@@ -138,21 +92,27 @@ class Leaky_onset_units_exc():
             baseline_uo - baseline_ui: resting state activity level for each component
         """
         
-        self.W_uo = None
-        self.W_ui = None
+        self.N = N
+        self.W = np.zeros((N, N))
         self.alpha_uo = alpha_uo
         self.alpha_ui = alpha_ui
-        self.baseline_uo = 0.0
-        self.baseline_ui = 0.0
+        self.baseline_uo = np.zeros(N)
+        self.baseline_ui = np.zeros(N)
+        self.activity_uo = np.array([self.baseline_uo])
+        self.activity_ui = np.array([self.baseline_ui])
+        self.output = 0.0
         
-    def update_weights(self, W: np.array()):
+    def update_weights(self, W: np.array):
         """ 
         Update weight matrix for both uo and ui components
         
         Args:
             - np.array() single value: intraconnection within each component (uo, ui)
         """
-        self.W = W
+        if W.shape == (self.N, self.N):
+            self.W = W
+        else:
+            raise ValueError("Weight matrix shape incorrect. Expected shape ({}, {})".format(self.N, self.N))
         
     def reset_activity(self):
         """Resets neuron activity.
@@ -163,8 +123,11 @@ class Leaky_onset_units_exc():
         Raises:
             ValueError: If the start activity vector does not have N elements.
         """
-        self.activity_uo = np.array([self.baseline_uo])
-        self.activity_ui = np.array([self.baseline_ui])
+        self.activity_uo *= 0
+        self.activitu_ui *= 0
+        self.activity_uo += np.array([self.baseline_uo])
+        self.activity_ui += np.array([self.baseline_ui])
+        self.output *= 0
         
     def step(self, inputs):
         """
@@ -172,33 +135,36 @@ class Leaky_onset_units_exc():
             
             - activity_ui will be used as inhibition for input income in uo
         """
-        if self.W is not None:
-            net_input_ui = np.dot(self.W, self.activity_ui) + inputs
-            updated_activity_ui = np.tanh(net_input_ui)
-        else:
-            updated_activity_ui = np.tanh(inputs)
-        
-        self.activity_ui += self.alpha_ui * (updated_activity_ui + self.baseline_ui - self.activity_ui)
+        net_input = np.dot(self.W, self.output) + inputs
+        self.activity_ui += self.alpha_ui * (net_input + self.baseline_ui - self.activity_ui)
         
         """
         Set  component uo activity:
             
             - activity_uo will be used as output of the onset unit
         """
-        if self.W is not None:
-            net_input_uo = np.dot(self.W, self.activity_uo) + np.maximum(0, (inputs - self.activity_ui.copy()))
-            updated_activity_uo = np.tanh(net_input_uo)
-        else:
-            updated_activity_uo = np.tanh(np.maximum(0, (inputs - self.activity_ui.copy())))
-            
-        self.activity_uo += self.alpha_uo * (updated_activity_uo + self.baseline_uo - self.activity_uo)
-        
+        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input + self.baseline_uo - self.activity_ui) - self.activity_uo)
         self.output = np.maximum(0, self.activity_uo.copy())
         return self.output
     
+class Leaky_onset_units_inh(Leaky_onset_units_exc):
+    
+    def step(self, inputs):
+        """
+        Set inhibitory component ui activity:
+            
+            - activity_ui will be used as inhibition for input income in uo
+            
+        Set  component uo activity:
+            
+            - activity_uo will be used as output of the onset unit
+        """
+        return - super(Leaky_onset_units_inh, self).step(inputs)
+    
+    
 class Basal_Ganglia:
     
-    def __init__(self, N, alpha: float, threshold: float, baseline: float, DLS_GPi_W, STNdl_GPi_W):
+    def __init__(self, N, alpha: float, baseline: float, DLS_GPi_W, STNdl_GPi_W):
         """
         Initialize different layers of neurons of size "N"
            
@@ -210,9 +176,9 @@ class Basal_Ganglia:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Leaky_units_inh(N, alpha, threshold, baseline)
-        self.STNdl = Leaky_units_exc(N, alpha, threshold, baseline)
-        self.GPi = Leaky_units_inh(N, alpha, threshold, baseline = 0.8)
+        self.DLS = Leaky_units_inh(N, alpha, baseline)
+        self.STNdl = Leaky_units_exc(N, alpha, baseline)
+        self.GPi = Leaky_units_exc(N, alpha, baseline = 0.7)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.matrices = {
@@ -220,7 +186,7 @@ class Basal_Ganglia:
             "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
             }
 
-    def reset_act(self):
+    def reset_activity(self):
         """ 
         Reset activity values for each Layer object through the Layre's function for activity reset
         """
@@ -243,5 +209,5 @@ class Basal_Ganglia:
         
         output_GPi = self.GPi.step(np.dot(self.matrices["DLS_GPi"], output_DLS) + np.dot(self.matrices["STNdl_GPi"], output_STNdl))
         
-        return output_GPi
+        return output_GPi 
     
