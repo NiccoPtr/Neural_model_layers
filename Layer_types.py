@@ -5,7 +5,7 @@ Created on Wed Jul 23 13:09:24 2025
 @author: Utente
 """
 
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np
 
 class Leaky_units_exc:
 
@@ -21,8 +21,8 @@ class Leaky_units_exc:
         self.N = N
         self.W = np.zeros((N, N))
         self.alpha = alpha
-        self.baseline = np.zeros(N)
-        self.activity = np.full(self.N, self.baseline)
+        self.baseline = np.ones(N) * baseline
+        self.activity = np.array([self.baseline])
         self.output = 0.0
 
     def update_weights(self, W: np.array):
@@ -49,7 +49,7 @@ class Leaky_units_exc:
             ValueError: If the start activity vector does not have N elements.
         """
         self.activity *= 0
-        self.activity += np.full(self.N, self.baseline)
+        self.activity += np.array([self.baseline])
         self.output *= 0
         
 
@@ -65,7 +65,7 @@ class Leaky_units_exc:
         net_input = np.dot(self.W, self.output) + inputs
         self.activity += self.alpha * (net_input + self.baseline - self.activity)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
-        return self.output
+        return self.output.copy()
     
 class Leaky_units_inh(Leaky_units_exc):
     
@@ -96,8 +96,8 @@ class Leaky_onset_units_exc():
         self.W = np.zeros((N, N))
         self.alpha_uo = alpha_uo
         self.alpha_ui = alpha_ui
-        self.baseline_uo = np.zeros(N)
-        self.baseline_ui = np.zeros(N)
+        self.baseline_uo = np.ones(N) * baseline_uo
+        self.baseline_ui = np.ones(N) * baseline_ui
         self.activity_uo = np.array([self.baseline_uo])
         self.activity_ui = np.array([self.baseline_ui])
         self.output = 0.0
@@ -145,7 +145,7 @@ class Leaky_onset_units_exc():
         """
         self.activity_uo += self.alpha_uo * (np.maximum(0, net_input + self.baseline_uo - self.activity_ui) - self.activity_uo)
         self.output = np.maximum(0, self.activity_uo.copy())
-        return self.output
+        return self.output.copy()
     
 class Leaky_onset_units_inh(Leaky_onset_units_exc):
     
@@ -162,7 +162,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
         return - super(Leaky_onset_units_inh, self).step(inputs)
     
     
-class Basal_Ganglia:
+class Basal_Ganglia_dl:
     
     def __init__(self, N, alpha: float, baseline: float, DLS_GPi_W, STNdl_GPi_W):
         """
@@ -178,10 +178,10 @@ class Basal_Ganglia:
         """
         self.DLS = Leaky_units_inh(N, alpha, baseline)
         self.STNdl = Leaky_units_exc(N, alpha, baseline)
-        self.GPi = Leaky_units_exc(N, alpha, baseline = 0.7)
+        self.GPi = Leaky_units_inh(N, alpha, baseline = 0.7)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
-        self.matrices = {
+        self.BG_dl_Ws = {
             "DLS_GPi" : np.eye(N).astype(float) * self.DLS_GPi_W,
             "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
             }
@@ -194,7 +194,7 @@ class Basal_Ganglia:
         self.STNdl.reset_activity()
         self.GPi.reset_activity()
         
-    def step(self, inputs):
+    def step(self, inputs, inp_feedback):
         """
         Return the output of the 2 layers below GPi layer using the input argument as Input
         
@@ -204,10 +204,10 @@ class Basal_Ganglia:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DLS = self.DLS.step(inputs)
-        output_STNdl = self.STNdl.step(inputs)
+        output_DLS = self.DLS.step((inputs + inp_feedback))
+        output_STNdl = self.STNdl.step(inp_feedback)
         
-        output_GPi = self.GPi.step(np.dot(self.matrices["DLS_GPi"], output_DLS) + np.dot(self.matrices["STNdl_GPi"], output_STNdl))
+        output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl))
         
-        return output_GPi 
+        return output_BG_dl 
     

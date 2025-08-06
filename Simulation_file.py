@@ -1,4 +1,11 @@
-import numpy as np
+"""
+Created on Mon Aug  4 18:30:29 2025
+
+@author: Utente
+"""
+
+from Layer_types import Leaky_units_exc, Basal_Ganglia_dl
+import numpy as np, matplotlib.pyplot as plt
 
 def create_input_levels(input_level_1,
                         input_level_2
@@ -19,28 +26,67 @@ def create_input_levels(input_level_1,
      
     return inputs
 
-def run_simulation(max_timesteps, input_level_1, input_level_2):
+def set_layers():
     
-    timesteps = max_timesteps
-    inputs = create_input_levels(input_level_1, input_level_2)
+    BG_dl = Basal_Ganglia_dl(N = 2, 
+                             alpha = 0.2, 
+                             baseline = 0.0, 
+                             DLS_GPi_W = 1.0, 
+                             STNdl_GPi_W = 1.0)
+    MGV = Leaky_units_exc(N = 2, 
+                          alpha = 0.2, 
+                          baseline = 0.0)
+    MGV.update_weights(np.array([[1, -1], [-1, 1]]))
+    MC = Leaky_units_exc(N = 2, 
+                          alpha = 0.2, 
+                          baseline = 0.0)
+    return BG_dl, MGV, MC
     
-    B_G = Basal_Ganglia(N = 2, alpha = 0.1, threshold = 0.8, baseline = 0.0)
+def set_env(input_level_1, input_level_2, N = 2):
+
+    inputs = create_input_levels(input_level_1,
+                                 input_level_2)    
+   
+    Ws = {"inp_BGdl" : np.eye(N),
+        "BGdl_MGV" : np.eye(N),
+        "MGV_MC" : np.eye(N),
+        "MC_STNdl" : np.eye(N),
+        "MC_DLS" : np.eye(N)}
+    
+    return inputs, Ws
+
+def run_simulation(input_level_1, input_level_2, max_timesteps):
+    
+    BG_dl, MGV, MC = set_layers()
+    inputs, Ws = set_env(input_level_1, input_level_2, N = 2)
     
     results = []
-    
     for inp in inputs:
-        B_G.reset_act()
-        outputs_GPi = []
-        for t in range(timesteps):
-            output_GPi = B_G.step(inp)
-            outputs_GPi.append(output_GPi.copy())
-    
-        results.append({"Output_GPi" : output_GPi,
-                        "Output_history" : outputs_GPi,
-                        "Inputs" : inp
-                        })
-    
+        BG_dl.reset_activity()
+        MGV.reset_activity()
+        MC.reset_activity()
+        
+        output_MC_history = []
+        activity_MC_history = []
+        output_MC = np.array([0.0, 0.0])
+        for epoch in range(max_timesteps):
+            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp), np.dot(Ws["MC_DLS"], output_MC))
+            output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl))
+            output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV))
+            
+            output_MC_history.append(output_MC)
+            activity_MC_history.append(MC.activity.copy())
+            
+        result_epoch = {
+                        "Inputs" : inp,
+                        "Final_output" : output_MC,
+                        "Output_history" : output_MC_history,
+                        "Activity_history" : activity_MC_history
+                        }
+        results.append(result_epoch)
+            
     return results
+    
 
 def plotting(results):
     
