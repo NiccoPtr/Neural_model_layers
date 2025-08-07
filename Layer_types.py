@@ -61,17 +61,20 @@ class Leaky_units_exc:
         Returns:
             np.ndarray: Updated activity vector.
         """
+        
         net_input = np.dot(self.W, self.output) + inputs
         self.activity += self.alpha * (net_input - self.activity)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
+        
+        if np.any(self.output > 1.0):
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
+
         
         print(f"  [DEBUG] net_input: {net_input}")
         print(f"  [DEBUG] updated activity: {self.activity}")
         print(f"  [DEBUG] output: {self.output}")
         
         return self.output.copy()
-    
-        
     
 class Leaky_units_inh(Leaky_units_exc):
     
@@ -86,7 +89,7 @@ class Leaky_units_inh(Leaky_units_exc):
         """
         return - super(Leaky_units_inh, self).step(inputs)
 
-class Leaky_onset_units_exc():
+class Leaky_onset_units_exc:
     
     def __init__(self, N, W, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
         """
@@ -150,7 +153,11 @@ class Leaky_onset_units_exc():
             - activity_uo will be used as output of the onset unit
         """
         self.activity_uo += self.alpha_uo * (np.maximum(0, net_input - self.activity_ui) - self.activity_uo)
-        self.output = np.maximum(0, self.activity_uo.copy())
+        self.output = np.maximum(0, np.tanh(self.activity_uo.copy()))
+        
+        if np.any(self.output > 1.0):
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
+
         return self.output.copy()
     
 class Leaky_onset_units_inh(Leaky_onset_units_exc):
@@ -216,9 +223,9 @@ class Basal_Ganglia_dl:
         print(f"[BGDL] DLS output: {output_DLS}")
         print(f"[BGDL] STN output: {output_STNdl}")
         
-        output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl))
+        output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS.copy()) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl.copy()))
         
         print(f"[BGDL] GPi output: {output_BG_dl}")
         
-        return output_BG_dl 
+        return output_BG_dl.copy()
     

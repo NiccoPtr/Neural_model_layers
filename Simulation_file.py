@@ -74,12 +74,12 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
             output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl))
             output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV))
             
-            output_MC_history.append(output_MC)
+            output_MC_history.append(output_MC.copy())
             activity_MC_history.append(MC.activity.copy())
             
         result_inp = {
                         "Inputs" : inp,
-                        "Final_output" : output_MC,
+                        "Final_output" : output_MC.copy(),
                         "Output_history" : output_MC_history,
                         "Activity_history" : activity_MC_history
                         }
