@@ -22,8 +22,8 @@ class Leaky_units_exc:
         self.W = np.zeros((N, N))
         self.alpha = alpha
         self.baseline = np.ones(N) * baseline
-        self.activity = np.array([self.baseline])
-        self.output = 0.0
+        self.activity = self.baseline
+        self.output = np.zeros(N)
 
     def update_weights(self, W: np.array):
         """Updates the weight matrix.
@@ -49,7 +49,7 @@ class Leaky_units_exc:
             ValueError: If the start activity vector does not have N elements.
         """
         self.activity *= 0
-        self.activity += np.array([self.baseline])
+        self.activity += self.baseline
         self.output *= 0
         
 
@@ -98,9 +98,9 @@ class Leaky_onset_units_exc():
         self.alpha_ui = alpha_ui
         self.baseline_uo = np.ones(N) * baseline_uo
         self.baseline_ui = np.ones(N) * baseline_ui
-        self.activity_uo = np.array([self.baseline_uo])
-        self.activity_ui = np.array([self.baseline_ui])
-        self.output = 0.0
+        self.activity_uo = self.baseline_uo
+        self.activity_ui = self.baseline_ui
+        self.output = np.zeros(N)
         
     def update_weights(self, W: np.array):
         """ 
@@ -125,8 +125,8 @@ class Leaky_onset_units_exc():
         """
         self.activity_uo *= 0
         self.activitu_ui *= 0
-        self.activity_uo += np.array([self.baseline_uo])
-        self.activity_ui += np.array([self.baseline_ui])
+        self.activity_uo += self.baseline_uo
+        self.activity_ui += self.baseline_ui
         self.output *= 0
         
     def step(self, inputs):
@@ -178,7 +178,7 @@ class Basal_Ganglia_dl:
         """
         self.DLS = Leaky_units_inh(N, alpha, baseline)
         self.STNdl = Leaky_units_exc(N, alpha, baseline)
-        self.GPi = Leaky_units_inh(N, alpha, baseline = 0.7)
+        self.GPi = Leaky_units_inh(N, alpha, baseline = 0.2)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
@@ -204,7 +204,7 @@ class Basal_Ganglia_dl:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DLS = self.DLS.step((inputs + inp_feedback))
+        output_DLS = self.DLS.step(inputs + inp_feedback)
         output_STNdl = self.STNdl.step(inp_feedback)
         
         output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl))

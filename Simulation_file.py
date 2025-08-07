@@ -30,16 +30,16 @@ def set_layers():
     
     BG_dl = Basal_Ganglia_dl(N = 2, 
                              alpha = 0.2, 
-                             baseline = 0.0, 
+                             baseline = 0.1, 
                              DLS_GPi_W = 1.0, 
                              STNdl_GPi_W = 1.0)
     MGV = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
-                          baseline = 0.0)
+                          baseline = 0.1)
     MGV.update_weights(np.array([[1, -1], [-1, 1]]))
     MC = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
-                          baseline = 0.0)
+                          baseline = 0.1)
     return BG_dl, MGV, MC
     
 def set_env(input_level_1, input_level_2, N = 2):
@@ -77,13 +77,13 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
             output_MC_history.append(output_MC)
             activity_MC_history.append(MC.activity.copy())
             
-        result_epoch = {
+        result_inp = {
                         "Inputs" : inp,
                         "Final_output" : output_MC,
                         "Output_history" : output_MC_history,
                         "Activity_history" : activity_MC_history
                         }
-        results.append(result_epoch)
+        results.append(result_inp)
             
     return results
     
