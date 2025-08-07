@@ -22,7 +22,7 @@ class Leaky_units_exc:
         self.W = np.zeros((N, N))
         self.alpha = alpha
         self.baseline = np.ones(N) * baseline
-        self.activity = self.baseline
+        self.activity = self.baseline.copy()
         self.output = np.zeros(N)
 
     def update_weights(self, W: np.array):
@@ -49,10 +49,9 @@ class Leaky_units_exc:
             ValueError: If the start activity vector does not have N elements.
         """
         self.activity *= 0
-        self.activity += self.baseline
+        self.activity += self.baseline.copy()
         self.output *= 0
         
-
     def step(self, inputs):
         """Runs a single timestep, updating activity.
 
@@ -63,9 +62,16 @@ class Leaky_units_exc:
             np.ndarray: Updated activity vector.
         """
         net_input = np.dot(self.W, self.output) + inputs
-        self.activity += self.alpha * (net_input + self.baseline - self.activity)
+        self.activity += self.alpha * (net_input - self.activity)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
+        
+        print(f"  [DEBUG] net_input: {net_input}")
+        print(f"  [DEBUG] updated activity: {self.activity}")
+        print(f"  [DEBUG] output: {self.output}")
+        
         return self.output.copy()
+    
+        
     
 class Leaky_units_inh(Leaky_units_exc):
     
@@ -98,8 +104,8 @@ class Leaky_onset_units_exc():
         self.alpha_ui = alpha_ui
         self.baseline_uo = np.ones(N) * baseline_uo
         self.baseline_ui = np.ones(N) * baseline_ui
-        self.activity_uo = self.baseline_uo
-        self.activity_ui = self.baseline_ui
+        self.activity_uo = self.baseline_uo.copy()
+        self.activity_ui = self.baseline_ui.copy()
         self.output = np.zeros(N)
         
     def update_weights(self, W: np.array):
@@ -125,8 +131,8 @@ class Leaky_onset_units_exc():
         """
         self.activity_uo *= 0
         self.activitu_ui *= 0
-        self.activity_uo += self.baseline_uo
-        self.activity_ui += self.baseline_ui
+        self.activity_uo += self.baseline_uo.copy()
+        self.activity_ui += self.baseline_ui.copy()
         self.output *= 0
         
     def step(self, inputs):
@@ -136,14 +142,14 @@ class Leaky_onset_units_exc():
             - activity_ui will be used as inhibition for input income in uo
         """
         net_input = np.dot(self.W, self.output) + inputs
-        self.activity_ui += self.alpha_ui * (net_input + self.baseline_ui - self.activity_ui)
+        self.activity_ui += self.alpha_ui * (net_input - self.activity_ui)
         
         """
         Set  component uo activity:
             
             - activity_uo will be used as output of the onset unit
         """
-        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input + self.baseline_uo - self.activity_ui) - self.activity_uo)
+        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input - self.activity_ui) - self.activity_uo)
         self.output = np.maximum(0, self.activity_uo.copy())
         return self.output.copy()
     
@@ -178,7 +184,7 @@ class Basal_Ganglia_dl:
         """
         self.DLS = Leaky_units_inh(N, alpha, baseline)
         self.STNdl = Leaky_units_exc(N, alpha, baseline)
-        self.GPi = Leaky_units_inh(N, alpha, baseline = 0.2)
+        self.GPi = Leaky_units_inh(N, alpha, baseline)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
@@ -207,7 +213,12 @@ class Basal_Ganglia_dl:
         output_DLS = self.DLS.step(inputs + inp_feedback)
         output_STNdl = self.STNdl.step(inp_feedback)
         
+        print(f"[BGDL] DLS output: {output_DLS}")
+        print(f"[BGDL] STN output: {output_STNdl}")
+        
         output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl))
+        
+        print(f"[BGDL] GPi output: {output_BG_dl}")
         
         return output_BG_dl 
     

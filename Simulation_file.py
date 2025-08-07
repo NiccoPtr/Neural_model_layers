@@ -35,8 +35,8 @@ def set_layers():
                              STNdl_GPi_W = 1.0)
     MGV = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
-                          baseline = 0.1)
-    MGV.update_weights(np.array([[1, -1], [-1, 1]]))
+                          baseline = 0.7)
+    MGV.update_weights(np.array([[1, -0.8], [-0.8, 1]]))
     MC = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
                           baseline = 0.1)
