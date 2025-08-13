@@ -69,10 +69,9 @@ class Leaky_units_exc:
         if np.any(self.output > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
 
-        
-        print(f"  [DEBUG] net_input: {net_input}")
-        print(f"  [DEBUG] updated activity: {self.activity}")
-        print(f"  [DEBUG] output: {self.output}")
+        # print(f"  [DEBUG] net_input: {net_input}")
+        # print(f"  [DEBUG] updated activity: {self.activity}")
+        # print(f"  [DEBUG] output: {self.output}")
         
         return self.output.copy()
     
@@ -133,7 +132,7 @@ class Leaky_onset_units_exc:
             ValueError: If the start activity vector does not have N elements.
         """
         self.activity_uo *= 0
-        self.activitu_ui *= 0
+        self.activity_ui *= 0
         self.activity_uo += self.baseline_uo.copy()
         self.activity_ui += self.baseline_ui.copy()
         self.output *= 0
@@ -152,7 +151,7 @@ class Leaky_onset_units_exc:
             
             - activity_uo will be used as output of the onset unit
         """
-        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input - self.activity_ui) - self.activity_uo)
+        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input - self.activity_ui.copy()) - self.activity_uo)
         self.output = np.maximum(0, np.tanh(self.activity_uo.copy()))
         
         if np.any(self.output > 1.0):
@@ -198,6 +197,7 @@ class Basal_Ganglia_dl:
             "DLS_GPi" : np.eye(N).astype(float) * self.DLS_GPi_W,
             "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
             }
+        self.output_BG_dl = np.zeros(N)
 
     def reset_activity(self):
         """ 
@@ -206,6 +206,7 @@ class Basal_Ganglia_dl:
         self.DLS.reset_activity()
         self.STNdl.reset_activity()
         self.GPi.reset_activity()
+        self.output_BG_dl *= 0
         
     def step(self, inputs, inp_feedback):
         """
@@ -220,12 +221,15 @@ class Basal_Ganglia_dl:
         output_DLS = self.DLS.step(inputs + inp_feedback)
         output_STNdl = self.STNdl.step(inp_feedback)
         
-        print(f"[BGDL] DLS output: {output_DLS}")
-        print(f"[BGDL] STN output: {output_STNdl}")
+        # print(f"[BGDL] DLS output: {output_DLS}")
+        # print(f"[BGDL] STN output: {output_STNdl}")
         
-        output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS.copy()) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl.copy()))
+        self.output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS.copy()) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl.copy()))
         
-        print(f"[BGDL] GPi output: {output_BG_dl}")
+        if np.any(self.output_BG_dl > 1.0):
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
+            
+        # print(f"[BGDL] GPi output: {output_BG_dl}")
         
-        return output_BG_dl.copy()
+        return self.output_BG_dl.copy()
     

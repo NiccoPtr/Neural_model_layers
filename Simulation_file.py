@@ -30,16 +30,15 @@ def set_layers():
     
     BG_dl = Basal_Ganglia_dl(N = 2, 
                              alpha = 0.2, 
-                             baseline = 0.1, 
-                             DLS_GPi_W = 1.0, 
-                             STNdl_GPi_W = 1.0)
+                             baseline = 0.0, 
+                             DLS_GPi_W = 0.5, 
+                             STNdl_GPi_W = 0.5)
     MGV = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
-                          baseline = 0.7)
-    MGV.update_weights(np.array([[1, -0.8], [-0.8, 1]]))
+                          baseline = 0.4)
     MC = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
-                          baseline = 0.1)
+                          baseline = 0.0)
     return BG_dl, MGV, MC
     
 def set_env(input_level_1, input_level_2, N = 2):
@@ -58,9 +57,10 @@ def set_env(input_level_1, input_level_2, N = 2):
 def run_simulation(input_level_1, input_level_2, max_timesteps):
     
     BG_dl, MGV, MC = set_layers()
-    inputs, Ws = set_env(input_level_1, input_level_2, N = 2)
+    inputs, Ws = set_env(input_level_1, input_level_2, N=2)
     
     results = []
+    
     for inp in inputs:
         BG_dl.reset_activity()
         MGV.reset_activity()
@@ -68,24 +68,28 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
         
         output_MC_history = []
         activity_MC_history = []
-        output_MC = np.array([0.0, 0.0])
+        
         for epoch in range(max_timesteps):
-            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp), np.dot(Ws["MC_DLS"], output_MC))
-            output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl))
-            output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV))
+            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp.copy()),
+                                    (np.dot(Ws["inp_BGdl"], inp.copy())))
+            output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl.copy()))
+            output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV.copy()))
             
-            output_MC_history.append(output_MC.copy())
-            activity_MC_history.append(MC.activity.copy())
+            if np.any(output_MC > 1):
+                raise ValueError(f"Clamping failed! Got: {output_MC}")
             
+            output_MC_history.append(np.round(output_MC.copy(), 4))
+            activity_MC_history.append(np.round(MC.activity.copy(), 4))
+        
         result_inp = {
-                        "Inputs" : inp,
-                        "Final_output" : output_MC.copy(),
-                        "Output_history" : output_MC_history,
-                        "Activity_history" : activity_MC_history
-                        }
+            "Inputs": inp.copy(),
+            "Final_output": np.round(output_MC.copy(), 4),
+            "Output_history": output_MC_history,
+            "Activity_history": activity_MC_history
+        }
         results.append(result_inp)
-            
-    return results
+    
+    return results, inputs
     
 
 def plotting(results):
