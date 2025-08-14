@@ -31,11 +31,12 @@ def set_layers():
     BG_dl = Basal_Ganglia_dl(N = 2, 
                              alpha = 0.2, 
                              baseline = 0.0, 
-                             DLS_GPi_W = 0.5, 
-                             STNdl_GPi_W = 0.5)
+                             DLS_GPi_W = 1.0, 
+                             STNdl_GPi_W = 1.0)
     MGV = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
                           baseline = 0.4)
+    MGV.update_weights(np.array([[1.0, -0.2], [-0.2, 1.0]]))
     MC = Leaky_units_exc(N = 2, 
                           alpha = 0.2, 
                           baseline = 0.0)
@@ -71,7 +72,7 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
         
         for epoch in range(max_timesteps):
             output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp.copy()),
-                                    (np.dot(Ws["inp_BGdl"], inp.copy())))
+                                    (np.dot(Ws["MC_STNdl"], MC.output.copy())))
             output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl.copy()))
             output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV.copy()))
             

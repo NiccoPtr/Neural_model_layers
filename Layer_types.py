@@ -23,7 +23,7 @@ class Leaky_units_exc:
         self.alpha = alpha
         self.baseline = np.ones(N) * baseline
         self.activity = self.baseline.copy()
-        self.output = np.zeros(N)
+        self.output = np.ones(N) * np.tanh(self.activity.copy())
 
     def update_weights(self, W: np.array):
         """Updates the weight matrix.
@@ -108,7 +108,7 @@ class Leaky_onset_units_exc:
         self.baseline_ui = np.ones(N) * baseline_ui
         self.activity_uo = self.baseline_uo.copy()
         self.activity_ui = self.baseline_ui.copy()
-        self.output = np.zeros(N)
+        self.output = np.ones(N) * np.tanh(self.activity_uo.copy())
         
     def update_weights(self, W: np.array):
         """ 
