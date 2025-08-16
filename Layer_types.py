@@ -90,7 +90,7 @@ class Leaky_units_inh(Leaky_units_exc):
 
 class Leaky_onset_units_exc:
     
-    def __init__(self, N, W, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
+    def __init__(self, N, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
         """
         Initialize values for both uo and ui components
         

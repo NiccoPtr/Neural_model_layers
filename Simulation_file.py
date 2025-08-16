@@ -4,6 +4,7 @@ Created on Mon Aug  4 18:30:29 2025
 @author: Utente
 """
 
+from params import parameters
 from Layer_types import Leaky_units_exc, Basal_Ganglia_dl
 import numpy as np, matplotlib.pyplot as plt
 
@@ -26,23 +27,27 @@ def create_input_levels(input_level_1,
      
     return inputs
 
-def set_layers():
+def set_layers(parameters):
     
-    BG_dl = Basal_Ganglia_dl(N = 2, 
-                             alpha = 0.2, 
-                             baseline = 0.0, 
-                             DLS_GPi_W = 1.0, 
-                             STNdl_GPi_W = 1.0)
-    MGV = Leaky_units_exc(N = 2, 
-                          alpha = 0.2, 
-                          baseline = 0.4)
+    BG_dl = Basal_Ganglia_dl(parameters.N, 
+                             parameters.alpha, 
+                             parameters.baseline, 
+                             parameters.DLS_GPi_W, 
+                             parameters.STNdl_GPi_W)
+    
+    MGV = Leaky_units_exc(parameters.N, 
+                          parameters.alpha,
+                          parameters.baseline_MGV)
+    
     MGV.update_weights(np.array([[1.0, -0.2], [-0.2, 1.0]]))
-    MC = Leaky_units_exc(N = 2, 
-                          alpha = 0.2, 
-                          baseline = 0.0)
+    
+    MC = Leaky_units_exc(parameters.N, 
+                         parameters.alpha, 
+                         parameters.baseline)
+    
     return BG_dl, MGV, MC
     
-def set_env(input_level_1, input_level_2, N = 2):
+def set_env(input_level_1, input_level_2, N):
 
     inputs = create_input_levels(input_level_1,
                                  input_level_2)    
@@ -57,7 +62,7 @@ def set_env(input_level_1, input_level_2, N = 2):
 
 def run_simulation(input_level_1, input_level_2, max_timesteps):
     
-    BG_dl, MGV, MC = set_layers()
+    BG_dl, MGV, MC = set_layers(parameters)
     inputs, Ws = set_env(input_level_1, input_level_2, N=2)
     
     results = []
