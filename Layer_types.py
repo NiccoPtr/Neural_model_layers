@@ -51,6 +51,7 @@ class Leaky_units_exc:
         self.activity *= 0
         self.activity += self.baseline.copy()
         self.output *= 0
+        self.output += np.ones(self.N) * np.tanh(self.activity.copy())
         
     def step(self, inputs):
         """Runs a single timestep, updating activity.
@@ -136,6 +137,7 @@ class Leaky_onset_units_exc:
         self.activity_uo += self.baseline_uo.copy()
         self.activity_ui += self.baseline_ui.copy()
         self.output *= 0
+        self.output += np.ones(self.N) * np.tanh(self.activity_uo.copy())
         
     def step(self, inputs):
         """
@@ -197,7 +199,6 @@ class Basal_Ganglia_dl:
             "DLS_GPi" : np.eye(N).astype(float) * self.DLS_GPi_W,
             "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
             }
-        self.output_BG_dl = np.zeros(N)
 
     def reset_activity(self):
         """ 
@@ -206,7 +207,6 @@ class Basal_Ganglia_dl:
         self.DLS.reset_activity()
         self.STNdl.reset_activity()
         self.GPi.reset_activity()
-        self.output_BG_dl *= 0
         
     def step(self, inputs, inp_feedback):
         """

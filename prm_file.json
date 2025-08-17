@@ -3,7 +3,7 @@
     "alpha": 0.2,
     "alpha_uo": 0.4,
     "alpha_ui": 0.1,
-    "baseline": 0.0,
+    "baseline": 0.1,
     "baseline_MGV": 0.4,
     "baseline_uo": 0.0,
     "baseline_ui": 0.0,
