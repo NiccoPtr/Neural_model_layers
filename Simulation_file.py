@@ -39,7 +39,7 @@ def set_layers(parameters):
                           parameters.alpha,
                           parameters.baseline_MGV)
     
-    MGV.update_weights(np.array([[1.06, -0.1], [-0.1, 1.06]]))
+    MGV.update_weights(np.array([[1.048, 0.0], [0.0, 1.048]]))
     
     MC = Leaky_units_exc(parameters.N, 
                          parameters.alpha, 
@@ -74,7 +74,7 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
         
         output_MC_history = []
         activity_MC_history = []
-        out_put_MGV = []
+        output_MGV_history = []
         
         for epoch in range(max_timesteps):
             output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp.copy()),
@@ -85,23 +85,23 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
             if np.any(output_MC > 1):
                 raise ValueError(f"Clamping failed! Got: {output_MC}")
             
-            out_put_MGV.append(np.round(output_MGV.copy(), 4))
+            output_MGV_history.append(np.round(output_MGV.copy(), 4))
             output_MC_history.append(np.round(output_MC.copy(), 4))
             activity_MC_history.append(np.round(MC.activity.copy(), 4))
         
         result_inp = {
             "Inputs": inp.copy(),
             "Final_output": np.round(output_MC.copy(), 4),
-            "Output_MGV": out_put_MGV,
+            "Output_MGV": output_MGV_history,
             "Output_history": output_MC_history,
             "Activity_history": activity_MC_history
         }
         results.append(result_inp)
     
-    return results, inputs
+    return results, inputs, MGV.W.copy()
     
 
-def plotting(results, save = False):
+def plotting(results, W, save = False):
     
     unique_inp = sorted(set(
         tuple(res["Inputs"]) for res in results
@@ -124,10 +124,8 @@ def plotting(results, save = False):
     plt.tight_layout()
     
     if save:
-        plt.savefig("Simulation_plotting", dpi = 300)
+        W_str = "_".join(map(str, W.flatten()))
+        filename = f"Simulation_plot_MGV_{W_str}.png"
+        plt.savefig(filename, dpi=300)
         
     plt.show()
-    
-    
-    
-    
