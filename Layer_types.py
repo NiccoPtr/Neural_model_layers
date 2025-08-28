@@ -9,7 +9,7 @@ import numpy as np
 
 class Leaky_units_exc:
 
-    def __init__(self, N: int, alpha: float, baseline: float):
+    def __init__(self, N: int, alpha: float, baseline: float, rng, noise: float):
         """Initializes the neural unit.
 
         Args:
@@ -21,6 +21,8 @@ class Leaky_units_exc:
         self.N = N
         self.W = np.zeros((N, N))
         self.alpha = alpha
+        self.rng = rng
+        self.noise = noise
         self.baseline = np.ones(N) * baseline
         self.activity = self.baseline.copy()
         self.output = np.ones(N) * np.tanh(self.activity.copy())
@@ -63,7 +65,7 @@ class Leaky_units_exc:
             np.ndarray: Updated activity vector.
         """
         
-        net_input = np.dot(self.W, self.output) + inputs
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise))
         self.activity += self.alpha * (net_input - self.activity)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         
@@ -91,7 +93,7 @@ class Leaky_units_inh(Leaky_units_exc):
 
 class Leaky_onset_units_exc:
     
-    def __init__(self, N, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float):
+    def __init__(self, N, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float, rng, noise: float):
         """
         Initialize values for both uo and ui components
         
@@ -105,6 +107,8 @@ class Leaky_onset_units_exc:
         self.W = np.zeros((N, N))
         self.alpha_uo = alpha_uo
         self.alpha_ui = alpha_ui
+        self.rng = rng
+        self.noise = noise
         self.baseline_uo = np.ones(N) * baseline_uo
         self.baseline_ui = np.ones(N) * baseline_ui
         self.activity_uo = self.baseline_uo.copy()
@@ -145,7 +149,7 @@ class Leaky_onset_units_exc:
             
             - activity_ui will be used as inhibition for input income in uo
         """
-        net_input = np.dot(self.W, self.output) + inputs
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise))
         self.activity_ui += self.alpha_ui * (net_input - self.activity_ui)
         
         """
@@ -178,7 +182,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
     
 class Basal_Ganglia_dl:
     
-    def __init__(self, N, alpha: float, baseline: float, DLS_GPi_W, STNdl_GPi_W):
+    def __init__(self, N, alpha: float, baseline: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -190,15 +194,16 @@ class Basal_Ganglia_dl:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Leaky_units_inh(N, alpha, baseline)
-        self.STNdl = Leaky_units_exc(N, alpha, baseline)
-        self.GPi = Leaky_units_inh(N, alpha, baseline)
+        self.DLS = Leaky_units_inh(N, alpha, baseline, rng, noise)
+        self.STNdl = Leaky_units_exc(N, alpha, baseline, rng, noise)
+        self.GPi = Leaky_units_inh(N, alpha, baseline, rng, noise)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
             "DLS_GPi" : np.eye(N).astype(float) * self.DLS_GPi_W,
             "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
             }
+        
 
     def reset_activity(self):
         """ 
@@ -232,4 +237,3 @@ class Basal_Ganglia_dl:
         # print(f"[BGDL] GPi output: {output_BG_dl}")
         
         return self.output_BG_dl.copy()
-    

@@ -29,21 +29,29 @@ def create_input_levels(input_level_1,
 
 def set_layers(parameters):
     
+    rng = np.random.RandomState(parameters.seed)
+    
     BG_dl = Basal_Ganglia_dl(parameters.N, 
                              parameters.alpha, 
                              parameters.baseline, 
                              parameters.DLS_GPi_W, 
-                             parameters.STNdl_GPi_W)
+                             parameters.STNdl_GPi_W,
+                             rng,
+                             parameters.noise)
     
     MGV = Leaky_units_exc(parameters.N, 
                           parameters.alpha,
-                          parameters.baseline_MGV)
+                          parameters.baseline_MGV,
+                          rng,
+                          parameters.MGV_noise)
     
     MGV.update_weights(np.array([[1.048, 0.0], [0.0, 1.048]]))
     
     MC = Leaky_units_exc(parameters.N, 
                          parameters.alpha, 
-                         parameters.baseline)
+                         parameters.baseline,
+                         rng,
+                         parameters.noise)
     
     return BG_dl, MGV, MC
     
