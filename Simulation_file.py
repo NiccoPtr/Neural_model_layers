@@ -45,7 +45,7 @@ def set_layers(parameters):
                           rng,
                           parameters.MGV_noise)
     
-    MGV.update_weights(np.array([[1.048, 0.0], [0.0, 1.048]]))
+    MGV.update_weights(np.array([[1.0, -0.4], [-0.4, 1.0]]))
     
     MC = Leaky_units_exc(parameters.N, 
                          parameters.alpha, 
@@ -68,10 +68,17 @@ def set_env(input_level_1, input_level_2, N):
     
     return inputs, Ws
 
+def set_DA():
+    ι = 0.1
+    δ = 1.9
+    DA = 1.0
+    return ι, δ, DA
+
 def run_simulation(input_level_1, input_level_2, max_timesteps):
     
     BG_dl, MGV, MC = set_layers(parameters)
     inputs, Ws = set_env(input_level_1, input_level_2, N=2)
+    ι, δ, DA = set_DA()
     
     results = []
     
@@ -85,7 +92,7 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
         output_MGV_history = []
         
         for epoch in range(max_timesteps):
-            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], inp.copy()),
+            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], ((ι + δ * DA) * inp.copy())),
                                     (np.dot(Ws["MC_STNdl"], MC.output.copy())))
             output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl.copy()))
             output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV.copy()))

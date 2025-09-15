@@ -35,14 +35,14 @@ parameters = Parameters(
                         alpha_uo = 0.4,
                         alpha_ui = 0.1,
                         baseline = 0.1,
-                        baseline_MGV = 0.4,
+                        baseline_MGV = 0.6,
                         baseline_uo = 0.0,
                         baseline_ui = 0.0,
                         DLS_GPi_W = 1.0,
                         STNdl_GPi_W = 1.0,
                         seed = 2,
                         noise = 0.0,
-                        MGV_noise = 1.0
+                        MGV_noise = 0.1
                         )
 
 parameters.update(param_string)
