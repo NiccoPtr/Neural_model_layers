@@ -65,7 +65,7 @@ class Leaky_units_exc:
             np.ndarray: Updated activity vector.
         """
         
-        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise))
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise)) + self.baseline
         self.activity += self.alpha * (net_input - self.activity)
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         

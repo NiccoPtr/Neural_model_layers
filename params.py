@@ -36,6 +36,7 @@ parameters = Parameters(
                         alpha_ui = 0.1,
                         baseline = 0.1,
                         baseline_MGV = 0.6,
+                        baseline_GPi = 0.6,
                         baseline_uo = 0.0,
                         baseline_ui = 0.0,
                         DLS_GPi_W = 1.0,

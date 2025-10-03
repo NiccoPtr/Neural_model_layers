@@ -45,11 +45,11 @@ def set_layers(parameters):
                           rng,
                           parameters.MGV_noise)
     
-    MGV.update_weights(np.array([[1.0, -0.4], [-0.4, 1.0]]))
+    MGV.update_weights(np.array([[0.8, -0.8], [-0.8, 0.8]]))
     
     MC = Leaky_units_exc(parameters.N, 
                          parameters.alpha, 
-                         parameters.baseline,
+                         parameters.baseline_GPi,
                          rng,
                          parameters.noise)
     
