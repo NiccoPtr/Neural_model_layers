@@ -65,8 +65,13 @@ class Leaky_units_exc:
             np.ndarray: Updated activity vector.
         """
         
-        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise)) + self.baseline
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise))
         self.activity += self.alpha * (net_input - self.activity)
+    
+        below_baseline = self.activity < self.baseline
+        recover_mask = np.logical_and(below_baseline, net_input >= 0)
+        self.activity[recover_mask] += self.alpha * (self.baseline[recover_mask] - self.activity[recover_mask])
+        
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         
         if np.any(self.output > 1.0):
@@ -182,7 +187,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
     
 class Basal_Ganglia_dl:
     
-    def __init__(self, N, alpha: float, baseline: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
+    def __init__(self, N, alpha: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -194,9 +199,9 @@ class Basal_Ganglia_dl:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Leaky_units_inh(N, alpha, baseline, rng, noise)
-        self.STNdl = Leaky_units_exc(N, alpha, baseline, rng, noise)
-        self.GPi = Leaky_units_inh(N, alpha, baseline, rng, noise)
+        self.DLS = Leaky_units_inh(N, alpha, baseline_DLS, rng, noise)
+        self.STNdl = Leaky_units_exc(N, alpha, baseline_STNdl, rng, noise)
+        self.GPi = Leaky_units_inh(N, alpha, baseline_GPi, rng, noise)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
