@@ -1,8 +1,8 @@
 {
     "N": 2,
     "alpha": {
-        "BG_dl": 0.2,
-        "MGV": 0.2,
+        "BG_dl": 0.1,
+        "MGV": 0.1,
         "MC": 0.2
     },
     "alpha_uo": 0.4,
@@ -10,37 +10,32 @@
     "baseline": {
         "DLS": 0.0,
         "STNdl": 0.0,
-        "GPi": 0.4,
-        "MGV": 0.2,
-        "MC": 0.2
+        "GPi": 0.8,
+        "MGV": 0.0,
+        "MC": 0.0
     },
     "baseline_uo": 0.0,
     "baseline_ui": 0.0,
     "BG_dl_W": {
-        "DLS_GPi_W": 1.0,
-        "STNdl_GPi_W": 1.0
+        "DLS_GPi_W": 2.4,
+        "STNdl_GPi_W": 1.8
     },
     "seed": 2,
     "noise": {
         "BG_dl": 0.0,
-        "MGV": 0.1,
-        "MC": 0.0
+        "MGV": 0.0,
+        "MC": 0.05
     },
-    "R_matrices": {
-        "MGV": [
-            [
-                0.8,
-                -0.8
-            ],
-            [
-                -0.8,
-                0.8
-            ]
-        ]
+    "Matrices_scalars": {
+        "BGdl_MGV": 1.5,
+        "MGV_MC": 1.5,
+        "MC_MGV": 0.8,
+        "MC_STNdl": 1.6,
+        "MC_DLS": 1.0
     },
     "DA_values": {
         "Y": 0.1,
-        "\u0394": 1.9,
-        "DA": 1.0
+        "delta": 0.9,
+        "DA": 1
     }
 }

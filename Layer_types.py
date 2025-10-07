@@ -65,12 +65,8 @@ class Leaky_units_exc:
             np.ndarray: Updated activity vector.
         """
         
-        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise))
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise)) + self.baseline.copy()
         self.activity += self.alpha * (net_input - self.activity)
-    
-        below_baseline = self.activity < self.baseline
-        recover_mask = np.logical_and(below_baseline, net_input >= 0)
-        self.activity[recover_mask] += self.alpha * (self.baseline[recover_mask] - self.activity[recover_mask])
         
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         

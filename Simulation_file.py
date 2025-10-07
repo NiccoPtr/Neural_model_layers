@@ -47,8 +47,6 @@ def set_layers(parameters):
                           rng,
                           parameters.noise["MGV"])
     
-    MGV.update_weights(np.array(parameters.R_matrices["MGV"]))
-    
     MC = Leaky_units_exc(parameters.N, 
                          parameters.alpha["MC"], 
                          parameters.baseline["MC"],
@@ -63,24 +61,25 @@ def set_env(input_level_1, input_level_2, N):
                                  input_level_2)    
    
     Ws = {"inp_BGdl" : np.eye(N),
-        "BGdl_MGV" : np.eye(N),
-        "MGV_MC" : np.eye(N),
-        "MC_STNdl" : np.eye(N),
-        "MC_DLS" : np.eye(N)}
+        "BGdl_MGV" : np.eye(N) * parameters.Matrices_scalars["BGdl_MGV"],
+        "MGV_MC" : np.eye(N) * parameters.Matrices_scalars["MGV_MC"],
+        "MC_MGV" : np.eye(N) * parameters.Matrices_scalars["MC_MGV"],
+        "MC_STNdl" : np.eye(N) * parameters.Matrices_scalars["MC_STNdl"],
+        "MC_DLS" : np.eye(N) * parameters.Matrices_scalars["MC_DLS"]}
     
     return inputs, Ws
 
 def set_DA():
     Y = parameters.DA_values["Y"]
-    Δ = parameters.DA_values["Δ"]
+    delta = parameters.DA_values["delta"]
     DA = parameters.DA_values["DA"]
-    return Y, Δ, DA
+    return Y, delta, DA
 
 def run_simulation(input_level_1, input_level_2, max_timesteps):
     
     BG_dl, MGV, MC = set_layers(parameters)
     inputs, Ws = set_env(input_level_1, input_level_2, N=2)
-    Y, Δ, DA = set_DA()
+    Y, delta, DA = set_DA()
     
     results = []
     
@@ -89,42 +88,47 @@ def run_simulation(input_level_1, input_level_2, max_timesteps):
         MGV.reset_activity()
         MC.reset_activity()
         
+        output_GPi_history = []
         output_MC_history = []
-        activity_MC_history = []
+        output_STNdl_history = []
         output_MGV_history = []
+        activity_MC_history = []
         
         for epoch in range(max_timesteps):
-            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], ((Y + Δ * DA) * inp.copy())),
+            output_BGdl = BG_dl.step(np.dot(Ws["inp_BGdl"], ((Y + delta * DA) * inp.copy())),
                                     (np.dot(Ws["MC_STNdl"], MC.output.copy())))
-            output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl.copy()))
+            output_MGV = MGV.step(np.dot(Ws["BGdl_MGV"], output_BGdl.copy()) + np.dot(Ws["MC_MGV"], MC.output.copy()))
             output_MC = MC.step(np.dot(Ws["MGV_MC"], output_MGV.copy()))
             
             if np.any(output_MC > 1):
                 raise ValueError(f"Clamping failed! Got: {output_MC}")
             
+            output_GPi_history.append(np.round(output_BGdl.copy(), 4) * - 1.0)
             output_MGV_history.append(np.round(output_MGV.copy(), 4))
             output_MC_history.append(np.round(output_MC.copy(), 4))
+            output_STNdl_history.append(np.round(BG_dl.STNdl.output.copy(), 4))
             activity_MC_history.append(np.round(MC.activity.copy(), 4))
         
         result_inp = {
             "Inputs": inp.copy(),
             "Final_output": np.round(output_MC.copy(), 4),
+            "Output_GPi": output_GPi_history,
             "Output_MGV": output_MGV_history,
             "Output_history": output_MC_history,
+            "Output_STNdl": output_STNdl_history,
             "Activity_history": activity_MC_history
         }
         results.append(result_inp)
     
-    return results, inputs, MGV.W.copy()
-    
+    return results, inputs
 
-def plotting(results, W, save = False):
+def plotting(results, save = False):
     
     unique_inp = sorted(set(
         tuple(res["Inputs"]) for res in results
         ))
-    rows = int(np.floor(np.sqrt(len(unique_inp))))
-    cols = int(np.ceil(len(unique_inp) / rows))
+    rows = 1 + len(unique_inp) // 2
+    cols = 2
     fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
     axs = axs.flatten()
     
@@ -141,8 +145,7 @@ def plotting(results, W, save = False):
     plt.tight_layout()
     
     if save:
-        W_str = "_".join(map(str, W.flatten()))
-        filename = f"Simulation_plot_MGV_{W_str}.png"
+        filename = "Simulation_plot.png"
         plt.savefig(filename, dpi=300)
         
     plt.show()
