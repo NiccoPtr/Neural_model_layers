@@ -9,9 +9,9 @@ from Testing_simulation_file import create_input_levels, set_layers, set_env, se
 from params import parameters
 import numpy as np
 
-deltas = np.linspace(0.1, 1, 10)
+deltas = np.linspace(4.9, 4.9, 1)
 DAs = np.linspace(0.1, 1, 10)
-seeds = np.linspace(1, 10, 4)
+seeds = np.linspace(1, 40, 40)
 
 results_test = []
 for delta in deltas:
@@ -19,7 +19,7 @@ for delta in deltas:
         for seed in seeds:
             BG_dl, MGV, MC = set_layers(parameters, int(seed))
             results = run_simulation((0, 1, 1),
-                                 (0.2, 1, 1), 
+                                 (0.1, 1, 1), 
                                  600,
                                  0.1,
                                  delta,
@@ -41,7 +41,7 @@ for i, delta in enumerate(deltas):
     
     list_avg_f_outputs.append(avg_final_output.copy())
 
-threshold = 0.3
+threshold = 0.38
 percents = []
 
 for list_ in list_avg_f_outputs:
