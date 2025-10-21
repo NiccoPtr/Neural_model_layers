@@ -32,7 +32,7 @@ def set_layers(parameters):
     rng = np.random.RandomState(parameters.seed)
     
     BG_dl = Basal_Ganglia_dl(parameters.N, 
-                             parameters.alpha["BG_dl"], 
+                             parameters.tau["BG_dl"], 
                              parameters.baseline["DLS"],
                              parameters.baseline["STNdl"],
                              parameters.baseline["GPi"],
@@ -42,13 +42,13 @@ def set_layers(parameters):
                              parameters.noise["BG_dl"])
     
     MGV = Leaky_units_exc(parameters.N, 
-                          parameters.alpha["MGV"],
+                          parameters.tau["MGV"],
                           parameters.baseline["MGV"],
                           rng,
                           parameters.noise["MGV"])
     
     MC = Leaky_units_exc(parameters.N, 
-                         parameters.alpha["MC"], 
+                         parameters.tau["MC"], 
                          parameters.baseline["MC"],
                          rng,
                          parameters.noise["MC"])

@@ -9,18 +9,18 @@ import numpy as np
 
 class Leaky_units_exc:
 
-    def __init__(self, N: int, alpha: float, baseline: float, rng, noise: float):
+    def __init__(self, N: int, tau: float, baseline: float, rng, noise: float):
         """Initializes the neural unit.
 
         Args:
             N (int): Number of neurons in the model (must be 2).
-            alpha (float): Learning rate for activity update.
+            tau (float): Learning rate for activity update.
             threshold (float): Threshold for action selection.
 
         """
         self.N = N
         self.W = np.zeros((N, N))
-        self.alpha = alpha
+        self.tau = tau
         self.rng = rng
         self.noise = noise
         self.baseline = np.ones(N) * baseline
@@ -66,7 +66,7 @@ class Leaky_units_exc:
         """
         
         net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn(self.N) * self.noise)) + self.baseline.copy()
-        self.activity += self.alpha * (net_input - self.activity)
+        self.activity += (1/self.tau) * (net_input - self.activity)
         
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         
@@ -94,26 +94,25 @@ class Leaky_units_inh(Leaky_units_exc):
 
 class Leaky_onset_units_exc:
     
-    def __init__(self, N, alpha_uo: float, alpha_ui: float, baseline_uo: float, baseline_ui: float, rng, noise: float):
+    def __init__(self, N, tau_uo: float, tau_ui: float, baseline: float, rng, noise: float):
         """
         Initialize values for both uo and ui components
         
         Args:
             W_uo - W_ui: weights for intraconnection for each component.
-            alpha_uo - alpha_ui (float): Learning rate for activity update for each component.
+            tau_uo - tau_ui (float): Learning rate for activity update for each component.
             baseline_uo - baseline_ui: resting state activity level for each component
         """
         
         self.N = N
         self.W = np.zeros((N, N))
-        self.alpha_uo = alpha_uo
-        self.alpha_ui = alpha_ui
+        self.tau_uo = tau_uo
+        self.tau_ui = tau_ui
         self.rng = rng
         self.noise = noise
-        self.baseline_uo = np.ones(N) * baseline_uo
-        self.baseline_ui = np.ones(N) * baseline_ui
-        self.activity_uo = self.baseline_uo.copy()
-        self.activity_ui = self.baseline_ui.copy()
+        self.baseline = np.ones(N) * baseline
+        self.activity_uo = self.baseline.copy()
+        self.activity_ui = self.baseline.copy()
         self.output = np.ones(N) * np.tanh(self.activity_uo.copy())
         
     def update_weights(self, W: np.array):
@@ -139,8 +138,8 @@ class Leaky_onset_units_exc:
         """
         self.activity_uo *= 0
         self.activity_ui *= 0
-        self.activity_uo += self.baseline_uo.copy()
-        self.activity_ui += self.baseline_ui.copy()
+        self.activity_uo += self.baseline.copy()
+        self.activity_ui += self.baseline.copy()
         self.output *= 0
         self.output += np.ones(self.N) * np.tanh(self.activity_uo.copy())
         
@@ -150,15 +149,15 @@ class Leaky_onset_units_exc:
             
             - activity_ui will be used as inhibition for input income in uo
         """
-        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise))
-        self.activity_ui += self.alpha_ui * (net_input - self.activity_ui)
+        net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise)) + self.baseline
+        self.activity_ui += (1/self.tau_ui) * (net_input - self.activity_ui)
         
         """
         Set  component uo activity:
             
             - activity_uo will be used as output of the onset unit
         """
-        self.activity_uo += self.alpha_uo * (np.maximum(0, net_input - self.activity_ui.copy()) - self.activity_uo)
+        self.activity_uo += (1/self.tau_uo) * (np.maximum(0, net_input - self.activity_ui.copy()) - self.activity_uo)
         self.output = np.maximum(0, np.tanh(self.activity_uo.copy()))
         
         if np.any(self.output > 1.0):
@@ -183,7 +182,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
     
 class Basal_Ganglia_dl:
     
-    def __init__(self, N, alpha: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
+    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -195,9 +194,9 @@ class Basal_Ganglia_dl:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Leaky_units_inh(N, alpha, baseline_DLS, rng, noise)
-        self.STNdl = Leaky_units_exc(N, alpha, baseline_STNdl, rng, noise)
-        self.GPi = Leaky_units_inh(N, alpha, baseline_GPi, rng, noise)
+        self.DLS = Leaky_units_inh(N, tau, baseline_DLS, rng, noise)
+        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise)
+        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
@@ -238,3 +237,40 @@ class Basal_Ganglia_dl:
         # print(f"[BGDL] GPi output: {output_BG_dl}")
         
         return self.output_BG_dl.copy()
+    
+class BLA_IC:
+    
+    def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, max_W, theta_da):
+
+        self.BLA_IC_layer = Leaky_onset_units_exc(N, tau_uo, tau_ui, baseline, rng, noise)
+        
+        self.t = np.zeros(N)
+        self.t_dot = np.zeros(N)
+        self.tau_t = tau_t
+        self.alpha_t = alpha_t
+        self.eta_b = eta_b
+        self.max_W = max_W
+        self.theta_da = theta_da
+        
+    def reset_activity(self):
+        
+        self.BLA_IC_layer.reset_activity()
+
+    def step(self, inputs, da):
+        
+        self.outputs = self.BLA_IC_layer.step(inputs) 
+
+        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.outputs)
+        self.t += self.t_dot
+
+        pos = np.maximum(0, self.t_dot)
+        neg = np.maximum(0, -self.t_dot)
+
+        delta_W = (self.eta_b *
+                   np.maximum(0, da - self.theta_da) *
+                   np.outer(pos, neg.T) *
+                   (self.max_W - self.BLA_IC_layer.W))
+        
+        self.BLA_IC_layer.W += delta_W
+
+        return self.outputs.copy()

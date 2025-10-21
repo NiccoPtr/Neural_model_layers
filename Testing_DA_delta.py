@@ -18,8 +18,8 @@ for delta in deltas:
     for DA in DAs:
         for seed in seeds:
             BG_dl, MGV, MC = set_layers(parameters, int(seed))
-            results = run_simulation((0, 1, 1),
-                                 (0.1, 1, 1), 
+            results = run_simulation((0.4, 1, 1),
+                                 (0.5, 1, 1), 
                                  600,
                                  0.1,
                                  delta,
