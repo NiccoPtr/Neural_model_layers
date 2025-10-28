@@ -260,7 +260,9 @@ class BLA_IC:
         
         self.outputs = self.BLA_IC_layer.step(inputs) 
 
-        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.outputs)
+        self.t_dot = -self.t / self.tau_t + self.alpha_t * self.outputs
+        # self.t_dot = 1/self.tau_t * (-self.t + self.alpha_t * self.outputs)
+
         self.t += self.t_dot
 
         pos = np.maximum(0, self.t_dot)
