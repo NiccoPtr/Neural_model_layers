@@ -25,9 +25,9 @@ param_string = "Simulation"
 param_file = "prm_file"
 
 parameters = Parameters(
-                        N = 2,
+                        N = {"BG_dl": 2, "MGV": 2, "MC": 2, "BLA_IC": 4},
                         tau = {"BG_dl": 10, "MGV": 10, "MC": 5, "BLA_IC": [10, 10]},
-                        baseline = {"DLS": 0.0, "STNdl": 0.0, "GPi": 0.8, "MGV": 0.0, "MC": 0.0, "BLA_IC": [0.0, 0.0]},
+                        baseline = {"DLS": 0.0, "STNdl": 0.0, "GPi": 0.8, "MGV": 0.0, "MC": 0.0, "BLA_IC": 0.0},
                         BG_dl_W = {"DLS_GPi_W": 2.4, "STNdl_GPi_W": 1.8},
                         seed = 2,
                         noise = {"BG_dl": 0.0, "MGV": 0.0, "MC": 0.05, "BLA_IC": 0.0},

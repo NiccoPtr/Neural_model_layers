@@ -5,7 +5,7 @@ Created on Mon Aug  4 18:30:29 2025
 """
 
 from params import parameters
-from Layer_types import Leaky_units_exc, Basal_Ganglia_dl
+from Layer_types import Leaky_units_exc, BG_dl_Layer
 import numpy as np, matplotlib.pyplot as plt
 
 def create_input_levels(input_level_1,
@@ -31,7 +31,7 @@ def set_layers(parameters):
     
     rng = np.random.RandomState(parameters.seed)
     
-    BG_dl = Basal_Ganglia_dl(parameters.N, 
+    BG_dl = BG_dl_Layer(parameters.N["BG_dl"], 
                              parameters.tau["BG_dl"], 
                              parameters.baseline["DLS"],
                              parameters.baseline["STNdl"],
@@ -41,13 +41,13 @@ def set_layers(parameters):
                              rng,
                              parameters.noise["BG_dl"])
     
-    MGV = Leaky_units_exc(parameters.N, 
+    MGV = Leaky_units_exc(parameters.N["MGV"], 
                           parameters.tau["MGV"],
                           parameters.baseline["MGV"],
                           rng,
                           parameters.noise["MGV"])
     
-    MC = Leaky_units_exc(parameters.N, 
+    MC = Leaky_units_exc(parameters.N["MC"], 
                          parameters.tau["MC"], 
                          parameters.baseline["MC"],
                          rng,
@@ -61,11 +61,12 @@ def set_env(input_level_1, input_level_2, N):
                                  input_level_2)    
    
     Ws = {"inp_BGdl" : np.eye(N),
-        "BGdl_MGV" : np.eye(N) * parameters.Matrices_scalars["BGdl_MGV"],
-        "MGV_MC" : np.eye(N) * parameters.Matrices_scalars["MGV_MC"],
-        "MC_MGV" : np.eye(N) * parameters.Matrices_scalars["MC_MGV"],
-        "MC_STNdl" : np.eye(N) * parameters.Matrices_scalars["MC_STNdl"],
-        "MC_DLS" : np.eye(N) * parameters.Matrices_scalars["MC_DLS"]}
+          "BGdl_MGV" : np.eye(N) * parameters.Matrices_scalars["BGdl_MGV"],
+          "MGV_MC" : np.eye(N) * parameters.Matrices_scalars["MGV_MC"],
+          "MC_MGV" : np.eye(N) * parameters.Matrices_scalars["MC_MGV"],
+          "MC_STNdl" : np.eye(N) * parameters.Matrices_scalars["MC_STNdl"],
+          "MC_DLS" : np.eye(N) * parameters.Matrices_scalars["MC_DLS"]
+          }
     
     return inputs, Ws
 
@@ -142,7 +143,11 @@ def plotting(results, save = False):
         axs[i].set_ylabel('Activity level')
         axs[i].set_ylim(0, 1)
 
+    for j in range(len(unique_inp), len(axs)):
+        fig.delaxes(axs[j])
+
     plt.tight_layout()
+    
     
     if save:
         filename = "Simulation_plot.png"

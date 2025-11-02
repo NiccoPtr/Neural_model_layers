@@ -5,31 +5,30 @@ Created on Sun Oct 19 10:42:12 2025
 @author: Utente
 """
 from params import parameters
-from Layer_types import BLA_IC, Leaky_onset_units_exc
+from Layer_types import Leaky_onset_units_exc, BLA_IC_Layer
 import numpy as np, matplotlib.pyplot as plt
 
 def set_inputs_1(steps, N):
     
     inputs = np.zeros([steps, N])
-    b1 = int(0.2 * steps)
-    b2 = int(0.25 * steps)
+    b1 = int(0.5 * steps)
+    b2 = int(0.55 * steps)
     b3 = int(0.8 * steps)
     inputs[b1:b2, 0] = 3.0
     inputs[b2:b3, :] = 3.0
     
     return inputs
 
-def test_Leaky_Onset_unit(parameters, epochs, steps, eta_b, da, tau_t, alpha_t, max_W, theta_da):
+def test_Leaky_Onset_unit(parameters, epochs, steps, eta_b, da, tau_t, alpha_t, max_W, theta_da, inputs):
     
     rng = np.random.RandomState(parameters.seed)
     Layer = Leaky_onset_units_exc(N = 2,
-                                  tau_uo = 20,
-                                  tau_ui = 20,
+                                  tau_uo = 5,
+                                  tau_ui = 5,
                                   baseline = 0.0, 
                                   rng = rng, 
                                   noise = 0.0)
     
-    inputs = set_inputs_1(steps, Layer.N)
     t_dot = np.zeros(Layer.N)
     t = np.zeros(Layer.N)
     results = []
@@ -128,7 +127,7 @@ def set_inputs_2(steps, N):
 def test_BLA_IC(parameters, epochs, steps):
     
     rng = np.random.RandomState(parameters.seed)
-    Layer = BLA_IC(
+    Layer = BLA_IC_Layer(
                     N = 4, 
                     tau_uo = 20,
                     tau_ui = 20,
@@ -218,3 +217,66 @@ def plotting_2(results):
     plt.ylabel("Input")
     plt.title("Evolution of 4x4 Connection Weights")
     plt.show()
+    
+    
+def testing_HebbLearning_W(N, epochs, steps):
+    
+    results = []
+    
+    for i in range(25, 76, 2):
+        if i < 50:
+            inputs = np.zeros([200, 2])
+            b1 = int(0.5 * 200)
+            b2 = int((i/100) * 200)
+            b3 = int(0.95 * 200)
+            inputs[b2:b1, 1] = 3.0
+            inputs[b1:b3, :] = 3.0
+        
+        else:
+            inputs = np.zeros([200, 2])
+            b1 = int(0.5 * 200)
+            b2 = int((i/100) * 200)
+            b3 = int(0.95 * 200)
+            inputs[b1:b2, 0] = 3.0
+            inputs[b2:b3, :] = 3.0
+        
+        run = test_Leaky_Onset_unit(parameters,
+                                    epochs = 1,
+                                    steps = 200,
+                                    eta_b = 0.1,
+                                    da = 1.0,
+                                    tau_t = 10.0,
+                                    alpha_t = 0.2,
+                                    max_W = 1.0,
+                                    theta_da = 0.2, 
+                                    inputs = inputs)
+
+        result = {"Matrix_value": run[0]["W_tracking"][-1].copy(),
+                  "Inp_time_diff": i - 50
+                  }
+        
+        results.append(result.copy())
+    
+    return results
+
+def plotting_3(results):
+    
+    M_Values_1_2 = [W["Matrix_value"][1, 0] for W in results]
+    M_Values_2_1 = [W["Matrix_value"][0, 1] for W in results]
+    inp_time_diff = [T["Inp_time_diff"] for T in results]
+    
+    plt.plot(inp_time_diff, M_Values_1_2, label = "1→2")
+    plt.legend(loc = "upper right")
+    plt.xlabel("Inp_time_diff")
+    plt.ylabel("Matrix_value")
+    plt.title("Matrix update given input presentation time difference")
+    plt.show()
+    
+    plt.plot(inp_time_diff, M_Values_2_1, label = "2→1")
+    plt.legend(loc = "upper right")
+    plt.xlabel("Inp_time_diff")
+    plt.ylabel("Matrix_value")
+    plt.title("Matrix update given input presentation time difference")
+    plt.show()
+        
+        
