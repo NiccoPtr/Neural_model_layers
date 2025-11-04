@@ -392,3 +392,46 @@ class BLA_IC_Layer:
         self.BLA_IC_layer.W += delta_W
 
         return self.outputs.copy()
+    
+class SNpc_Layer:
+    
+    def __init__(self, N: int, tau: float, baseline: float, Inh_Layer_1_DA_Layer_1_W, Inh_Layer_2_DA_Layer_2_W, rng, noise: float):
+        
+        self.Inh_Layer_1 = Leaky_units_inh(N, tau, baseline, rng, noise)
+        self.Inh_Layer_2 = Leaky_units_inh(N, tau, baseline, rng, noise)
+        self.DA_Layer_1 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        self.DA_Layer_2 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        
+        self.Inh_Layer_1_DA_Layer_1_W = Inh_Layer_1_DA_Layer_1_W
+        self.Inh_Layer_2_DA_Layer_2_W = Inh_Layer_2_DA_Layer_2_W
+        self.SNpc_Ws = {
+            "Inh_Layer_1_DA_Layer_1_W" : np.eye(N).astype(float) * self.Inh_Layer_1_DA_Layer_1_W,
+            "Inh_Layer_2_DA_Layer_2_W" : np.eye(N).astype(float) * self.Inh_Layer_2_DA_Layer_2_W
+            }
+        
+    def reset_activity(self):
+        
+        self.Inh_Layer_1.reset_activity()
+        self.Inh_Layer_2.reset_activity()
+        self.DA_Layer_1.reset_activity()
+        self.DA_Layer_2.reset_activity()
+        
+    def step(self, inp_NAc, inp_DMS, inp_PPN):
+        
+        output_1 = self.Inh_Layer_1.step(inp_NAc)
+        self.DA_Layer_1.step(output_1 + inp_PPN)
+        
+        output_2 = self.Inh_Layer_2.step(inp_DMS)
+        self.DA_Layer_2.step(output_2 + inp_PPN)
+        
+        if np.any(self.DA_Layer_1.output.copy() > 1.0) or np.any(self.DA_Layer_2.output.copy() > 1.0):
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
+            
+        
+        
+        
+        
+        
+        
+        
+        
