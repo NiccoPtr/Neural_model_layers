@@ -7,7 +7,7 @@ Created on Sat Aug 16 11:50:44 2025
 from parameter_manager import ParameterManager
 
 class Parameters(ParameterManager):
-    def __init__(self, N, tau, baseline, BG_dl_W, BG_dm_W, BG_v_W, seed, noise, Matrices_scalars, DA_values):
+    def __init__(self, N, tau, baseline, BG_dl_W, BG_dm_W, BG_v_W, SNpc_W, seed, noise, Matrices_scalars, DA_values):
         
         self.N = N
         self.tau = tau
@@ -15,6 +15,7 @@ class Parameters(ParameterManager):
         self.BG_dl_W = BG_dl_W
         self.BG_dm_W = BG_dm_W
         self.BG_v_W = BG_v_W
+        self.SNpc_W = SNpc_W 
         self.seed = seed
         self.noise = noise
         self.Matrices_scalars = Matrices_scalars
@@ -33,6 +34,7 @@ parameters = Parameters(
                         BG_dl_W = {"DLS_GPi_W": 2.4, "STNdl_GPi_W": 1.8},
                         BG_dm_W = {"DMS_GPiSNpr_W": 2.4, "STNdm_GPiSNpr_W": 1.8},
                         BG_v_W = {"NAc_SNpr_W": 2.4, "STNv_SNpr_W": 1.8},
+                        SNpc_W = {"Inh_Layer_1_DA_Layer_1_W": 1.0, "Inh_Layer_2_DA_Layer_2_W": 1.0},
                         seed = 2,
                         noise = {"BG_dl": 0.0, "MGV": 0.0, "MC": 0.05, "BLA_IC": 0.0},
                         Matrices_scalars = {"BGdl_MGV": 1.5, "MGV_MC": 1.5, "MC_MGV": 0.8, "MC_STNdl": 1.6, "MC_DLS": 1.0},

@@ -213,7 +213,7 @@ class BG_v_Layer:
         self.STNv.reset_activity()
         self.SNpr.reset_activity()
         
-    def step(self, inputs, inp_feedback):
+    def step(self, inputs, inp_feedback_NAc, inp_feedback_STNv):
         """
         Return the output of the 2 layers below GPi layer using the input argument as Input
         
@@ -223,8 +223,8 @@ class BG_v_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_NAc = self.NAc.step(inputs + inp_feedback)
-        output_STNv = self.STNv.step(inp_feedback)
+        output_NAc = self.NAc.step(inputs + inp_feedback_NAc)
+        output_STNv = self.STNv.step(inp_feedback_STNv)
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
@@ -271,7 +271,7 @@ class BG_dm_Layer:
         self.STNdm.reset_activity()
         self.GPi_SNpr.reset_activity()
         
-    def step(self, inputs, inp_feedback):
+    def step(self, inputs, inp_feedback_DMS, inp_feedback_STNdm):
         """
         Return the output of the 2 layers below GPi layer using the input argument as Input
         
@@ -281,8 +281,8 @@ class BG_dm_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DMS = self.DMS.step(inputs + inp_feedback)
-        output_STNdm = self.STNdm.step(inp_feedback)
+        output_DMS = self.DMS.step(inputs + inp_feedback_DMS)
+        output_STNdm = self.STNdm.step(inp_feedback_STNdm)
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
@@ -329,7 +329,7 @@ class BG_dl_Layer:
         self.STNdl.reset_activity()
         self.GPi.reset_activity()
         
-    def step(self, inputs, inp_feedback):
+    def step(self, inputs, inp_feedback_DLS, inp_feedback_STNdl):
         """
         Return the output of the 2 layers below GPi layer using the input argument as Input
         
@@ -339,8 +339,8 @@ class BG_dl_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DLS = self.DLS.step(inputs + inp_feedback)
-        output_STNdl = self.STNdl.step(inp_feedback)
+        output_DLS = self.DLS.step(inputs + inp_feedback_DLS)
+        output_STNdl = self.STNdl.step(inp_feedback_STNdl)
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
@@ -353,10 +353,10 @@ class BG_dl_Layer:
         # print(f"[BGDL] GPi output: {output_BG_dl}")
         
         return self.output_BG_dl.copy()
-    
+
 class BLA_IC_Layer:
     
-    def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, max_W, theta_da):
+    def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, theta_da, max_W):
 
         self.BLA_IC_layer = Leaky_onset_units_exc(N, tau_uo, tau_ui, baseline, rng, noise)
         
@@ -386,7 +386,7 @@ class BLA_IC_Layer:
 
         delta_W = (self.eta_b *
                    np.maximum(0, da - self.theta_da) *
-                   np.outer(pos, neg.T) *
+                   np.outer(pos, neg) *
                    (self.max_W - self.BLA_IC_layer.W))
         
         self.BLA_IC_layer.W += delta_W
@@ -395,43 +395,34 @@ class BLA_IC_Layer:
     
 class SNpc_Layer:
     
-    def __init__(self, N: int, tau: float, baseline: float, Inh_Layer_1_DA_Layer_1_W, Inh_Layer_2_DA_Layer_2_W, rng, noise: float):
+    def __init__(self, N: int, tau: float, baseline: float, SNpci_1_SNpco_1_W, SNpci_2_SNpco_2_W, rng, noise: float):
         
-        self.Inh_Layer_1 = Leaky_units_inh(N, tau, baseline, rng, noise)
-        self.Inh_Layer_2 = Leaky_units_inh(N, tau, baseline, rng, noise)
-        self.DA_Layer_1 = Leaky_units_exc(N, tau, baseline, rng, noise)
-        self.DA_Layer_2 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        self.SNpci_1 = Leaky_units_inh(N, tau, baseline, rng, noise)
+        self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise)
+        self.SNpco_1 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        self.SNpco_2 = Leaky_units_exc(N, tau, baseline, rng, noise)
         
-        self.Inh_Layer_1_DA_Layer_1_W = Inh_Layer_1_DA_Layer_1_W
-        self.Inh_Layer_2_DA_Layer_2_W = Inh_Layer_2_DA_Layer_2_W
+        self.SNpci_1_SNpco_1_W = SNpci_1_SNpco_1_W
+        self.SNpci_2_SNpco_2_W = SNpci_2_SNpco_2_W
         self.SNpc_Ws = {
-            "Inh_Layer_1_DA_Layer_1_W" : np.eye(N).astype(float) * self.Inh_Layer_1_DA_Layer_1_W,
-            "Inh_Layer_2_DA_Layer_2_W" : np.eye(N).astype(float) * self.Inh_Layer_2_DA_Layer_2_W
+            "SNpci_1_SNpco_1_W" : np.eye(N).astype(float) * self.SNpci_1_SNpco_1_W,
+            "SNpci_2_SNpco_2_W" : np.eye(N).astype(float) * self.SNpci_2_SNpco_2_W
             }
         
     def reset_activity(self):
         
-        self.Inh_Layer_1.reset_activity()
-        self.Inh_Layer_2.reset_activity()
-        self.DA_Layer_1.reset_activity()
-        self.DA_Layer_2.reset_activity()
+        self.SNpci_1.reset_activity()
+        self.SNpci_2.reset_activity()
+        self.SNpco_1.reset_activity()
+        self.SNpco_2.reset_activity()
         
     def step(self, inp_NAc, inp_DMS, inp_PPN):
         
-        output_1 = self.Inh_Layer_1.step(inp_NAc)
-        self.DA_Layer_1.step(output_1 + inp_PPN)
+        output_1 = self.SNpci_1.step(inp_NAc)
+        self.SNpco_1.step(output_1 + inp_PPN)
         
-        output_2 = self.Inh_Layer_2.step(inp_DMS)
-        self.DA_Layer_2.step(output_2 + inp_PPN)
+        output_2 = self.SNpci_2.step(inp_DMS)
+        self.SNpco_2.step(output_2 + inp_PPN)
         
-        if np.any(self.DA_Layer_1.output.copy() > 1.0) or np.any(self.DA_Layer_2.output.copy() > 1.0):
-            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
-            
-        
-        
-        
-        
-        
-        
-        
-        
+        if np.any(self.SNpco_1.output.copy() > 1.0) or np.any(self.SNpco_2.output.copy() > 1.0):
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")   

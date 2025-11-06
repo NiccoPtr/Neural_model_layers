@@ -1,6 +1,8 @@
 {
     "N": {
         "BG_dl": 2,
+        "BG_dm": 2,
+        "BG_v": 2,
         "MGV": 2,
         "MC": 2,
         "BLA_IC": 4
@@ -18,6 +20,12 @@
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.8,
+        "DMS": 0.0,
+        "STNdm": 0.0,
+        "GPi_SNpr": 0.0,
+        "NAc": 0.0,
+        "STNv": 0.0,
+        "SNpr": 0.0,
         "MGV": 0.0,
         "MC": 0.0,
         "BLA_IC": 0.0
@@ -25,6 +33,18 @@
     "BG_dl_W": {
         "DLS_GPi_W": 2.4,
         "STNdl_GPi_W": 1.8
+    },
+    "BG_dm_W": {
+        "DMS_GPiSNpr_W": 2.4,
+        "STNdm_GPiSNpr_W": 1.8
+    },
+    "BG_v_W": {
+        "NAc_SNpr_W": 2.4,
+        "STNv_SNpr_W": 1.8
+    },
+    "SNpc_W": {
+        "Inh_Layer_1_DA_Layer_1_W": 1.0,
+        "Inh_Layer_2_DA_Layer_2_W": 1.0
     },
     "seed": 2,
     "noise": {
