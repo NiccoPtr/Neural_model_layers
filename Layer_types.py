@@ -354,11 +354,11 @@ class BG_dl_Layer:
         
         return self.output_BG_dl.copy()
 
-class BLA_IC_Layer:
+class BLA_IC_Layer(Leaky_onset_units_exc):
     
     def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, theta_da, max_W):
-
-        self.BLA_IC_layer = Leaky_onset_units_exc(N, tau_uo, tau_ui, baseline, rng, noise)
+        
+        super(BLA_IC_Layer, self).__init__(N, tau_uo, tau_ui, baseline, rng, noise)
         
         self.t = np.zeros(N)
         self.t_dot = np.zeros(N)
@@ -367,17 +367,10 @@ class BLA_IC_Layer:
         self.eta_b = eta_b
         self.max_W = max_W
         self.theta_da = theta_da
-        
-    def reset_activity(self):
-        
-        self.BLA_IC_layer.reset_activity()
 
-    def step(self, inputs, da):
-        
-        self.outputs = self.BLA_IC_layer.step(inputs) 
-
-        self.t_dot = -self.t / self.tau_t + self.alpha_t * self.outputs
-        # self.t_dot = 1/self.tau_t * (-self.t + self.alpha_t * self.outputs)
+    def learn(self, da):
+    
+        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.outputs)
 
         self.t += self.t_dot
 
@@ -390,8 +383,7 @@ class BLA_IC_Layer:
                    (self.max_W - self.BLA_IC_layer.W))
         
         self.BLA_IC_layer.W += delta_W
-
-        return self.outputs.copy()
+        
     
 class SNpc_Layer:
     

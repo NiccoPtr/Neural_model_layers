@@ -17,8 +17,10 @@ def delta_Str_learn(eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_in
     
     delta_W_inp_str = (eta_str *
                        np.maximum(0, DA - theta_DA_str) * 
-                       np.outer(np.maximum(0, v_str - theta_str),
-                       np.maximum(0, v_inp - theta_inp_str)) *
+                       np.outer(
+                           np.maximum(0, v_str - theta_str),
+                           np.maximum(0, v_inp - theta_inp_str)
+                           ) *
                        (max_W_str - W))
     
     return delta_W_inp_str
@@ -83,9 +85,27 @@ Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05,
              "theta_inp_DLS": 0.5, "theta_inp_DMS": 0.5, "theta_inp_NAc": 0.9,
              "max_W_DLS": 1, "max_W_DMS": 1, "max_W_NAc": 2}
 
+"""
+Model's matrices
+"""
+
+Ws = {
+      "inp_BLA_IC": np.eye(N),
+      "Mani_DLS": np.ones((N, N)), "Mani_DMS": np.ones((N, N)),
+      "Food_PPN": np.ones(N), "Food_LH": np.ones(N),
+      "PPN_SNpco": np.ones(N),
+      "BLA_IC_NAc": np.eye(N), "BLA_IC_LH": np.ones(N),
+      "LH_VTA": np.ones(N),
+      "NAc_SNpci_1": np.eye(N), "DMS_SNpci_2": np.eye(N),
+      "GPi_MGV": np.eye(N), "GPi_SNpr_P": np.eye(N), "SNpr_DM": np.eye(N),
+      "MGV_MC": np.eye(N), "P_PFCd_PPC": np.eye(N), "DM_PL": np.eye(N),
+      "PL_NAc": np.eye(N), "PL_STNv": np.eye(N), "PL_PFCd_PPC": np.eye(N),
+      "PFCd_PPC_DMS": np.eye(N), "PFCd_PPC_STNdm": np.eye(N), "PFCd_PPC_PL": np.eye(N), "PFCd_PPC_MC": np.eye(N),
+      "MC_MGV": np.eye(N), "MC_DLS": np.eye(N), "MC_STNdl": np.eye(N), "MC_PFCd_PPC": np.eye(N)
+      }
 
 """
-Defining Layers for Model simulation
+Layers for Model simulation
 """          
     
 rng = np.random.RandomState(seed)

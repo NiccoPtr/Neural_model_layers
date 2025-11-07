@@ -7,9 +7,10 @@ Created on Sat Aug 16 11:50:44 2025
 from parameter_manager import ParameterManager
 
 class Parameters(ParameterManager):
-    def __init__(self, N, tau, baseline, BG_dl_W, BG_dm_W, BG_v_W, SNpc_W, seed, noise, Matrices_scalars, DA_values):
+    def __init__(self, N, threshold, tau, baseline, BG_dl_W, BG_dm_W, BG_v_W, SNpc_W, seed, noise, Matrices_scalars, DA_values, BLA_Learn, Str_Learn):
         
         self.N = N
+        self.threshold = threshold
         self.tau = tau
         self.baseline = baseline
         self.BG_dl_W = BG_dl_W
@@ -20,25 +21,71 @@ class Parameters(ParameterManager):
         self.noise = noise
         self.Matrices_scalars = Matrices_scalars
         self.DA_values = DA_values
+        self.BLA_Learn = BLA_Learn
+        self.Str_Learn = Str_Learn
         
         super(Parameters, self).__init__()
         
-
+        
 param_string = "Simulation"
 param_file = "prm_file"
 
 parameters = Parameters(
-                        N = {"BG_dl": 2, "BG_dm": 2, "BG_v": 2, "MGV": 2, "MC": 2, "BLA_IC": 4},
-                        tau = {"BG_dl": 10, "MGV": 10, "MC": 5, "BLA_IC": [10, 10]},
-                        baseline = {"DLS": 0.0, "STNdl": 0.0, "GPi": 0.8, "DMS": 0.0, "STNdm": 0.0, "GPi_SNpr": 0.0, "NAc": 0.0, "STNv": 0.0, "SNpr": 0.0, "MGV": 0.0, "MC": 0.0, "BLA_IC": 0.0},
-                        BG_dl_W = {"DLS_GPi_W": 2.4, "STNdl_GPi_W": 1.8},
-                        BG_dm_W = {"DMS_GPiSNpr_W": 2.4, "STNdm_GPiSNpr_W": 1.8},
-                        BG_v_W = {"NAc_SNpr_W": 2.4, "STNv_SNpr_W": 1.8},
-                        SNpc_W = {"Inh_Layer_1_DA_Layer_1_W": 1.0, "Inh_Layer_2_DA_Layer_2_W": 1.0},
                         seed = 2,
-                        noise = {"BG_dl": 0.0, "MGV": 0.0, "MC": 0.05, "BLA_IC": 0.0},
-                        Matrices_scalars = {"BGdl_MGV": 1.5, "MGV_MC": 1.5, "MC_MGV": 0.8, "MC_STNdl": 1.6, "MC_DLS": 1.0},
-                        DA_values = {"Y": 0.1, "delta": 4.9, "DA": 1.0}
+                        N = {"BG_dl": 2, "BG_dm": 2, "BG_v": 2, "MGV": 2, "MC": 2, "BLA_IC": 4, "SNpc": 2, "PPN": 1, "LH": 1, "VTA": 1, "P": 2, "DM": 2, "PL": 2, "PFCd_PPC": 2},
+                        
+                        threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.8, "BLA_IC": 0.0, "SNpc": 1.0, "PPN": 0.0, "LH": 0.0, "VTA": 1.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
+                        
+                        tau = {"MC": 2000, "PFCd_PPC": 2000, "PL": 2000, "MGV": 300, "P": 300, "DM": 300, "BG_dl": 300, "BG_dm": 300, "BG_v": 300, "BLA_IC": [500, 500], "SNpc": 300, "PPN": [100, 500], "LH": [100, 500], "VTA": 300},
+                        
+                        baseline = {"PPN": 0.0,
+                                    "LH": 0.0,
+                                    "VTA": 0.0,
+                                    "BLA_IC": 0.0,
+                                    "SNpc": 0.0,
+                                    "DLS": 0.0, "STNdl": 0.0, "GPi": 0.8, 
+                                    "DMS": 0.0, "STNdm": 0.0, "GPi_SNpr": 0.8, 
+                                    "NAc": 0.0, "STNv": 0.0, "SNpr": 0.8, 
+                                    "MGV": 0.0,
+                                    "MC": 0.0,
+                                    "P": 0.0,
+                                    "PFCd_PPC": 0.0,
+                                    "DM": 0.0,
+                                    "PL": 0.0
+                                    },
+                        
+                        BG_dl_W = {"DLS_GPi_W": 3, "STNdl_GPi_W": 2},
+                        
+                        BG_dm_W = {"DMS_GPiSNpr_W": 3, "STNdm_GPiSNpr_W": 2},
+                        
+                        BG_v_W = {"NAc_SNpr_W": 3, "STNv_SNpr_W": 2},
+                        
+                        SNpc_W = {"SNpci_1_SNpco_1_W": 1.0, "SNpci_2_SNpco_2_W": 1.0},
+                        
+                        noise = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.05, "BLA_IC": 0.0, "SNpc": 0.0, "PPN": 0.0, "LH": 0.0, "VTA": 0.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
+                        
+                        Matrices_scalars = {"Mani_DLS": 0.0, "Mani_DMS": 0.0, "Mani_BLA_IC": 5,
+                                            "Food_PPN": 10, "Food_BLA_IC": 5, "Food_LH": 10,
+                                            "Sat_BLA_IC": 10,
+                                            "PPN_SNpco": 20,
+                                            "BLA_IC_NAc": 0.0, "BLA_IC_LH": 5,
+                                            "LH_VTA": 20,
+                                            "NAc_SNpci_1": 6, "DMS_SNpci_2": 10,
+                                            "GPi_MGV": 1.5, "GPi_SNpr_P": 1.5, "SNpr_DM": 1.5,
+                                            "MGV_MC": 1.2, "P_PFCd_PPC": 1.0, "DM_PL": 1.0,
+                                            "PL_NAc": 1.0, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2, 
+                                            "PFCd_PPC_DMS": 1.0, "PFCd_PPC_STNdm": 1.6, "PFCd_PPC_PL": 1.0, "PFCd_PPC_MC": 1.0, 
+                                            "MC_MGV": 1.0, "MC_DLS": 1.0, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2},
+                        
+                        DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
+                        
+                        BLA_Learn = {"eta_b": 0.08, "alpha_t": 10**10, "tau_t": 500, "theta_DA": 0.7, "max_W": 2},
+                        
+                        Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
+                                     "theta_DA_DLS": 0.8, "theta_DA_DMS": 0.8, "theta_DA_NAc": 0.9,
+                                     "theta_DLS": 0.5, "theta_DMS": 0.5, "theta_NAc": 0.9,
+                                     "theta_inp_DLS": 0.5, "theta_inp_DMS": 0.5, "theta_inp_NAc": 0.9,
+                                     "max_W_DLS": 1, "max_W_DMS": 1, "max_W_NAc": 2}
                         )
 
 parameters.update(param_string)
