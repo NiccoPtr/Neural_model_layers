@@ -36,7 +36,7 @@ parameters = Parameters(
                         
                         threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.8, "BLA_IC": 0.0, "SNpc": 1.0, "PPN": 0.0, "LH": 0.0, "VTA": 1.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
                         
-                        tau = {"MC": 2000, "PFCd_PPC": 2000, "PL": 2000, "MGV": 300, "P": 300, "DM": 300, "BG_dl": 300, "BG_dm": 300, "BG_v": 300, "BLA_IC": [500, 500], "SNpc": 300, "PPN": [100, 500], "LH": [100, 500], "VTA": 300},
+                        tau = {"MC": 6, "PFCd_PPC": 6, "PL": 6, "MGV": 6, "P": 6, "DM": 6, "BG_dl": 6, "BG_dm": 6, "BG_v": 6, "BLA_IC": [10, 10], "SNpc": 6, "PPN": [2, 10], "LH": [2, 10], "VTA": 6},
                         
                         baseline = {"PPN": 0.0,
                                     "LH": 0.0,

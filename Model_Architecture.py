@@ -34,7 +34,7 @@ N = {"BG_dl": 2, "BG_dm": 2, "BG_v": 2, "MGV": 2, "MC": 2, "BLA_IC": 4, "SNpc": 
 
 threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.8, "BLA_IC": 0.0, "SNpc": 1.0, "PPN": 0.0, "LH": 0.0, "VTA": 1.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0}
 
-tau = {"MC": 2000, "PFCd_PPC": 2000, "PL": 2000, "MGV": 300, "P": 300, "DM": 300, "BG_dl": 300, "BG_dm": 300, "BG_v": 300, "BLA_IC": [500, 500], "SNpc": 300, "PPN": [100, 500], "LH": [100, 500], "VTA": 300}
+tau = {"MC": 6, "PFCd_PPC": 6, "PL": 6, "MGV": 6, "P": 6, "DM": 6, "BG_dl": 6, "BG_dm": 6, "BG_v": 6, "BLA_IC": [10, 10], "SNpc": 6, "PPN": [2, 10], "LH": [2, 10], "VTA": 6}
 
 baseline = {"PPN": 0.0,
             "LH": 0.0,
@@ -90,12 +90,18 @@ Model's matrices
 """
 
 Ws = {
-      "inp_BLA_IC": np.eye(N),
+      "inp_BLA_IC": np.array([[1, 0, 0, 0, 0, 0],
+                              [0, 1, 0, 0, 0, 0],
+                              [0, 0, 1, 0, -1, 0],
+                              [0, 0, 0, 1, 0, -1]
+                              ]),
       "Mani_DLS": np.ones((N, N)), "Mani_DMS": np.ones((N, N)),
-      "Food_PPN": np.ones(N), "Food_LH": np.ones(N),
-      "PPN_SNpco": np.ones(N),
-      "BLA_IC_NAc": np.eye(N), "BLA_IC_LH": np.ones(N),
-      "LH_VTA": np.ones(N),
+      "Food_PPN": np.array([1, 1]), "Food_LH": np.array([1, 1]),
+      "PPN_SNpco": np.array([1]),
+      "BLA_IC_NAc": np.array([[0, 0, 1, 1],
+                              [0, 0, 1, 1]]), 
+      "BLA_IC_LH": np.array([0, 0, 1, 1]),
+      "LH_VTA": np.array([1]),
       "NAc_SNpci_1": np.eye(N), "DMS_SNpci_2": np.eye(N),
       "GPi_MGV": np.eye(N), "GPi_SNpr_P": np.eye(N), "SNpr_DM": np.eye(N),
       "MGV_MC": np.eye(N), "P_PFCd_PPC": np.eye(N), "DM_PL": np.eye(N),
@@ -173,20 +179,20 @@ MC = Leaky_units_exc(N["MC"],
                      noise["MC"])
 
 BG_dm = BG_dm_Layer(N["BG_dm"], 
-                      tau["BG_dm"], 
-                      baseline["DMS"],
-                      baseline["STNdm"],
-                      baseline["GPi_SNpr"],
-                      BG_dm_W["DMS_GPiSNpr_W"], 
-                      BG_dm_W["STNdm_GPiSNpr_W"],
-                      rng,
-                      noise["BG_dm"])
+                    tau["BG_dm"], 
+                    baseline["DMS"],
+                    baseline["STNdm"],
+                    baseline["GPi_SNpr"],
+                    BG_dm_W["DMS_GPiSNpr_W"], 
+                    BG_dm_W["STNdm_GPiSNpr_W"],
+                    rng,
+                    noise["BG_dm"])
 
 P = Leaky_units_exc(N["P"], 
-                      tau["P"],
-                      baseline["P"],
-                      rng,
-                      noise["P"])
+                    tau["P"],
+                    baseline["P"],
+                    rng,
+                    noise["P"])
 
 PFCd_PPC = Leaky_units_exc(N["PFCd_PPC"], 
                      tau["PFCd_PPC"], 
@@ -195,25 +201,25 @@ PFCd_PPC = Leaky_units_exc(N["PFCd_PPC"],
                      noise["PFCd_PPC"])
 
 BG_v = BG_v_Layer(N["BG_v"], 
-                      tau["BG_v"], 
-                      baseline["NAc"],
-                      baseline["STNv"],
-                      baseline["SNpr"],
-                      BG_v_W["NAc_SNpr_W"], 
-                      BG_v_W["STNv_SNpr_W"],
-                      rng,
-                      noise["BG_v"])
+                  tau["BG_v"], 
+                  baseline["NAc"],
+                  baseline["STNv"],
+                  baseline["SNpr"],
+                  BG_v_W["NAc_SNpr_W"], 
+                  BG_v_W["STNv_SNpr_W"],
+                  rng,
+                  noise["BG_v"])
 
-DM = Leaky_units_exc(N["P"], 
-                      tau["P"],
-                      baseline["P"],
-                      rng,
-                      noise["P"])
-
-PL = Leaky_units_exc(N["PFCd_PC"], 
-                     tau["PFCd_PC"], 
-                     baseline["PFCd_PC"],
+DM = Leaky_units_exc(N["DM"], 
+                     tau["DM"],
+                     baseline["DM"],
                      rng,
-                     noise["PFCd_PC"]) 
+                     noise["DM"])
+
+PL = Leaky_units_exc(N["PL"], 
+                     tau["PL"], 
+                     baseline["PL"],
+                     rng,
+                     noise["PL"]) 
 
                         

@@ -25,7 +25,7 @@ class Leaky_units_exc:
         self.noise = noise
         self.baseline = np.ones(N) * baseline
         self.activity = self.baseline.copy()
-        self.output = np.ones(N) * np.tanh(self.activity.copy())
+        self.output = np.zeros(N)
 
     def update_weights(self, W: np.array):
         """Updates the weight matrix.
@@ -53,7 +53,6 @@ class Leaky_units_exc:
         self.activity *= 0
         self.activity += self.baseline.copy()
         self.output *= 0
-        self.output += np.ones(self.N) * np.tanh(self.activity.copy())
         
     def step(self, inputs):
         """Runs a single timestep, updating activity.
@@ -77,7 +76,6 @@ class Leaky_units_exc:
         # print(f"  [DEBUG] updated activity: {self.activity}")
         # print(f"  [DEBUG] output: {self.output}")
         
-        return self.output.copy()
     
 class Leaky_units_inh(Leaky_units_exc):
     
@@ -90,7 +88,7 @@ class Leaky_units_inh(Leaky_units_exc):
         Returns:
             np.ndarray: negative Updated activity vector.
         """
-        return - super(Leaky_units_inh, self).step(inputs)
+        - super(Leaky_units_inh, self).step(inputs)
 
 class Leaky_onset_units_exc:
     
@@ -113,7 +111,7 @@ class Leaky_onset_units_exc:
         self.baseline = np.ones(N) * baseline
         self.activity_uo = self.baseline.copy()
         self.activity_ui = self.baseline.copy()
-        self.output = np.ones(N) * np.tanh(self.activity_uo.copy())
+        self.output = np.zeros(N)
         
     def update_weights(self, W: np.array):
         """ 
@@ -141,7 +139,6 @@ class Leaky_onset_units_exc:
         self.activity_uo += self.baseline.copy()
         self.activity_ui += self.baseline.copy()
         self.output *= 0
-        self.output += np.ones(self.N) * np.tanh(self.activity_uo.copy())
         
     def step(self, inputs):
         """
@@ -157,13 +154,12 @@ class Leaky_onset_units_exc:
             
             - activity_uo will be used as output of the onset unit
         """
-        self.activity_uo += (1/self.tau_uo) * (np.maximum(0, net_input - self.activity_ui.copy()) - self.activity_uo)
-        self.output = np.maximum(0, np.tanh(self.activity_uo.copy()))
+        self.activity_uo += (1/self.tau_uo) * (np.maximum(0, net_input - self.activity_ui) - self.activity_uo)
+        self.output = np.maximum(0, np.tanh(self.activity_uo))
         
         if np.any(self.output > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
 
-        return self.output.copy()
     
 class Leaky_onset_units_inh(Leaky_onset_units_exc):
     
@@ -177,7 +173,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
             
             - activity_uo will be used as output of the onset unit
         """
-        return - super(Leaky_onset_units_inh, self).step(inputs)
+        - super(Leaky_onset_units_inh, self).step(inputs)
     
 
 class BG_v_Layer:
@@ -197,6 +193,9 @@ class BG_v_Layer:
         self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise)
         self.STNv = Leaky_units_exc(N, tau, baseline_STNv, rng, noise)
         self.SNpr = Leaky_units_inh(N, tau, baseline_SNpr, rng, noise)
+        self.output_BG_v = np.zeros(N)
+        self.output_NAc_pre = np.zeros(N)
+        self.output_STNv_pre = np.zeros(N)
         self.NAc_SNpr_W = NAc_SNpr_W
         self.STNv_SNpr_W = STNv_SNpr_W
         self.BG_v_Ws = {
@@ -229,14 +228,14 @@ class BG_v_Layer:
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_v = self.SNpr.step(np.dot(self.BG_v_Ws["NAc_SNpr"], output_NAc.copy()) + np.dot(self.BG_v_Ws["STNv_SNpr"], output_STNv.copy()))
+        self.output_BG_v = self.SNpr.step(np.dot(self.BG_v_Ws["NAc_SNpr"], self.output_NAc_pre) + np.dot(self.BG_v_Ws["STNv_SNpr"], self.output_STNv_pre))
         
         if np.any(self.output_BG_dl > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
-        # print(f"[BGDL] GPi output: {output_BG_dl}")
-        
-        return self.output_BG_v.copy()    
+        self.output_NAc_pre = output_NAc.copy()
+        self.output_STNv_pre = output_STNv.copy()
+         
 
 class BG_dm_Layer:
     
@@ -255,6 +254,9 @@ class BG_dm_Layer:
         self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise)
         self.STNdm = Leaky_units_exc(N, tau, baseline_STNdm, rng, noise)
         self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise)
+        self.output_BG_dm = np.zeros(N)
+        self.output_DMS_pre = np.zeros(N)
+        self.output_STNdm_pre = np.zeros(N)
         self.DMS_GPiSNpr_W = DMS_GPiSNpr_W
         self.STNdm_GPiSNpr_W = STNdm_GPiSNpr_W
         self.BG_dm_Ws = {
@@ -287,14 +289,14 @@ class BG_dm_Layer:
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_dm = self.GPi_SNpr.step(np.dot(self.BG_dm_Ws["DMS_GPiSNpr"], output_DMS.copy()) + np.dot(self.BG_dm_Ws["STNdm_GPiSNpr"], output_STNdm.copy()))
+        self.output_BG_dm = self.GPi_SNpr.step(np.dot(self.BG_dm_Ws["DMS_GPiSNpr"], self.output_DMS_pre) + np.dot(self.BG_dm_Ws["STNdm_GPiSNpr"], self.output_STNdm_pre))
         
         if np.any(self.output_BG_dl > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
-        # print(f"[BGDL] GPi output: {output_BG_dl}")
+        self.output_DMS_pre = output_DMS.coppy()
+        self.output_STNdm_pre = output_STNdm.copy()
         
-        return self.output_BG_dm.copy()
     
 class BG_dl_Layer:
     
@@ -313,6 +315,9 @@ class BG_dl_Layer:
         self.DLS = Leaky_units_inh(N, tau, baseline_DLS, rng, noise)
         self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise)
         self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise)
+        self.output_BG_dl = np.zeros(N)
+        self.output_DLS_pre = np.zeros(N)
+        self.output_STNdl_pre = np.zeros(N)
         self.DLS_GPi_W = DLS_GPi_W
         self.STNdl_GPi_W = STNdl_GPi_W
         self.BG_dl_Ws = {
@@ -345,14 +350,14 @@ class BG_dl_Layer:
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], output_DLS.copy()) + np.dot(self.BG_dl_Ws["STNdl_GPi"], output_STNdl.copy()))
+        self.output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], self.output_DLS_pre) + np.dot(self.BG_dl_Ws["STNdl_GPi"], self.output_STNdl_pre))
         
         if np.any(self.output_BG_dl > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
-        # print(f"[BGDL] GPi output: {output_BG_dl}")
+        self.output_DLS_pre = output_DLS.copy()
+        self.output_STNdl_pre = output_STNdl.copy()
         
-        return self.output_BG_dl.copy()
 
 class BLA_IC_Layer(Leaky_onset_units_exc):
     
@@ -393,6 +398,10 @@ class SNpc_Layer:
         self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise)
         self.SNpco_1 = Leaky_units_exc(N, tau, baseline, rng, noise)
         self.SNpco_2 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        self.output_1 = np.zeros(N)
+        self.output_2 = np.zeros(N)
+        self.output_SNpci_1_pre = np.zeros(N)
+        self.output_SNpci_2_pre = np.zeros(N)
         
         self.SNpci_1_SNpco_1_W = SNpci_1_SNpco_1_W
         self.SNpci_2_SNpco_2_W = SNpci_2_SNpco_2_W
@@ -410,11 +419,15 @@ class SNpc_Layer:
         
     def step(self, inp_NAc, inp_DMS, inp_PPN):
         
-        output_1 = self.SNpci_1.step(inp_NAc)
-        self.SNpco_1.step(output_1 + inp_PPN)
+        output_i_1 = self.SNpci_1.step(inp_NAc)
+        self.output_1 = self.SNpco_1.step(self.output_SNpci_1_pre + inp_PPN)
         
-        output_2 = self.SNpci_2.step(inp_DMS)
-        self.SNpco_2.step(output_2 + inp_PPN)
+        output_i_2 = self.SNpci_2.step(inp_DMS)
+        self.output_2 = self.SNpco_2.step(self.output_SNpci_2_pre + inp_PPN)
         
         if np.any(self.SNpco_1.output.copy() > 1.0) or np.any(self.SNpco_2.output.copy() > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")   
+            
+        self.output_SNpci_1_pre = output_i_1.copy()
+        self.output_SNpci_2_pre = output_i_2.copy()
+            
