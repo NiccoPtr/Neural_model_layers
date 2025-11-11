@@ -64,18 +64,21 @@ parameters = Parameters(
                         
                         noise = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.05, "BLA_IC": 0.0, "SNpc": 0.0, "PPN": 0.0, "LH": 0.0, "VTA": 0.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
                         
-                        Matrices_scalars = {"Mani_DLS": 0.0, "Mani_DMS": 0.0, "Mani_BLA_IC": 5,
-                                            "Food_PPN": 10, "Food_BLA_IC": 5, "Food_LH": 10,
-                                            "Sat_BLA_IC": 10,
-                                            "PPN_SNpco": 20,
-                                            "BLA_IC_NAc": 0.0, "BLA_IC_LH": 5,
-                                            "LH_VTA": 20,
-                                            "NAc_SNpci_1": 6, "DMS_SNpci_2": 10,
+                        Matrices_scalars = {
+                                            "Mani_DLS": 0.0, "Mani_DMS": 0.0, "Mani_BLA_IC": 5.0,
+                                            "Food_PPN": 10.0, "Food_BLA_IC": 5.0, "Food_LH": 10.0,
+                                            "Sat_BLA_IC": 10.0,
+                                            "PPN_SNpco": 20.0,
+                                            "BLA_IC_NAc": 0.0, "BLA_IC_LH": 5.0,
+                                            "LH_VTA": 20.0,
+                                            "NAc_SNpci_1": 6.0, "DMS_SNpci_2": 10.0,
                                             "GPi_MGV": 1.5, "GPi_SNpr_P": 1.5, "SNpr_DM": 1.5,
-                                            "MGV_MC": 1.2, "P_PFCd_PPC": 1.0, "DM_PL": 1.0,
-                                            "PL_NAc": 1.0, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2, 
-                                            "PFCd_PPC_DMS": 1.0, "PFCd_PPC_STNdm": 1.6, "PFCd_PPC_PL": 1.0, "PFCd_PPC_MC": 1.0, 
-                                            "MC_MGV": 1.0, "MC_DLS": 1.0, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2},
+                                            "MGV_MC": 1.2, "P_PFCd_PPC": 1.2, "DM_PL": 1.2,
+                                            "PL_DM": 1.0, "PL_NAc": 1.0, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2,
+                                            "PFCd_PPC_P": 1.0, "PFCd_PPC_DMS": 1.0, "PFCd_PPC_STNdm": 1.6,
+                                            "PFCd_PPC_PL": 1.0, "PFCd_PPC_MC": 1.0,
+                                            "MC_MGV": 1.0, "MC_DLS": 1.0, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2
+                                        },
                         
                         DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
                         

@@ -13,18 +13,6 @@ import numpy as np
 from Simulation_file import set_DA, set_env
 from Layer_types import *
 
-def delta_Str_learn(eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, max_W_str, W):
-    
-    delta_W_inp_str = (eta_str *
-                       np.maximum(0, DA - theta_DA_str) * 
-                       np.outer(
-                           np.maximum(0, v_str - theta_str),
-                           np.maximum(0, v_inp - theta_inp_str)
-                           ) *
-                       (max_W_str - W))
-    
-    return delta_W_inp_str
-
 """
 Model's parameters'
 """
@@ -95,8 +83,12 @@ Ws = {
                               [0, 0, 1, 0, -1, 0],
                               [0, 0, 0, 1, 0, -1]
                               ]),
-      "Mani_DLS": np.ones((N, N)), "Mani_DMS": np.ones((N, N)),
-      "Food_PPN": np.array([1, 1]), "Food_LH": np.array([1, 1]),
+      "Mani_DLS": np.array([[1, 1, 0, 0, 0, 0],
+                            [1, 1, 0, 0, 0, 0]]),
+      "Mani_DMS": np.array([[1, 1, 0, 0, 0, 0],
+                            [1, 1, 0, 0, 0, 0]]),
+      "Food_PPN": np.array([0, 0, 1, 1, 0, 0]),
+      "Food_LH": np.array([0, 0, 1, 1, 0, 0]),
       "PPN_SNpco": np.array([1]),
       "BLA_IC_NAc": np.array([[0, 0, 1, 1],
                               [0, 0, 1, 1]]), 
@@ -105,8 +97,8 @@ Ws = {
       "NAc_SNpci_1": np.eye(N), "DMS_SNpci_2": np.eye(N),
       "GPi_MGV": np.eye(N), "GPi_SNpr_P": np.eye(N), "SNpr_DM": np.eye(N),
       "MGV_MC": np.eye(N), "P_PFCd_PPC": np.eye(N), "DM_PL": np.eye(N),
-      "PL_NAc": np.eye(N), "PL_STNv": np.eye(N), "PL_PFCd_PPC": np.eye(N),
-      "PFCd_PPC_DMS": np.eye(N), "PFCd_PPC_STNdm": np.eye(N), "PFCd_PPC_PL": np.eye(N), "PFCd_PPC_MC": np.eye(N),
+      "PL_DM": np.eye(N), "PL_NAc": np.eye(N), "PL_STNv": np.eye(N), "PL_PFCd_PPC": np.eye(N),
+      "PFCd_PPC_P": np.eye(N), "PFCd_PPC_DMS": np.eye(N), "PFCd_PPC_STNdm": np.eye(N), "PFCd_PPC_PL": np.eye(N), "PFCd_PPC_MC": np.eye(N),
       "MC_MGV": np.eye(N), "MC_DLS": np.eye(N), "MC_STNdl": np.eye(N), "MC_PFCd_PPC": np.eye(N)
       }
 
