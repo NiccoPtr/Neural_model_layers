@@ -243,32 +243,132 @@ class Model:
     
     def step(self, _input_):
         
-        self.BLA_IC.step(np.dot(Ws["inp_BLA_IC"], _input_))
+        """
+        Compute step for each layer using the output_pre values
+        """
         
-        self.BG_dm.step((parameters.DA_values["Y_DMS"] + (parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)) * np.dot(Ws["Mani_DMS"], _input_),
-                        np.dot(Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
-                        np.dot(Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre)
+        self.BLA_IC.step(np.dot(self.Ws["inp_BLA_IC"], _input_))
+        
+        self.BG_dm.step((parameters.DA_values["Y_DMS"] + (parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)) * np.dot(self.Ws["Mani_DMS"], _input_),
+                        np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
+                        np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre)
                         )
         
-        self.BG_dl.step((parameters.DA_values["Y_DLS"] + (parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)) * np.dot(Ws["Mani_DLS"], _input_),
-                        np.dot(Ws["MC_DLS"], self.MC_output_pre),
-                        np.dot(Ws["MC_STNdl"], self.MC_output_pre)
+        self.BG_dl.step((parameters.DA_values["Y_DLS"] + (parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)) * np.dot(self.Ws["Mani_DLS"], _input_),
+                        np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+                        np.dot(self.Ws["MC_STNdl"], self.MC_output_pre)
                         )
         
-        self.PPN.step(np.dot(Ws["Food_PPN"], _input_))
+        self.PPN.step(np.dot(self.Ws["Food_PPN"], _input_))
         
-        self.LH.step(np.dot(Ws["Food_LH"], _input_) + np.dot(Ws["BLA_IC_LH"], self.BLA_IC_output_pre))
+        self.LH.step(np.dot(self.Ws["Food_LH"], _input_) + np.dot(self.Ws["BLA_IC_LH"], self.BLA_IC_output_pre))
         
-        self.VTA.step(np.dot(Ws["LH_VTA"], self.LH_output_pre))
+        self.VTA.step(np.dot(self.Ws["LH_VTA"], self.LH_output_pre))
         
-        self.BG_v.step((parameters.DA_values["Y_NAc"] + (parameters.DA_values["delta_NAc"] * self.VTA_output_pre)) * np.dot(Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
-                       np.dot(Ws["PL_NAc"], self.MC_output_pre),
-                       np.dot(Ws["PL_STNv"], self.MC_output_pre)
+        self.BG_v.step((parameters.DA_values["Y_NAc"] + (parameters.DA_values["delta_NAc"] * self.VTA_output_pre)) * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
+                       np.dot(self.Ws["PL_NAc"], self.MC_output_pre),
+                       np.dot(self.Ws["PL_STNv"], self.MC_output_pre)
                        )
         
-        self.SNpc.step(np.dot(Ws["NAc_SNpci_1"], self.NAc_output_pre),
-                       np.dot(Ws["DMS_SNpci_2"], self.DMS_output_pre),
-                       np.dot(Ws["PPN_SNpco"], self.PPN_output_pre)
+        self.SNpc.step(np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre),
+                       np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre),
+                       np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre)
                        )
   
+        self.DM.step(np.dot(self.Ws["SNpr_DM"], self.BG_v_output_pre) + np.dot(self.Ws["PL_DM"], self.PL_output_pre))
+        
+        self.P.step(np.dot(self.Ws["GPi_SNpr_P"], self.BG_dm_output_pre) + np.dot(self.Ws["PFCd_PPC_P"], self.PFCd_PPC_output_pre))
+        
+        self.MGV.step(np.dot(self.Ws["GPi_MGV"], self.BG_dl_output_pre) + np.dot(self.Ws["MC_MGV"], self.MC_output_pre))
+        
+        self.PL.step(np.dot(self.Ws["DM_PL"], self.DM_output_pre) + np.dot(self.Ws["PFCd_PPC_PL"], self.PFCd_PPC_output_pre))
+        
+        self.PFCd_PPC.step(np.dot(self.Ws["P_PFCd_PPC"], self.P_output_pre) + np.dot(self.Ws["PL_PFCd_PPC"], self.PL_output_pre) + np.dot(self.Ws["MC_PFCd_PPC"], self.MC_output_pre))
+        
+        self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre) + np.dot(self.Ws["PFCd_PPC_MC"], self.PFCd_PPC_output_pre))
+        
+        """
+        Set learning for internal layers' and evironmental matrices
+        """
+        
+        self.BLA_IC.learn(self.VTA_output_pre)
+        
+        delta_W_BLA_IC_NAc = self.delta_Str_learn(parameters.Str_Learn["eta_NAc"],
+                                           self.VTA_output_pre,
+                                           self.NAc_output_pre,
+                                           self.BLA_IC_output_pre,
+                                           parameters.BLA_Learn["theta_DA_NAc"],
+                                           parameters.BLA_Learn["theta_NAc"],
+                                           parameters.BLA_Learn["theta_inp_NAc"],
+                                           self.Ws_learn_masks["BLA_IC_NAc"],
+                                           parameters.Str_Learn["max_W_NAc"],
+                                           self.Ws["BLA_IC_NAc"]
+                                           )
+        self.Ws["BLA_IC_NAc"] +=  delta_W_BLA_IC_NAc
+        
+        delta_W_Mani_DMS = self.delta_Str_learn(parameters.Str_Learn["eta_DMS"],
+                                           self.SNpco_output_pre_1,
+                                           self.DMS_output_pre,
+                                           _input_,
+                                           parameters.BLA_Learn["theta_DA_DMS"],
+                                           parameters.BLA_Learn["theta_DMS"],
+                                           parameters.BLA_Learn["theta_inp_DMS"],
+                                           self.Ws_learn_masks["Mani_DMS"],
+                                           parameters.Str_Learn["max_W_DMS"],
+                                           self.Ws["Mani_DMS"]
+                                           )
+        self.Ws["Mani_DMS"] +=  delta_W_Mani_DMS
+        
+        delta_W_Mani_DLS = self.delta_Str_learn(parameters.Str_Learn["eta_DLS"],
+                                           self.SNpco_output_pre_2,
+                                           self.DLS_output_pre,
+                                           _input_,
+                                           parameters.BLA_Learn["theta_DA_DLS"],
+                                           parameters.BLA_Learn["theta_DLS"],
+                                           parameters.BLA_Learn["theta_inp_DLS"],
+                                           self.Ws_learn_masks["Mani_DLS"],
+                                           parameters.Str_Learn["max_W_DLS"],
+                                           self.Ws["Mani_DLS"]
+                                           )
+        self.Ws["Mani_DLS"] +=  delta_W_Mani_DLS
+        
+        """
+        Update ouput_pre values based on current values
+        """
+        
+        self.PPN_output_pre = self.PPN.output.copy()
+
+        self.LH_output_pre = self.LH.output.copy()
+
+        self.VTA_output_pre = self.VTA.output.copy()
+
+        self.BLA_IC_output_pre = self.BLA_IC.output.copy()
+
+        self.SNpco_output_pre_1 = self.SNpc.output_1.output.copy()
+
+        self.SNpco_output_pre_2 = self.SNpc.output_2.copy()
+
+        self.BG_dl_output_pre = self.BG_dl.output.copy()
+
+        self.MGV_output_pre = self.MGV.output.copy()
+
+        self.MC_output_pre = self.MC.output.copy()
+
+        self.BG_dm_output_pre = self.BG_dm.output.copy()
+        
+        self.DMS_output_pre = self.BG_dm.DMS.output.copy()
+
+        self.P_output_pre = self.P.output.copy()
+
+        self.PFCd_PPC_output_pre = self.PFCd_PPC.output.copy()
+
+        self.BG_v_output_pre = self.BG_v.output.copy()
+        
+        self.NAc_output_pre = self.BG_v.NAc.output.copy()
+
+        self.DM_output_pre = self.DM.output.copy()
+
+        self.PL_output_pre = self.PL.output.copy()
+        
+        
         
