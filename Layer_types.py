@@ -88,7 +88,10 @@ class Leaky_units_inh(Leaky_units_exc):
         Returns:
             np.ndarray: negative Updated activity vector.
         """
-        - super(Leaky_units_inh, self).step(inputs)
+        super(Leaky_units_inh, self).step(inputs)
+        
+        self.output = -self.output
+
 
 class Leaky_onset_units_exc:
     
@@ -173,7 +176,9 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
             
             - activity_uo will be used as output of the onset unit
         """
-        - super(Leaky_onset_units_inh, self).step(inputs)
+        super(Leaky_onset_units_inh, self).step(inputs)
+        
+        self.output = - self.output
     
 
 class BG_v_Layer:
@@ -222,15 +227,19 @@ class BG_v_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_NAc = self.NAc.step(inputs + inp_feedback_NAc)
-        output_STNv = self.STNv.step(inp_feedback_STNv)
+        self.NAc.step(inputs + inp_feedback_NAc)
+        self.STNv.step(inp_feedback_STNv)
+        
+        output_NAc = self.NAc.output.copy()
+        output_STNv = self.STNv.output.copy()
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_v = self.SNpr.step(np.dot(self.BG_v_Ws["NAc_SNpr"], self.output_NAc_pre) + np.dot(self.BG_v_Ws["STNv_SNpr"], self.output_STNv_pre))
+        self.SNpr.step(np.dot(self.BG_v_Ws["NAc_SNpr"], self.output_NAc_pre) + np.dot(self.BG_v_Ws["STNv_SNpr"], self.output_STNv_pre))
+        self.output_BG_v = self.SNpr.output.copy()
         
-        if np.any(self.output_BG_dl > 1.0):
+        if np.any(self.output_BG_v > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
         self.output_NAc_pre = output_NAc.copy()
@@ -283,18 +292,22 @@ class BG_dm_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DMS = self.DMS.step(inputs + inp_feedback_DMS)
-        output_STNdm = self.STNdm.step(inp_feedback_STNdm)
+        self.DMS.step(inputs + inp_feedback_DMS)
+        self.STNdm.step(inp_feedback_STNdm)
+        
+        output_DMS = self.DMS.output.copy()
+        output_STNdm = self.STNdm.output.copy()
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_dm = self.GPi_SNpr.step(np.dot(self.BG_dm_Ws["DMS_GPiSNpr"], self.output_DMS_pre) + np.dot(self.BG_dm_Ws["STNdm_GPiSNpr"], self.output_STNdm_pre))
+        self.GPi_SNpr.step(np.dot(self.BG_dm_Ws["DMS_GPiSNpr"], self.output_DMS_pre) + np.dot(self.BG_dm_Ws["STNdm_GPiSNpr"], self.output_STNdm_pre))
+        self.output_BG_dm = self.GPi_SNpr.output.copy()
         
-        if np.any(self.output_BG_dl > 1.0):
+        if np.any(self.output_BG_dm > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
-        self.output_DMS_pre = output_DMS.coppy()
+        self.output_DMS_pre = output_DMS.copy()
         self.output_STNdm_pre = output_STNdm.copy()
         
     
@@ -344,13 +357,17 @@ class BG_dl_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        output_DLS = self.DLS.step(inputs + inp_feedback_DLS)
-        output_STNdl = self.STNdl.step(inp_feedback_STNdl)
+        self.DLS.step(inputs + inp_feedback_DLS)
+        self.STNdl.step(inp_feedback_STNdl)
+        
+        output_DLS = self.DLS.output.copy()
+        output_STNdl = self.STNdl.output.copy()
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.output_BG_dl = self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], self.output_DLS_pre) + np.dot(self.BG_dl_Ws["STNdl_GPi"], self.output_STNdl_pre))
+        self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], self.output_DLS_pre) + np.dot(self.BG_dl_Ws["STNdl_GPi"], self.output_STNdl_pre))
+        self.output_BG_dl = self.GPi.output.copy()
         
         if np.any(self.output_BG_dl > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
@@ -375,7 +392,7 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
 
     def learn(self, da):
     
-        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.outputs)
+        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.output)
 
         self.t += self.t_dot
 
@@ -385,9 +402,9 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
         delta_W = (self.eta_b *
                    np.maximum(0, da - self.theta_da) *
                    np.outer(pos, neg) *
-                   (self.max_W - self.BLA_IC_layer.W))
+                   (self.max_W - self.W))
         
-        self.BLA_IC_layer.W += delta_W
+        self.W += delta_W
         
     
 class SNpc_Layer:
@@ -419,11 +436,15 @@ class SNpc_Layer:
         
     def step(self, inp_NAc, inp_DMS, inp_PPN):
         
-        output_i_1 = self.SNpci_1.step(inp_NAc)
-        self.output_1 = self.SNpco_1.step(self.output_SNpci_1_pre + inp_PPN)
+        self.SNpci_1.step(inp_NAc)
+        output_i_1 = self.SNpci_1.output.copy()
+        self.SNpco_1.step(self.output_SNpci_1_pre + inp_PPN)
+        self.output_1 = self.SNpco_1.output.copy()
         
-        output_i_2 = self.SNpci_2.step(inp_DMS)
-        self.output_2 = self.SNpco_2.step(self.output_SNpci_2_pre + inp_PPN)
+        self.SNpci_2.step(inp_DMS)
+        output_i_2 = self.SNpci_2.output.copy()
+        self.SNpco_2.step(self.output_SNpci_2_pre + inp_PPN)
+        self.output_2 = self.SNpco_2.output.copy()
         
         if np.any(self.SNpco_1.output.copy() > 1.0) or np.any(self.SNpco_2.output.copy() > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")   

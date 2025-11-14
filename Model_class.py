@@ -127,7 +127,7 @@ class Model:
                              parameters.noise["PL"])
         
         """
-        Outcomes at timestep n-1
+        Outputs pre at timestep n-1
         """
         
         self.PPN_output_pre = np.zeros(parameters.N["PPN"])
@@ -143,6 +143,8 @@ class Model:
         self.SNpco_output_pre_2 = np.zeros(parameters.N["SNpc"])
 
         self.BG_dl_output_pre = np.zeros(parameters.N["BG_dl"])
+        
+        self.DLS_output_pre = np.zeros(parameters.N["BG_dl"])
 
         self.MGV_output_pre = np.zeros(parameters.N["MGV"])
 
@@ -163,6 +165,28 @@ class Model:
         self.DM_output_pre = np.zeros(parameters.N["DM"])
 
         self.PL_output_pre = np.zeros(parameters.N["PL"])
+        
+        
+    def reset_activity(self):
+        
+        """
+        Reset layers' activity without setting matrices back to starting values
+        """
+        
+        self.PPN.reset_activity()
+        self.LH.reset_activity()
+        self.VTA.reset_activity()
+        self.BLA_IC.reset_activity()
+        self.SNpc.reset_activity()
+        self.BG_dl.reset_activity()
+        self.MGV.reset_activity()
+        self.MC.reset_activity()
+        self.BG_dm.reset_activity()
+        self.P.reset_activity()
+        self.PFCd_PPC.reset_activity()
+        self.BG_v.reset_activity()
+        self.DM.reset_activity()
+        self.PL.reset_activity()
         
         
     def set_env(self, parameters):
@@ -223,14 +247,12 @@ class Model:
                                                     [0.0, 0.0, 1.0, 1.0]]),
                         }
         
-        """
-        Set input array()
-        """
         
     def delta_Str_learn(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
         
+        DA_term = np.maximum(0, DA - theta_DA_str)[:, None]
         delta_W_inp_str = (eta_str *
-                           np.maximum(0, DA - theta_DA_str) * 
+                           DA_term * 
                            np.outer(
                                np.maximum(0, v_str - theta_str),
                                np.maximum(0, v_inp - theta_inp_str)
@@ -240,6 +262,98 @@ class Model:
         delta_W_inp_str *= mask
         
         return delta_W_inp_str 
+    
+    
+    def learning(self, parameters, _input_):
+        
+        """
+        Set learning for internal layers' and evironmental matrices
+        """
+        
+        self.BLA_IC.learn(self.VTA_output_pre)
+        
+        delta_W_BLA_IC_NAc = self.delta_Str_learn(parameters.Str_Learn["eta_NAc"],
+                                           self.VTA_output_pre,
+                                           self.NAc_output_pre,
+                                           self.BLA_IC_output_pre,
+                                           parameters.Str_Learn["theta_DA_NAc"],
+                                           parameters.Str_Learn["theta_NAc"],
+                                           parameters.Str_Learn["theta_inp_NAc"],
+                                           self.Ws_learn_masks["BLA_IC_NAc"],
+                                           parameters.Str_Learn["max_W_NAc"],
+                                           self.Ws["BLA_IC_NAc"]
+                                           )
+        self.Ws["BLA_IC_NAc"] +=  delta_W_BLA_IC_NAc
+        
+        delta_W_Mani_DMS = self.delta_Str_learn(parameters.Str_Learn["eta_DMS"],
+                                           self.SNpco_output_pre_1,
+                                           self.DMS_output_pre,
+                                           _input_,
+                                           parameters.Str_Learn["theta_DA_DMS"],
+                                           parameters.Str_Learn["theta_DMS"],
+                                           parameters.Str_Learn["theta_inp_DMS"],
+                                           self.Ws_learn_masks["Mani_DMS"],
+                                           parameters.Str_Learn["max_W_DMS"],
+                                           self.Ws["Mani_DMS"]
+                                           )
+        self.Ws["Mani_DMS"] +=  delta_W_Mani_DMS
+        
+        delta_W_Mani_DLS = self.delta_Str_learn(parameters.Str_Learn["eta_DLS"],
+                                           self.SNpco_output_pre_2,
+                                           self.DLS_output_pre,
+                                           _input_,
+                                           parameters.Str_Learn["theta_DA_DLS"],
+                                           parameters.Str_Learn["theta_DLS"],
+                                           parameters.Str_Learn["theta_inp_DLS"],
+                                           self.Ws_learn_masks["Mani_DLS"],
+                                           parameters.Str_Learn["max_W_DLS"],
+                                           self.Ws["Mani_DLS"]
+                                           )
+        self.Ws["Mani_DLS"] +=  delta_W_Mani_DLS
+        
+        
+    def update_output_pre(self):
+        
+        """
+        Update ouput_pre values based on current values
+        """
+        
+        self.PPN_output_pre = self.PPN.output.copy()
+
+        self.LH_output_pre = self.LH.output.copy()
+
+        self.VTA_output_pre = self.VTA.output.copy()
+
+        self.BLA_IC_output_pre = self.BLA_IC.output.copy()
+
+        self.SNpco_output_pre_1 = self.SNpc.output_1.copy()
+
+        self.SNpco_output_pre_2 = self.SNpc.output_2.copy()
+
+        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        
+        self.DLS_output_pre = self.BG_dl.DLS.output.copy()
+
+        self.MGV_output_pre = self.MGV.output.copy()
+
+        self.MC_output_pre = self.MC.output.copy()
+
+        self.BG_dm_output_pre = self.BG_dm.output_BG_dm.copy()
+        
+        self.DMS_output_pre = self.BG_dm.DMS.output.copy()
+
+        self.P_output_pre = self.P.output.copy()
+
+        self.PFCd_PPC_output_pre = self.PFCd_PPC.output.copy()
+
+        self.BG_v_output_pre = self.BG_v.output_BG_v.copy()
+        
+        self.NAc_output_pre = self.BG_v.NAc.output.copy()
+
+        self.DM_output_pre = self.DM.output.copy()
+
+        self.PL_output_pre = self.PL.output.copy()
+        
     
     def step(self, _input_):
         
@@ -287,88 +401,8 @@ class Model:
         
         self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre) + np.dot(self.Ws["PFCd_PPC_MC"], self.PFCd_PPC_output_pre))
         
-        """
-        Set learning for internal layers' and evironmental matrices
-        """
         
-        self.BLA_IC.learn(self.VTA_output_pre)
         
-        delta_W_BLA_IC_NAc = self.delta_Str_learn(parameters.Str_Learn["eta_NAc"],
-                                           self.VTA_output_pre,
-                                           self.NAc_output_pre,
-                                           self.BLA_IC_output_pre,
-                                           parameters.BLA_Learn["theta_DA_NAc"],
-                                           parameters.BLA_Learn["theta_NAc"],
-                                           parameters.BLA_Learn["theta_inp_NAc"],
-                                           self.Ws_learn_masks["BLA_IC_NAc"],
-                                           parameters.Str_Learn["max_W_NAc"],
-                                           self.Ws["BLA_IC_NAc"]
-                                           )
-        self.Ws["BLA_IC_NAc"] +=  delta_W_BLA_IC_NAc
-        
-        delta_W_Mani_DMS = self.delta_Str_learn(parameters.Str_Learn["eta_DMS"],
-                                           self.SNpco_output_pre_1,
-                                           self.DMS_output_pre,
-                                           _input_,
-                                           parameters.BLA_Learn["theta_DA_DMS"],
-                                           parameters.BLA_Learn["theta_DMS"],
-                                           parameters.BLA_Learn["theta_inp_DMS"],
-                                           self.Ws_learn_masks["Mani_DMS"],
-                                           parameters.Str_Learn["max_W_DMS"],
-                                           self.Ws["Mani_DMS"]
-                                           )
-        self.Ws["Mani_DMS"] +=  delta_W_Mani_DMS
-        
-        delta_W_Mani_DLS = self.delta_Str_learn(parameters.Str_Learn["eta_DLS"],
-                                           self.SNpco_output_pre_2,
-                                           self.DLS_output_pre,
-                                           _input_,
-                                           parameters.BLA_Learn["theta_DA_DLS"],
-                                           parameters.BLA_Learn["theta_DLS"],
-                                           parameters.BLA_Learn["theta_inp_DLS"],
-                                           self.Ws_learn_masks["Mani_DLS"],
-                                           parameters.Str_Learn["max_W_DLS"],
-                                           self.Ws["Mani_DLS"]
-                                           )
-        self.Ws["Mani_DLS"] +=  delta_W_Mani_DLS
-        
-        """
-        Update ouput_pre values based on current values
-        """
-        
-        self.PPN_output_pre = self.PPN.output.copy()
-
-        self.LH_output_pre = self.LH.output.copy()
-
-        self.VTA_output_pre = self.VTA.output.copy()
-
-        self.BLA_IC_output_pre = self.BLA_IC.output.copy()
-
-        self.SNpco_output_pre_1 = self.SNpc.output_1.output.copy()
-
-        self.SNpco_output_pre_2 = self.SNpc.output_2.copy()
-
-        self.BG_dl_output_pre = self.BG_dl.output.copy()
-
-        self.MGV_output_pre = self.MGV.output.copy()
-
-        self.MC_output_pre = self.MC.output.copy()
-
-        self.BG_dm_output_pre = self.BG_dm.output.copy()
-        
-        self.DMS_output_pre = self.BG_dm.DMS.output.copy()
-
-        self.P_output_pre = self.P.output.copy()
-
-        self.PFCd_PPC_output_pre = self.PFCd_PPC.output.copy()
-
-        self.BG_v_output_pre = self.BG_v.output.copy()
-        
-        self.NAc_output_pre = self.BG_v.NAc.output.copy()
-
-        self.DM_output_pre = self.DM.output.copy()
-
-        self.PL_output_pre = self.PL.output.copy()
         
         
         
