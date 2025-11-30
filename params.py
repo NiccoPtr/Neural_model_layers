@@ -7,7 +7,22 @@ Created on Sat Aug 16 11:50:44 2025
 from parameter_manager import ParameterManager
 
 class Parameters(ParameterManager):
-    def __init__(self, N, threshold, tau, baseline, BG_dl_W, BG_dm_W, BG_v_W, SNpc_W, seed, noise, Matrices_scalars, DA_values, BLA_Learn, Str_Learn):
+    def __init__(self,
+                 N = None,
+                 threshold = None,
+                 tau = None,
+                 baseline = None,
+                 BG_dl_W = None,
+                 BG_dm_W = None,
+                 BG_v_W = None,
+                 SNpc_W = None, 
+                 seed = None,
+                 noise = None,
+                 Matrices_scalars = None,
+                 DA_values = None,
+                 BLA_Learn = None,
+                 Str_Learn = None
+                 ):
         
         self.N = N
         self.threshold = threshold

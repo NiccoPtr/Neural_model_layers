@@ -5,15 +5,17 @@ Created on Fri Nov 14 17:46:01 2025
 @author: Nicc
 """
 
-from params import parameters
+from params import Parameters
 from Model_class import Model
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np, matplotlib.pyplot as plt, argparse
 
-def Simulation(parameters, inputs, epochs, timesteps):
+def Simulation(parameters, inputs, epochs, timesteps, model = None):
     
-    model = Model(parameters)
-    model.set_env(parameters)
-    results =  [] 
+    if model is None:
+        model = Model(parameters)
+        model.set_Ws(parameters)
+
+    results = []
     
     for epoch in range(epochs):
            
@@ -21,9 +23,7 @@ def Simulation(parameters, inputs, epochs, timesteps):
         inp_t = []
         
         for t in range(timesteps):
-            model.step(inputs) 
-            model.learning(parameters, inputs)
-            model.update_output_pre()
+            model.step(inputs, learning=True) 
             
             MC_output.append(np.round(model.MC.output.copy(), 4))
             inp_t.append(inputs.copy())
@@ -68,6 +68,40 @@ def plotting(results, save = False):
         
     plt.show()
 
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description="Run neural model simulation.")
+    parser.add_argument("--epochs", type=int, default=2,
+                        help="Number of training epochs")
+    parser.add_argument("--timesteps", type=int, default=1000,
+                        help="Number of timesteps per epoch")
+    
+    parser.add_argument("--inputs", nargs='+', type=float,
+                    default=[1.0, 0.0, 1.0, 0.0, 0.0, 1.0],
+                    help="Environmental inputs incoming")
+    
+    args = parser.parse_args()
+    
+    parameters = Parameters()
+    parameters.load("prm_file.json" ,mode = "json")
+    
+    epochs = args.epochs
+    timesteps = args.timesteps
+    inputs = np.array(args.inputs)
+    model, results = Simulation(parameters, inputs, epochs, timesteps)
+    
+    for res in results:
+    	print("Final Motor Cortex output at epoch " + str(res["Epoch"]) + ": " + str(res["MC_Output"][-1]))
+    	print("Environmental Input:" + str(res["Inp"]))
+
+    plotting(results)
+    
+	
+	
+
+    
+
+    
     
     
         

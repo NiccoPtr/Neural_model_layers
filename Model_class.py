@@ -166,6 +166,12 @@ class Model:
 
         self.PL_output_pre = np.zeros(parameters.N["PL"])
         
+        """
+        Set Network's weights'
+        """
+        
+        self.set_Ws(parameters)
+        
         
     def reset_activity(self):
         
@@ -189,7 +195,7 @@ class Model:
         self.PL.reset_activity()
         
         
-    def set_env(self, parameters):
+    def set_Ws(self, parameters):
         
         """
         Matrices set up
@@ -355,7 +361,7 @@ class Model:
         self.PL_output_pre = self.PL.output.copy()
         
     
-    def step(self, _input_):
+    def step(self, _input_, learning = False):
         
         """
         Compute step for each layer using the output_pre values
@@ -401,7 +407,11 @@ class Model:
         
         self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre) + np.dot(self.Ws["PFCd_PPC_MC"], self.PFCd_PPC_output_pre))
         
+        if learning:
+            self.learning(parameters, _input_)
         
+        self.update_output_pre()
+            
         
         
         
