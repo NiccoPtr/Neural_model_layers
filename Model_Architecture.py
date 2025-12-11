@@ -20,7 +20,7 @@ seed = 2
 
 N = {"BG_dl": 2, "BG_dm": 2, "BG_v": 2, "MGV": 2, "MC": 2, "BLA_IC": 4, "SNpc": 2, "PPN": 1, "LH": 1, "VTA": 1, "P": 2, "DM": 2, "PL": 2, "PFCd_PPC": 2}
 
-threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.8, "BLA_IC": 0.0, "SNpc": 1.0, "PPN": 0.0, "LH": 0.0, "VTA": 1.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0}
+threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.0, "BLA_IC": 0.0, "SNpc": 0.0, "PPN": 0.0, "LH": 0.0, "VTA": 0.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
 
 tau = {"MC": 6, "PFCd_PPC": 6, "PL": 6, "MGV": 6, "P": 6, "DM": 6, "BG_dl": 6, "BG_dm": 6, "BG_v": 6, "BLA_IC": [10, 10], "SNpc": 6, "PPN": [2, 10], "LH": [2, 10], "VTA": 6}
 

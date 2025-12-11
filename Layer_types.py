@@ -9,7 +9,7 @@ import numpy as np
 
 class Leaky_units_exc:
 
-    def __init__(self, N: int, tau: float, baseline: float, rng, noise: float):
+    def __init__(self, N: int, tau: float, baseline: float, rng, noise: float, threshold: float):
         """Initializes the neural unit.
 
         Args:
@@ -24,6 +24,7 @@ class Leaky_units_exc:
         self.rng = rng
         self.noise = noise
         self.baseline = np.ones(N) * baseline
+        self.threshold = threshold
         self.activity = self.baseline.copy()
         self.output = np.zeros(N)
 
@@ -150,15 +151,37 @@ class Leaky_onset_units_exc:
             - activity_ui will be used as inhibition for input income in uo
         """
         net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise)) + self.baseline
-        self.activity_ui += (1/self.tau_ui) * (net_input - self.activity_ui)
+        net_input = np.clip(net_input, -1e6, 1e6)
+        net_input = np.nan_to_num(net_input)
+        
+        ui_dot = (1 / self.tau_ui) * (net_input - self.activity_ui)
+        ui_dot = np.nan_to_num(ui_dot)
+        ui_dot = np.clip(ui_dot, -1e6, 1e6)
+    
+        self.activity_ui += ui_dot
+        self.activity_ui = np.clip(self.activity_ui, -1e6, 1e6)
+        self.activity_ui = np.nan_to_num(self.activity_ui)
         
         """
         Set  component uo activity:
             
             - activity_uo will be used as output of the onset unit
         """
-        self.activity_uo += (1/self.tau_uo) * (np.maximum(0, net_input - self.activity_ui) - self.activity_uo)
-        self.output = np.maximum(0, np.tanh(self.activity_uo))
+        uo_input = np.maximum(0, net_input - self.activity_ui)
+        uo_input = np.nan_to_num(uo_input)
+    
+        uo_dot = (1 / self.tau_uo) * (uo_input - self.activity_uo)
+        uo_dot = np.nan_to_num(uo_dot)
+        uo_dot = np.clip(uo_dot, -1e6, 1e6)
+    
+        self.activity_uo += uo_dot
+        self.activity_uo = np.clip(self.activity_uo, -1e6, 1e6)
+        self.activity_uo = np.nan_to_num(self.activity_uo)
+        
+        act = np.tanh(self.activity_uo)      
+        act = np.nan_to_num(act)
+    
+        self.output = np.maximum(0, act)     
         
         if np.any(self.output > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
@@ -183,7 +206,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
 
 class BG_v_Layer:
     
-    def __init__(self, N, tau: float, baseline_NAc: float, baseline_STNv: float, baseline_SNpr: float, NAc_SNpr_W, STNv_SNpr_W, rng, noise: float):
+    def __init__(self, N, tau: float, baseline_NAc: float, baseline_STNv: float, baseline_SNpr: float, NAc_SNpr_W, STNv_SNpr_W, rng, noise: float, threshold: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -195,9 +218,9 @@ class BG_v_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise)
-        self.STNv = Leaky_units_exc(N, tau, baseline_STNv, rng, noise)
-        self.SNpr = Leaky_units_inh(N, tau, baseline_SNpr, rng, noise)
+        self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise, threshold)
+        self.STNv = Leaky_units_exc(N, tau, baseline_STNv, rng, noise, threshold)
+        self.SNpr = Leaky_units_inh(N, tau, baseline_SNpr, rng, noise, threshold)
         self.output_BG_v = np.zeros(N)
         self.output_NAc_pre = np.zeros(N)
         self.output_STNv_pre = np.zeros(N)
@@ -248,7 +271,7 @@ class BG_v_Layer:
 
 class BG_dm_Layer:
     
-    def __init__(self, N, tau: float, baseline_DMS: float, baseline_STNdm: float, baseline_GPi_SNpr: float, DMS_GPiSNpr_W, STNdm_GPiSNpr_W, rng, noise: float):
+    def __init__(self, N, tau: float, baseline_DMS: float, baseline_STNdm: float, baseline_GPi_SNpr: float, DMS_GPiSNpr_W, STNdm_GPiSNpr_W, rng, noise: float, threshold: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -260,9 +283,9 @@ class BG_dm_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise)
-        self.STNdm = Leaky_units_exc(N, tau, baseline_STNdm, rng, noise)
-        self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise)
+        self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise, threshold)
+        self.STNdm = Leaky_units_exc(N, tau, baseline_STNdm, rng, noise, threshold)
+        self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise, threshold)
         self.output_BG_dm = np.zeros(N)
         self.output_DMS_pre = np.zeros(N)
         self.output_STNdm_pre = np.zeros(N)
@@ -313,7 +336,7 @@ class BG_dm_Layer:
     
 class BG_dl_Layer:
     
-    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float):
+    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float, threshold: float):
         """
         Initialize different layers of neurons of size "N"
            
@@ -325,9 +348,9 @@ class BG_dl_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DLS = Leaky_units_inh(N, tau, baseline_DLS, rng, noise)
-        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise)
-        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise)
+        self.DLS = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
+        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
+        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
         self.output_BG_dl = np.zeros(N)
         self.output_DLS_pre = np.zeros(N)
         self.output_STNdl_pre = np.zeros(N)
@@ -391,30 +414,41 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
         self.theta_da = theta_da
 
     def learn(self, da):
+
+        self.t_dot = (1 / self.tau_t) * (-self.t + self.alpha_t * self.output)
     
-        self.t_dot = (1/self.tau_t) * (-self.t + self.alpha_t * self.output)
-
+        self.t_dot = np.clip(self.t_dot, -1e6, 1e6)
+    
         self.t += self.t_dot
-
+        self.t = np.clip(self.t, -1e12, 1e12)
+    
         pos = np.maximum(0, self.t_dot)
         neg = np.maximum(0, -self.t_dot)
-
+    
+        pos = np.nan_to_num(pos)
+        neg = np.nan_to_num(neg)
+    
+        da_term = np.maximum(0, da - self.theta_da)
+        da_term = np.nan_to_num(da_term)
+    
         delta_W = (self.eta_b *
-                   np.maximum(0, da - self.theta_da) *
+                   da_term *
                    np.outer(pos, neg) *
                    (self.max_W - self.W))
-        
+    
+        delta_W = np.nan_to_num(delta_W)
+    
         self.W += delta_W
-        
+
     
 class SNpc_Layer:
     
-    def __init__(self, N: int, tau: float, baseline: float, SNpci_1_SNpco_1_W, SNpci_2_SNpco_2_W, rng, noise: float):
+    def __init__(self, N: int, tau: float, baseline: float, SNpci_1_SNpco_1_W, SNpci_2_SNpco_2_W, rng, noise: float, threshold: float):
         
-        self.SNpci_1 = Leaky_units_inh(N, tau, baseline, rng, noise)
-        self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise)
-        self.SNpco_1 = Leaky_units_exc(N, tau, baseline, rng, noise)
-        self.SNpco_2 = Leaky_units_exc(N, tau, baseline, rng, noise)
+        self.SNpci_1 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
+        self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
+        self.SNpco_1 = Leaky_units_exc(N, tau, baseline, rng, noise, threshold)
+        self.SNpco_2 = Leaky_units_exc(N, tau, baseline, rng, noise, threshold)
         self.output_1 = np.zeros(N)
         self.output_2 = np.zeros(N)
         self.output_SNpci_1_pre = np.zeros(N)

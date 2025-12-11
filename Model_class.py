@@ -38,7 +38,8 @@ class Model:
                               parameters.tau["VTA"],
                               parameters.baseline["VTA"],
                               rng,
-                              parameters.noise["VTA"])
+                              parameters.noise["VTA"],
+                              parameters.threshold["VTA"])
 
         self.BLA_IC = BLA_IC_Layer(parameters.N["BLA_IC"],
                               parameters.tau["BLA_IC"][0],
@@ -58,7 +59,8 @@ class Model:
                           parameters.SNpc_W["SNpci_1_SNpco_1_W"],
                           parameters.SNpc_W["SNpci_2_SNpco_2_W"],
                           rng,
-                          parameters.noise["SNpc"])
+                          parameters.noise["SNpc"],
+                          parameters.threshold["SNpc"])
 
         self.BG_dl = BG_dl_Layer(parameters.N["BG_dl"], 
                             parameters.tau["BG_dl"], 
@@ -68,19 +70,22 @@ class Model:
                             parameters.BG_dl_W["DLS_GPi_W"], 
                             parameters.BG_dl_W["STNdl_GPi_W"],
                             rng,
-                            parameters.noise["BG_dl"])
+                            parameters.noise["BG_dl"],
+                            parameters.threshold["BG_dl"])
 
         self.MGV = Leaky_units_exc(parameters.N["MGV"], 
                               parameters.tau["MGV"],
                               parameters.baseline["MGV"],
                               rng,
-                              parameters.noise["MGV"])
+                              parameters.noise["MGV"],
+                              parameters.threshold["MGV"])
 
         self.MC = Leaky_units_exc(parameters.N["MC"], 
                              parameters.tau["MC"], 
                              parameters.baseline["MC"],
                              rng,
-                             parameters.noise["MC"])
+                             parameters.noise["MC"],
+                             parameters.threshold["MC"])
 
         self.BG_dm = BG_dm_Layer(parameters.N["BG_dm"], 
                             parameters.tau["BG_dm"], 
@@ -90,19 +95,22 @@ class Model:
                             parameters.BG_dm_W["DMS_GPiSNpr_W"], 
                             parameters.BG_dm_W["STNdm_GPiSNpr_W"],
                             rng,
-                            parameters.noise["BG_dm"])
+                            parameters.noise["BG_dm"],
+                            parameters.threshold["BG_dm"])
 
         self.P = Leaky_units_exc(parameters.N["P"], 
                             parameters.tau["P"],
                             parameters.baseline["P"],
                             rng,
-                            parameters.noise["P"])
+                            parameters.noise["P"],
+                            parameters.threshold["P"])
 
         self.PFCd_PPC = Leaky_units_exc(parameters.N["PFCd_PPC"], 
                                    parameters.tau["PFCd_PPC"], 
                                    parameters.baseline["PFCd_PPC"],
                                    rng,
-                                   parameters.noise["PFCd_PPC"])
+                                   parameters.noise["PFCd_PPC"],
+                                   parameters.threshold["PFCd_PPC"])
 
         self.BG_v = BG_v_Layer(parameters.N["BG_v"], 
                           parameters.tau["BG_v"], 
@@ -112,19 +120,22 @@ class Model:
                           parameters.BG_v_W["NAc_SNpr_W"], 
                           parameters.BG_v_W["STNv_SNpr_W"],
                           rng,
-                          parameters.noise["BG_v"])
+                          parameters.noise["BG_v"],
+                          parameters.threshold["BG_v"])
 
         self.DM = Leaky_units_exc(parameters.N["DM"], 
                              parameters.tau["DM"],
                              parameters.baseline["DM"],
                              rng,
-                             parameters.noise["DM"])
+                             parameters.noise["DM"],
+                             parameters.threshold["DM"])
 
         self.PL = Leaky_units_exc(parameters.N["PL"], 
                              parameters.tau["PL"], 
                              parameters.baseline["PL"],
                              rng,
-                             parameters.noise["PL"])
+                             parameters.noise["PL"],
+                             parameters.threshold["PL"])
         
         """
         Outputs pre at timestep n-1
@@ -254,7 +265,7 @@ class Model:
                         }
         
         
-    def delta_Str_learn(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+    def delta_Str_learn_USV(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
         
         DA_term = np.maximum(0, DA - theta_DA_str)[:, None]
         delta_W_inp_str = (eta_str *
@@ -267,8 +278,38 @@ class Model:
         
         delta_W_inp_str *= mask
         
-        return delta_W_inp_str 
+        return delta_W_inp_str
     
+    def delta_Str_learn_SV(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+
+        DA_term = np.maximum(0, DA - theta_DA_str)
+        DA_term = np.clip(DA_term, 0, 1e6)       
+        DA_term = np.nan_to_num(DA_term)
+        DA_term = DA_term[:, None]               
+    
+        post = np.maximum(0, v_str - theta_str)
+        pre = np.maximum(0, v_inp - theta_inp_str)
+    
+        post = np.clip(post, 0, 1e6)
+        pre  = np.clip(pre, 0, 1e6)
+    
+        post = np.nan_to_num(post)
+        pre  = np.nan_to_num(pre)
+    
+        hebb = np.outer(post, pre)
+        hebb = np.nan_to_num(hebb)
+    
+        w_diff = (max_W_str - W)
+        w_diff = np.nan_to_num(w_diff)
+        w_diff = np.clip(w_diff, -1e6, 1e6)
+    
+        delta_W = eta_str * DA_term * hebb * w_diff
+    
+        delta_W = np.nan_to_num(delta_W)
+        delta_W *= mask                              
+    
+        return delta_W
+
     
     def learning(self, parameters, _input_):
         
@@ -278,9 +319,9 @@ class Model:
         
         self.BLA_IC.learn(self.VTA_output_pre)
         
-        delta_W_BLA_IC_NAc = self.delta_Str_learn(parameters.Str_Learn["eta_NAc"],
+        delta_W_BLA_IC_NAc = self.delta_Str_learn_SV(parameters.Str_Learn["eta_NAc"],
                                            self.VTA_output_pre,
-                                           self.NAc_output_pre,
+                                           self.NAc_output_pre * -1,
                                            self.BLA_IC_output_pre,
                                            parameters.Str_Learn["theta_DA_NAc"],
                                            parameters.Str_Learn["theta_NAc"],
@@ -291,9 +332,9 @@ class Model:
                                            )
         self.Ws["BLA_IC_NAc"] +=  delta_W_BLA_IC_NAc
         
-        delta_W_Mani_DMS = self.delta_Str_learn(parameters.Str_Learn["eta_DMS"],
+        delta_W_Mani_DMS = self.delta_Str_learn_SV(parameters.Str_Learn["eta_DMS"],
                                            self.SNpco_output_pre_1,
-                                           self.DMS_output_pre,
+                                           self.DMS_output_pre * -1,
                                            _input_,
                                            parameters.Str_Learn["theta_DA_DMS"],
                                            parameters.Str_Learn["theta_DMS"],
@@ -304,9 +345,9 @@ class Model:
                                            )
         self.Ws["Mani_DMS"] +=  delta_W_Mani_DMS
         
-        delta_W_Mani_DLS = self.delta_Str_learn(parameters.Str_Learn["eta_DLS"],
+        delta_W_Mani_DLS = self.delta_Str_learn_SV(parameters.Str_Learn["eta_DLS"],
                                            self.SNpco_output_pre_2,
-                                           self.DLS_output_pre,
+                                           self.DLS_output_pre * -1,
                                            _input_,
                                            parameters.Str_Learn["theta_DA_DLS"],
                                            parameters.Str_Learn["theta_DLS"],
@@ -411,8 +452,3 @@ class Model:
             self.learning(parameters, _input_)
         
         self.update_output_pre()
-            
-        
-        
-        
-        
