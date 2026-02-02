@@ -9,6 +9,8 @@ from params import Parameters
 from Model_class import Model
 import numpy as np, matplotlib.pyplot as plt, argparse
 
+np.seterr("raise")
+
 def Simulation(parameters, model = None):
     
     if model is None:
@@ -160,7 +162,7 @@ if __name__ == "__main__":
     parameters = Parameters()
     parameters.load("prm_file.json" ,mode = "json")
     parameters.scheduling = {
-                            "trials": 100,
+                            "trials": 10,
                             "phases": [0.25, 0.50, 0.75, 1.0],
                             "timesteps": 1000,
                             "states": np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -178,5 +180,5 @@ if __name__ == "__main__":
     # for res in results:
     # 	print("Final Motor Cortex output at epoch " + str(res["Trial"]) + ": " + str(res["MC_Output"][-1]))
     # 	print("Starting environmental state:" + str(res["States_timeline"][0]))
-
+  
     plotting_2(results)

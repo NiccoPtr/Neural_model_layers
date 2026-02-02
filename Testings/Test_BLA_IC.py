@@ -4,6 +4,7 @@ Created on Sun Oct 19 10:42:12 2025
 
 @author: Utente
 """
+
 from params import parameters
 from Layer_types import Leaky_onset_units_exc, BLA_IC_Layer
 import numpy as np, matplotlib.pyplot as plt

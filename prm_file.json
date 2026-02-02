@@ -101,7 +101,7 @@
         "BG_dm": 0.0,
         "BG_v": 0.0,
         "MGV": 0.0,
-        "MC": 0.1,
+        "MC": 0.2,
         "BLA_IC": 0.0,
         "SNpc": 0.0,
         "PPN": 0.0,
@@ -109,8 +109,8 @@
         "VTA": 0.0,
         "P": 0.0,
         "DM": 0.0,
-        "PL": 0.1,
-        "PFCd_PPC": 0.1
+        "PL": 0.2,
+        "PFCd_PPC": 0.2
     },
     "Matrices_scalars": {
         "Mani_DLS": 0.0,
@@ -155,7 +155,7 @@
         "delta_NAc": 1.5
     },
     "BLA_Learn": {
-        "eta_b": 0.08,
+        "eta_b": 0.0,
         "alpha_t": 10000000000,
         "tau_t": 500,
         "theta_DA": 0.7,

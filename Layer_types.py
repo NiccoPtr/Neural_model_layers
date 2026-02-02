@@ -151,16 +151,16 @@ class Leaky_onset_units_exc:
             - activity_ui will be used as inhibition for input income in uo
         """
         net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise)) + self.baseline
-        net_input = np.clip(net_input, -1e6, 1e6)
-        net_input = np.nan_to_num(net_input)
+        # net_input = np.clip(net_input, -1e6, 1e6)
+        # net_input = np.nan_to_num(net_input)
         
         ui_dot = (1 / self.tau_ui) * (net_input - self.activity_ui)
-        ui_dot = np.nan_to_num(ui_dot)
-        ui_dot = np.clip(ui_dot, -1e6, 1e6)
+        # ui_dot = np.nan_to_num(ui_dot)
+        # ui_dot = np.clip(ui_dot, -1e6, 1e6)
     
         self.activity_ui += ui_dot
-        self.activity_ui = np.clip(self.activity_ui, -1e6, 1e6)
-        self.activity_ui = np.nan_to_num(self.activity_ui)
+        # self.activity_ui = np.clip(self.activity_ui, -1e6, 1e6)
+        # self.activity_ui = np.nan_to_num(self.activity_ui)
         
         """
         Set  component uo activity:
@@ -168,18 +168,18 @@ class Leaky_onset_units_exc:
             - activity_uo will be used as output of the onset unit
         """
         uo_input = np.maximum(0, net_input - self.activity_ui)
-        uo_input = np.nan_to_num(uo_input)
+        # uo_input = np.nan_to_num(uo_input)
     
         uo_dot = (1 / self.tau_uo) * (uo_input - self.activity_uo)
-        uo_dot = np.nan_to_num(uo_dot)
-        uo_dot = np.clip(uo_dot, -1e6, 1e6)
+        # uo_dot = np.nan_to_num(uo_dot)
+        # uo_dot = np.clip(uo_dot, -1e6, 1e6)
     
         self.activity_uo += uo_dot
-        self.activity_uo = np.clip(self.activity_uo, -1e6, 1e6)
-        self.activity_uo = np.nan_to_num(self.activity_uo)
+        # self.activity_uo = np.clip(self.activity_uo, -1e6, 1e6)
+        # self.activity_uo = np.nan_to_num(self.activity_uo)
         
         act = np.tanh(self.activity_uo)      
-        act = np.nan_to_num(act)
+        # act = np.nan_to_num(act)
     
         self.output = np.maximum(0, act)     
         
@@ -417,26 +417,26 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
 
         self.t_dot = (1 / self.tau_t) * (-self.t + self.alpha_t * self.output)
     
-        self.t_dot = np.clip(self.t_dot, -1e6, 1e6)
+        # self.t_dot = np.clip(self.t_dot, -1e6, 1e6)
     
         self.t += self.t_dot
-        self.t = np.clip(self.t, -1e12, 1e12)
+        # self.t = np.clip(self.t, -1e12, 1e12)
     
         pos = np.maximum(0, self.t_dot)
         neg = np.maximum(0, -self.t_dot)
     
-        pos = np.nan_to_num(pos)
-        neg = np.nan_to_num(neg)
+        # pos = np.nan_to_num(pos)
+        # neg = np.nan_to_num(neg)
     
         da_term = np.maximum(0, da - self.theta_da)
-        da_term = np.nan_to_num(da_term)
+        # da_term = np.nan_to_num(da_term)
     
         delta_W = (self.eta_b *
                    da_term *
                    np.outer(pos, neg) *
                    (self.max_W - self.W))
     
-        delta_W = np.nan_to_num(delta_W)
+        # delta_W = np.nan_to_num(delta_W)
     
         self.W += delta_W
 

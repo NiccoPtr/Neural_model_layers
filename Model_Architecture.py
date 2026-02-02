@@ -65,7 +65,7 @@ Matrices_scalars = {"Mani_DLS": 0.0, "Mani_DMS": 0.0, "Mani_BLA_IC": 5,
 
 DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5}
 
-BLA_Learn = {"eta_b": 0.08, "alpha_t": 10**10, "tau_t": 500, "theta_DA": 0.7, "max_W": 2}
+BLA_Learn = {"eta_b": 0.008, "alpha_t": 10**10, "tau_t": 500, "theta_DA": 0.7, "max_W": 2}
 
 Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
              "theta_DA_DLS": 0.8, "theta_DA_DMS": 0.8, "theta_DA_NAc": 0.9,

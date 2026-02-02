@@ -319,7 +319,7 @@ class Model:
         
         self.BLA_IC.learn(self.VTA_output_pre)
         
-        delta_W_BLA_IC_NAc = self.delta_Str_learn_SV(parameters.Str_Learn["eta_NAc"],
+        delta_W_BLA_IC_NAc = self.delta_Str_learn_USV(parameters.Str_Learn["eta_NAc"],
                                            self.VTA_output_pre,
                                            self.NAc_output_pre * -1,
                                            self.BLA_IC_output_pre,
@@ -332,7 +332,7 @@ class Model:
                                            )
         self.Ws["BLA_IC_NAc"] +=  delta_W_BLA_IC_NAc
         
-        delta_W_Mani_DMS = self.delta_Str_learn_SV(parameters.Str_Learn["eta_DMS"],
+        delta_W_Mani_DMS = self.delta_Str_learn_USV(parameters.Str_Learn["eta_DMS"],
                                            self.SNpco_output_pre_1,
                                            self.DMS_output_pre * -1,
                                            _input_,
@@ -345,7 +345,7 @@ class Model:
                                            )
         self.Ws["Mani_DMS"] +=  delta_W_Mani_DMS
         
-        delta_W_Mani_DLS = self.delta_Str_learn_SV(parameters.Str_Learn["eta_DLS"],
+        delta_W_Mani_DLS = self.delta_Str_learn_USV(parameters.Str_Learn["eta_DLS"],
                                            self.SNpco_output_pre_2,
                                            self.DLS_output_pre * -1,
                                            _input_,
