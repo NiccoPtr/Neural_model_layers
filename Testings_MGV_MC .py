@@ -13,6 +13,8 @@ import numpy as np
 from Layer_types import BG_dl_Layer, Leaky_units_exc
 from params import Parameters
 
+#refactor: encapsulate an object of type CTBG which manages the used objects
+
 def plotting(res):
 
     fig, ax = plt.subplots(1, 1)
@@ -151,7 +153,7 @@ if __name__ == "__main__":
                          parameters.noise["MC"],
                          parameters.threshold["MC"])
     
-    Ws = {"inp_DMS": np.eye(parameters.N["BG_dl"]),
+    Ws = {"inp_DMS": np.ones(parameters.N["BG_dl"]), 
           "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
           "MGV_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["MGV_MC"],
           "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],

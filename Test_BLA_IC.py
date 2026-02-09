@@ -15,7 +15,7 @@ from params import Parameters
 
 def plotting(res):
     
-    fig, ax = plt.subplot(1, 1)
+    fig, ax = plt.subplots(1, 1)
     
     BLA_IC = np.array(res['BLA_IC_output']) 
     
@@ -31,6 +31,23 @@ def plotting(res):
     ax.set_ylim(0, 1)
 
     plt.show()    
+    
+    fig, ax = plt.subplots(1, 1)
+    
+    BLA_IC = np.array(res['Trace']) 
+    
+    ax.plot(BLA_IC[:, 0], label = 'Unit_1')
+    ax.plot(BLA_IC[:, 1], label = 'Unit_2')
+    ax.plot(BLA_IC[:, 2], label = 'Unit_3')
+    ax.plot(BLA_IC[:, 3], label = 'Unit_4')
+        
+    ax.set_title('Trace simulation')
+    ax.legend()
+    ax.set_xlabel('Timestep')
+    ax.set_ylabel('Activity level')
+    ax.set_ylim(0, 1)
+
+    plt.show()  
     
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
@@ -104,18 +121,21 @@ if __name__ == "__main__":
         
     BLA_IC.reset_activity()
     BLA_IC_output = []
+    t_ = []
     _input_ = []
     
-    for t in range(parameters.scheduling['timesteps']):
+    for t in range(timesteps):
         
         BLA_IC.step(np.dot(W, inp))
         BLA_IC.learn(da)
         
         BLA_IC_output.append(BLA_IC.output.copy())
+        t_.append(BLA_IC.t.copy())
         _input_.append(inp.copy())
 
     result = {
               'BLA_IC_output': BLA_IC_output.copy(),
+              'Trace': t_.copy(),
               'Inputs_timeline': _input_.copy()
               }
     
