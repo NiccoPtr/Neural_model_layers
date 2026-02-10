@@ -6,7 +6,7 @@ Created on Mon Feb  9 17:03:56 2026
 """
 
 from Layer_types import BG_dl_Layer, Leaky_units_exc
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np
 
 class CT_BG():
     
@@ -37,16 +37,16 @@ class CT_BG():
                              parameters.noise["MC"],
                              parameters.threshold["MC"])
         
-        self.Ws = {"inp_DLS": np.ones(parameters.N["BG_dl"]), 
+        self.Ws = {"inp_DLS": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
               "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
               "MGV_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["MGV_MC"],
               "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],
               "MC_DLS": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS"],
               "MC_STNdl": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_STNdl"],
-              "PFCd_PPC_MC": np.eye(parameters.N["MC"] * 0.0)
+              "PFCd_PPC_MC": np.eye(parameters.N["MC"])
               }
         
-        self.W_learn_mask = np.ones(parameters.N["BG_dl"])
+        self.W_learn_mask = np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]])
         
         self.BG_dl_output_pre = np.zeros(parameters.N["BG_dl"])
         self.MGV_output_pre = np.zeros(parameters.N["MGV"])
@@ -82,7 +82,7 @@ class CT_BG():
                                            parameters.Str_Learn["theta_DA_DLS"],
                                            parameters.Str_Learn["theta_DLS"],
                                            parameters.Str_Learn["theta_inp_DLS"],
-                                           self.Ws_learn_masks,
+                                           self.W_learn_mask,
                                            parameters.Str_Learn["max_W_DLS"],
                                            self.Ws["inp_DLS"]
                                            )
@@ -90,42 +90,22 @@ class CT_BG():
         self.Ws['inp_DLS'] += delta_W_inp_DLS
         
         
-    def step(self, parameters, timesteps, inp, da, PFCd_PPC_inp = 0.0):
+    def step(self, parameters, inp, da, PFCd_PPC_inp = [0.0, 0.0], learning = True):
         
-        for _ in range(timesteps):
+        self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
+                   np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+                   np.dot(self.Ws["MC_STNdl"], self.MC_output_pre))
         
-            self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
-                       np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
-                       np.dot(self.Ws["MC_STNdl"], self.MC_output_pre))
-            
-            self.MGV.step(np.dot(self.Ws["GPi_MGV"], self.BG_dl_output_pre +
-                     np.dot(self.Ws["MC_MGV"], self.MC_output_pre)))
-            
-            self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre +
-                                np.dot(self.Ws['PFCd_PPC_MC'], PFCd_PPC_inp)))
-            
-            self.learning(self, parameters, da, inp)
-            
-            self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
-            self.MGV_output_pre = self.MGV.output.copy()
-            self.MC_output_pre = self.MC.output.copy()
-         
-            
-    def plotting(self, res):
+        self.MGV.step(np.dot(self.Ws["GPi_MGV"], self.BG_dl_output_pre) +
+                 np.dot(self.Ws["MC_MGV"], self.MC_output_pre))
         
-        fig, ax = plt.subplots(1, 1)
-
-        BG_dl = np.array(res["BG_dl_output"]) * -1
-
-        ax.plot(BG_dl[:, 0], label="Unit_1")
-        ax.plot(BG_dl[:, 1], label="Unit_2")
-
-        ax.set_title("BG simulation")
-        ax.legend()
-        ax.set_xlabel("Timestep")
-        ax.set_ylabel("Activity level")
-        ax.set_ylim(0, 1)
-
-        plt.tight_layout()
-
-        plt.show()
+        self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre) +
+                    np.dot(self.Ws['PFCd_PPC_MC'], np.array(PFCd_PPC_inp)))
+        
+        if learning:
+            self.learning(parameters, da, inp)
+        
+        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        self.MGV_output_pre = self.MGV.output.copy()
+        self.MC_output_pre = self.MC.output.copy()
+   
