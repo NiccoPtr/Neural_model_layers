@@ -10,7 +10,7 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Layer_types import BLA_IC_Layer
+from BLA_IC_simulation import BLA_IC_sm
 from params import Parameters
 
 def plotting(res):
@@ -56,14 +56,14 @@ def parse_args():
         "--inp",
         type=float,
         nargs=6,
-        default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        default=[1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
         help="Input values (six floats)",
     )
     parser.add_argument(
         "-t",
         "--timesteps",
         type=int,
-        default=1000,
+        default=2000,
         help="Number of timesteps",
     )
     parser.add_argument(
@@ -84,7 +84,7 @@ def parse_args():
         '-da',
         '--dopamine',
         type=float,
-        default=0.0,
+        default=1.0,
         help='Insert Dopaminergic modulation for BLA_IC learning')
     
     return parser.parse_args()    
@@ -101,36 +101,22 @@ if __name__ == "__main__":
 
     rng = np.random.RandomState(parameters.seed)
     
-    BLA_IC = BLA_IC_Layer(parameters.N["BLA_IC"],
-                          parameters.tau["BLA_IC"][0],
-                          parameters.tau["BLA_IC"][1],
-                          parameters.baseline["BLA_IC"],
-                          rng,
-                          parameters.noise["BLA_IC"],
-                          parameters.BLA_Learn["eta_b"],
-                          parameters.BLA_Learn["tau_t"],
-                          parameters.BLA_Learn["alpha_t"],
-                          parameters.BLA_Learn["theta_DA"],
-                          parameters.BLA_Learn["max_W"])
-    
-    
-    W = np.array([[5.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                  [0.0, 5.0, 0.0, 0.0, 0.0, 0.0],
-                  [0.0, 0.0, 5.0, 0.0, -10.0, 0.0],
-                  [0.0, 0.0, 0.0, 5.0, 0.0, -10.0]])
+    bla = BLA_IC_sm(parameters, rng)
         
-    BLA_IC.reset_activity()
+    bla.reset_activity()
     BLA_IC_output = []
     t_ = []
     _input_ = []
     
     for t in range(timesteps):
         
-        BLA_IC.step(np.dot(W, inp))
-        BLA_IC.learn(da)
+        # if t == timesteps//4 or t ==timesteps//2:
+        #     bla.reset_activity()
         
-        BLA_IC_output.append(BLA_IC.output.copy())
-        t_.append(BLA_IC.t.copy())
+        bla.step(inp, da)
+        
+        BLA_IC_output.append(bla.BLA_IC.output.copy())
+        t_.append(bla.BLA_IC.t.copy())
         _input_.append(inp.copy())
 
     result = {

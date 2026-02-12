@@ -53,7 +53,7 @@ def plotting(res):
     
     fig, ax = plt.subplots(1, 1)
 
-    MC = np.array(res["MC_output"]) * -1
+    MC = np.array(res["MC_output"])
 
     ax.plot(MC[:, 0], label="Unit_1")
     ax.plot(MC[:, 1], label="Unit_2")
@@ -67,6 +67,25 @@ def plotting(res):
     plt.tight_layout()
 
     plt.show()
+    
+    fig, ax = plt.subplots(1, 1)
+
+    W = np.array(res["Weight_timeline"])
+    
+    for i in range(2):
+        for j in range(2):
+            ax.plot(W[:, i, j], label=f'[{i}, {j}]')
+            
+    ax.set_title("Weights learning")
+    ax.legend()
+    ax.set_xlabel("Timestep")
+    ax.set_ylabel("Activity level")
+    ax.set_ylim(0, 1)
+    
+    plt.tight_layout()
+
+    plt.show()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")
@@ -75,7 +94,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=[0.2, 0.2],
+        default=[1.0, 1.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -96,7 +115,7 @@ def parse_args():
         "-da",
         "--dopamine",
         type=float,
-        default=[0.0, 0.0],
+        default=[0.8, 0.8],
         help="Insert dopamine for learnig: float type"
     )
     parser.add_argument(
@@ -117,8 +136,26 @@ def parse_args():
         "-nMC",
         "--noise_MC",
         type=float,
-        default=0.0,
+        default=0.24,
         help="Insert MC noise in simulation",
+    )
+    parser.add_argument(
+        "--MC_MGV_W",
+        type=float,
+        default=3.0,
+        help="Insert MC_MGV matrix strenght"
+    )
+    parser.add_argument(
+        "--GPi_baseline",
+        type=float,
+        default=0.2,
+        help="Insert GPi baseline value"
+    )
+    parser.add_argument(
+        "--MGV_MC_W",
+        type=float,
+        default=1.0,
+        help="Insert MGV_MC matrix strenght"
     )
     return parser.parse_args()
 
@@ -133,6 +170,9 @@ if __name__ == "__main__":
     parameters.noise['BG_dl'] = args.noise_BG_dl
     parameters.noise['MGV'] = args.noise_MGV
     parameters.noise['MC'] = args.noise_MC
+    parameters.Matrices_scalars['MC_MGV'] = args.MC_MGV_W
+    parameters.Matrices_scalars['MGV_MC'] = args.MGV_MC_W
+    parameters.baseline['GPi'] = args.GPi_baseline
                                                 
     rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)
