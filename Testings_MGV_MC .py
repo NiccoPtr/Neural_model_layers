@@ -78,10 +78,7 @@ def plotting(res):
     im = ax.imshow(
         W.reshape(-1, 2 * 2).T, interpolation="none", aspect="auto", vmin=0, vmax=1
     )
-    # for i in range(2):
-    #     for j in range(2):
-    #         ax.plot(W[:, i, j], label=f"[{i}, {j}]")
-
+    
     ax.set_title("Weights learning")
     ax.legend()
     ax.set_xlabel("Timestep")

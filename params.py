@@ -100,7 +100,7 @@ parameters = Parameters(
                         
                         DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
                         
-                        BLA_Learn = {"eta_b": 0.0, "alpha_t": 10**10, "tau_t": 500, "theta_DA": 0.7, "max_W": 2},
+                        BLA_Learn = {"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 500, "theta_DA": 0.7, "max_W": 2},
                         
                         Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
                                      "theta_DA_DLS": 0.3, "theta_DA_DMS": 0.3, "theta_DA_NAc": 0.5,
