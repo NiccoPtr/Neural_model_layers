@@ -156,7 +156,7 @@
     },
     "BLA_Learn": {
         "eta_b": 0.08,
-        "alpha_t": 10.0,
+        "alpha_t": 50.0,
         "tau_t": 500,
         "theta_DA": 0.7,
         "max_W": 2

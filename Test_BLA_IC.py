@@ -55,6 +55,15 @@ def plotting(results, deltas):
     
     W_max = [res['Max_weight'] for res in results]
     
+    # ref_idx = results[0]['Index_max_weight']
+
+    # W_max = [
+    #     res['Max_weight']
+    #     if np.array_equal(res['Index_max_weight'], ref_idx)
+    #     else 0
+    #     for res in results
+    # ]
+    
     ax.plot(deltas, W_max, label = 'Max_weight timeline')
     ax.set_title('Max_weight timeline')
     ax.legend()
@@ -62,7 +71,15 @@ def plotting(results, deltas):
     ax.set_ylabel('Max_W value')
     ax.set_ylim(0, 0.01)
     ax.set_xlim(deltas[0], deltas[-1])
-
+    
+    plt.show()
+    
+def best_delta(results, deltas):
+    
+    max_weights = np.array([res['Max_weight'] for res in results])
+    idxs = np.where(max_weights == max_weights.max())[0]
+    
+    return deltas[idxs]
     
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
@@ -114,7 +131,7 @@ if __name__ == "__main__":
     parameters.noise['BLA_IC'] = args.noise
 
     rng = np.random.RandomState(parameters.seed)
-    deltas = np.arange(20, 20 + 60 * 7, 7, dtype=float)
+    deltas = np.arange(20, 20 + 60 * 8, 4, dtype=float)
     
     results = []
     
@@ -145,16 +162,22 @@ if __name__ == "__main__":
             Weight_timeline.append(bla.BLA_IC.W.copy())
             _input_.append(inp.copy())
             W_max = bla.BLA_IC.W.max().copy()
+            idx_W_max = np.array(np.where(bla.BLA_IC.W == W_max)).ravel()
+
     
         result = {
                   'BLA_IC_output': BLA_IC_output.copy(),
                   'Trace': t_.copy(),
                   'Weight_timeline': Weight_timeline,
                   'Max_weight': W_max,
-                  'Inputs_timeline': _input_.copy()
+                  'Index_max_weight': idx_W_max,
+                  'Inputs_timeline': _input_.copy(),
+                  'Delta': delta
                   }
         
         results.append(result)
+        
+    best_delta = best_delta(results, deltas)
     
     if args.mode == "plot":
         plotting(results, deltas)
@@ -162,3 +185,6 @@ if __name__ == "__main__":
         mresults = np.hstack([result[key] for key in result.keys()])
         for row in mresults:
             print(("{:5.3f} " * len(row)).format(*row))
+            
+   
+        
