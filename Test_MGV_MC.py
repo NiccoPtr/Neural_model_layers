@@ -14,8 +14,6 @@ from CT_BG_simulation import CT_BG
 from params import Parameters
 
 plt.ion()
-# refactor: encapsulate an object of type CTBG which manages the used objects
-
 
 def plotting(res):
 
@@ -35,7 +33,7 @@ def plotting(res):
 
     plt.tight_layout()
 
-    plt.pause(0.1)
+    plt.show()
 
     fig, ax = plt.subplots(1, 1)
 
@@ -82,7 +80,7 @@ def plotting(res):
     ax.set_title("Weights learning")
     ax.legend()
     ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
+    ax.set_ylabel("Connections")
     ax.set_yticks(np.arange(4), [f"w{j}{i}" for j in range(2) for i in range(2)])
     plt.colorbar(im, ax=ax)
 
@@ -152,13 +150,22 @@ def parse_args():
         help="Insert MC noise in simulation",
     )
     parser.add_argument(
-        "--MC_MGV_W", type=float, default=3.0, help="Insert MC_MGV matrix strenght"
+        "--MC_MGV_W",
+        type=float,
+        default=3.0,
+        help="Insert MC_MGV matrix strenght"
     )
     parser.add_argument(
-        "--GPi_baseline", type=float, default=0.2, help="Insert GPi baseline value"
+        "--GPi_baseline",
+        type=float,
+        default=0.2,
+        help="Insert GPi baseline value"
     )
     parser.add_argument(
-        "--MGV_MC_W", type=float, default=1.0, help="Insert MGV_MC matrix strenght"
+        "--MGV_MC_W",
+        type=float,
+        default=1.0,
+        help="Insert MGV_MC matrix strenght"
     )
     return parser.parse_args()
 
@@ -183,36 +190,43 @@ if __name__ == "__main__":
     rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)
 
-    BG_dl_output = []
-    MGV_output = []
-    MC_output = []
-    W_timeline = []
-    _input_ = []
+    if args.mode == 'plot':    
+        BG_dl_output = []
+        MGV_output = []
+        MC_output = []
+        W_timeline = []
+        _input_ = []
 
     CT_BG_model.reset_activity()
 
     for _ in range(timesteps):
 
         CT_BG_model.step(parameters, inp, da)
-
-        BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
-        MGV_output.append(CT_BG_model.MGV.output.copy())
-        MC_output.append(CT_BG_model.MC.output.copy())
-        W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
-        _input_.append(inp.copy())
-
-    result = {
-        "BG_dl_output": BG_dl_output.copy(),
-        "MGV_output": MGV_output.copy(),
-        "MC_output": MC_output.copy(),
-        "Weight_timeline": W_timeline,
-        "Inputs_timeline": _input_.copy(),
-    }
+        
+        if args.mode == 'plot':
+            BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
+            MGV_output.append(CT_BG_model.MGV.output.copy())
+            MC_output.append(CT_BG_model.MC.output.copy())
+            W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
+            _input_.append(inp.copy())
+        
+    if args.mode == 'plot':
+        result = {
+            "BG_dl_output": BG_dl_output.copy(),
+            "MGV_output": MGV_output.copy(),
+            "MC_output": MC_output.copy(),
+            "Weight_timeline": W_timeline,
+            "Inputs_timeline": _input_.copy(),
+        }
+    
+    elif args.mode == 'stream':
+        fin_inp = inp.copy()
+        fin_W = CT_BG_model.Ws['inp_DLS'].copy().flatten()
 
     if args.mode == "plot":
         plotting(result)
     elif args.mode == "stream":
-        mresults = np.hstack([result[key] for key in result.keys()])
-        for row in mresults:
-            print(("{:5.3f} " * len(row)).format(*row))
-    input()
+        mresults = np.hstack((fin_inp, fin_W))
+        print(("{:10.5f} " * len(mresults)).format(*mresults))
+
+    input("Press Enter to exit")

@@ -13,73 +13,58 @@ import numpy as np
 from BLA_IC_simulation import BLA_IC_sm
 from params import Parameters
 
-def plotting(results, deltas):
-    
-    # fig, ax = plt.subplots(1, 1)
-    
-    # BLA_IC = [res['BLA_IC_output'] for res in results]
-    # for bla in BLA_IC:
-    
-    #     bla = np.array(bla)
-    #     ax.plot(bla[:, 0], label = 'Unit_1')
-    #     ax.plot(bla[:, 1], label = 'Unit_2')
-    #     ax.plot(bla[:, 2], label = 'Unit_3')
-    #     ax.plot(bla[:, 3], label = 'Unit_4')
-        
-    # ax.set_title('BLA_IC simulation')
-    # ax.legend()
-    # ax.set_xlabel('Timestep')
-    # ax.set_ylabel('Activity level')
-    # ax.set_ylim(0, 1)
+plt.ion()
 
-    # plt.show()    
+def plotting(result):
     
-    # fig, ax = plt.subplots(1, 1)
+    plt.close("all")
+    fig, ax = plt.subplots(1, 1)
     
-    # trace_BLA_IC = [res['Trace'] for res in results]
-    
-    # ax.plot(trace_BLA_IC[:, 0], label = 'Unit_1')
-    # ax.plot(trace_BLA_IC[:, 1], label = 'Unit_2')
-    # ax.plot(trace_BLA_IC[:, 2], label = 'Unit_3')
-    # ax.plot(trace_BLA_IC[:, 3], label = 'Unit_4')
+    BLA_IC = np.array(result['BLA_IC_output'])
+    ax.plot(BLA_IC[:, 0], label = 'Unit_1')
+    ax.plot(BLA_IC[:, 1], label = 'Unit_2')
+    ax.plot(BLA_IC[:, 2], label = 'Unit_3')
+    ax.plot(BLA_IC[:, 3], label = 'Unit_4')
         
-    # ax.set_title('Trace simulation')
-    # ax.legend()
-    # ax.set_xlabel('Timestep')
-    # ax.set_ylabel('Activity level')
-    # ax.set_ylim(0, 1)
+    ax.set_title('BLA_IC simulation')
+    ax.legend()
+    ax.set_xlabel('Timestep')
+    ax.set_ylabel('Activity level')
+    ax.set_ylim(0, 1)
 
-    # plt.show()  
+    plt.show()    
     
     fig, ax = plt.subplots(1, 1)
     
-    W_max = [res['Max_weight'] for res in results]
-    
-    # ref_idx = results[0]['Index_max_weight']
-
-    # W_max = [
-    #     res['Max_weight']
-    #     if np.array_equal(res['Index_max_weight'], ref_idx)
-    #     else 0
-    #     for res in results
-    # ]
-    
-    ax.plot(deltas, W_max, label = 'Max_weight timeline')
-    ax.set_title('Max_weight timeline')
+    t = np.array(result['Trace'])
+    ax.plot(t[:, 0], label = 'Unit_1')
+    ax.plot(t[:, 1], label = 'Unit_2')
+    ax.plot(t[:, 2], label = 'Unit_3')
+    ax.plot(t[:, 3], label = 'Unit_4')
+        
+    ax.set_title('Trace simulation')
     ax.legend()
-    ax.set_xlabel('Deltas')
-    ax.set_ylabel('Max_W value')
-    ax.set_ylim(0, 0.01)
-    ax.set_xlim(deltas[0], deltas[-1])
+    ax.set_xlabel('Timestep')
+    ax.set_ylabel('Activity level')
+
+    plt.show()  
     
+    fig, ax = plt.subplots(1, 1)
+    
+    W_timeline = np.array(result['Weight_timeline'])
+    im = ax.imshow(
+        W_timeline.reshape(-1, 4 * 4).T, interpolation="none", aspect="auto", vmin=0, vmax=0.02
+    )
+    ax.set_title("Weights learning")
+    ax.legend()
+    ax.set_xlabel("Timestep")
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(16), [f"w{j}{i}" for j in range(4) for i in range(4)])
+    plt.colorbar(im, ax=ax)
+
+    plt.tight_layout()
+
     plt.show()
-    
-def best_delta(results, deltas):
-    
-    max_weights = np.array([res['Max_weight'] for res in results])
-    idxs = np.where(max_weights == max_weights.max())[0]
-    
-    return deltas[idxs]
     
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
@@ -92,6 +77,20 @@ def parse_args():
         help="Input values (six floats)",
     )
     parser.add_argument(
+        "-mani",
+        "--manipulanda",
+        type=float,
+        default=0,
+        help="Insert 0 for manipulanda lever, 1 for manipulanda chain",
+    )
+    parser.add_argument(
+        "-f",
+        "--food",
+        type=float,
+        default=2,
+        help="Insert 2 for food_1, 3 for food_2",
+    )
+    parser.add_argument(
         "-t",
         "--timesteps",
         type=int,
@@ -102,7 +101,7 @@ def parse_args():
         "-m",
         "--mode",
         type=str,
-        default="plot",
+        default="stream",
         help="Output mode ('plot', 'save', 'stream')",
     )
     parser.add_argument(
@@ -117,7 +116,15 @@ def parse_args():
         '--dopamine',
         type=float,
         default=2.0,
-        help='Insert Dopaminergic modulation for BLA_IC learning')
+        help='Insert Dopaminergic modulation for BLA_IC learning'
+        )
+    parser.add_argument(
+        '-de',
+        '--delta',
+        type=float,
+        default=160.0,
+        help='Insert delta for manipulanda input onset'
+        )
     
     return parser.parse_args()    
 
@@ -125,66 +132,58 @@ if __name__ == "__main__":
     args = parse_args()
     da = args.dopamine
     timesteps = args.timesteps
-
+    mani = args.manipulanda
+    food = args.food
+    delta = args.delta
+    inp = np.array(args.inp)
+    
     parameters = Parameters()
     parameters.load("prm_file.json" ,mode = "json")
     parameters.noise['BLA_IC'] = args.noise
-
     rng = np.random.RandomState(parameters.seed)
-    deltas = np.arange(20, 20 + 60 * 8, 4, dtype=float)
     
-    results = []
+    bla = BLA_IC_sm(parameters, rng)   
+    bla.reset_activity()
     
-    for i in range(len(deltas)):
-        
-        delta = deltas[i]
-        inp = np.array(args.inp)
-        bla = BLA_IC_sm(parameters, rng)
-            
-        bla.reset_activity()
+    
+    if args.mode == 'plot':
         BLA_IC_output = []
         t_ = []
         Weight_timeline = []
         _input_ = []
+            
+    for t in range(timesteps):
         
-        for t in range(timesteps):
+        if t == delta:
+            inp[mani] = 1.0
             
-            if t == delta:
-                inp[0] = 1.0
-                
-            if t == timesteps // 2:
-                inp[2] = 1.0
-                
-            bla.step(inp, da)
+        if t == timesteps // 2:
+            inp[food] = 1.0
             
+        bla.step(inp, da)
+        
+        if args.mode == 'plot':
             BLA_IC_output.append(bla.BLA_IC.output.copy())
             t_.append(bla.BLA_IC.t.copy())
             Weight_timeline.append(bla.BLA_IC.W.copy())
             _input_.append(inp.copy())
-            W_max = bla.BLA_IC.W.max().copy()
-            idx_W_max = np.array(np.where(bla.BLA_IC.W == W_max)).ravel()
-
-    
+        
+    if args.mode == 'plot':
         result = {
                   'BLA_IC_output': BLA_IC_output.copy(),
                   'Trace': t_.copy(),
                   'Weight_timeline': Weight_timeline,
-                  'Max_weight': W_max,
-                  'Index_max_weight': idx_W_max,
                   'Inputs_timeline': _input_.copy(),
                   'Delta': delta
                   }
+    elif args.mode == 'stream':
+        fin_inp = inp.copy()
+        fin_W = bla.BLA_IC.W.copy().flatten()
         
-        results.append(result)
-        
-    best_delta = best_delta(results, deltas)
-    
     if args.mode == "plot":
-        plotting(results, deltas)
+        plotting(result)
     elif args.mode == "stream":
-        mresults = np.hstack([result[key] for key in result.keys()])
-        for row in mresults:
-            print(("{:5.3f} " * len(row)).format(*row))
-            
-   
+        mresults = np.hstack((fin_inp, fin_W, delta))
+        print(("{:10.5f} " * len(mresults)).format(*mresults))
         
+    input("Press Enter to exit")
