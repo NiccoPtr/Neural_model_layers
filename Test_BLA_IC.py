@@ -8,7 +8,7 @@ Created on Fri Feb  6 11:13:28 2026
 import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
+import numpy as np, pandas as pd, os
 
 from BLA_IC_simulation import BLA_IC_sm
 from params import Parameters
@@ -125,6 +125,13 @@ def parse_args():
         default=160.0,
         help='Insert delta for manipulanda input onset'
         )
+    parser.add_argument(
+        '-s',
+        '--save',
+        type=str,
+        default='Yes',
+        help='Report if you want to append run into .csv file, Yes or  No'
+        )
     
     return parser.parse_args()    
 
@@ -177,13 +184,33 @@ if __name__ == "__main__":
                   'Delta': delta
                   }
     elif args.mode == 'stream':
-        fin_inp = inp.copy()
-        fin_W = bla.BLA_IC.W.copy().flatten()
+        inp_end = inp.copy()
+        W_end = bla.BLA_IC.W.copy().flatten()
+        
+    fin_inp = inp.copy()
+    fin_W = bla.BLA_IC.W.copy().flatten()
+        
+    input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
+    weight_cols = [f"Weight_{i}_{j}" for i in range(4) for j in range(4)]
+    delta_col = [str('Delta')]
+    values = np.concatenate([fin_inp, fin_W, [delta]])
+    columns = input_cols + weight_cols + delta_col
+    
+    df = pd.DataFrame([values], columns=columns ,index=[f'run_Delta: {delta}'])
         
     if args.mode == "plot":
         plotting(result)
     elif args.mode == "stream":
-        mresults = np.hstack((fin_inp, fin_W, delta))
+        mresults = np.hstack((inp_end, W_end, delta))
         print(("{:10.5f} " * len(mresults)).format(*mresults))
-        
+    
+    if args.save == 'Yes':
+        csv_path = r"C:\Users\Nicc\Desktop\CNR_Model\results.csv"
+        if os.path.exists(csv_path):
+            df.to_csv(csv_path, mode="a", header=False)
+        else:
+            df.to_csv(csv_path)
+    
     input("Press Enter to exit")
+    
+    
