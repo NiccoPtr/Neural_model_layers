@@ -402,7 +402,7 @@ class Model:
         self.PL_output_pre = self.PL.output.copy()
         
     
-    def step(self, _input_, learning = False):
+    def step(self, _input_, learning = True):
         
         """
         Compute step for each layer using the output_pre values

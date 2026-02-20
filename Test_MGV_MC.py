@@ -8,7 +8,7 @@ Created on Mon Dec  8 10:59:11 2025
 import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
+import numpy as np, pandas as pd, os
 
 from CT_BG_simulation import CT_BG
 from params import Parameters
@@ -118,7 +118,7 @@ def parse_args():
         "--mode",
         type=str,
         default="plot",
-        help="Output mode ('plot', 'save', 'stream')",
+        help="Output mode ('plot', 'save', 'short_save' 'stream')",
     )
     parser.add_argument(
         "-da",
@@ -175,6 +175,7 @@ if __name__ == "__main__":
     inp = np.array(args.inp)
     timesteps = args.timesteps
     da = np.array(args.dopamine)
+    seed = args.seed
 
     parameters = Parameters()
     parameters.load("prm_file.json", mode="json")
@@ -184,49 +185,94 @@ if __name__ == "__main__":
     parameters.Matrices_scalars["MC_MGV"] = args.MC_MGV_W
     parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
     parameters.baseline["GPi"] = args.GPi_baseline
-    parameters.seed = args.seed
     parameters.Str_Learn["eta_DLS"] = 0.2
 
-    rng = np.random.RandomState(parameters.seed)
+    rng = np.random.RandomState(seed)
     CT_BG_model = CT_BG(parameters, rng)
 
-    if args.mode == 'plot':    
-        BG_dl_output = []
-        MGV_output = []
-        MC_output = []
-        W_timeline = []
-        _input_ = []
+    
+    BG_dl_output = []
+    MGV_output = []
+    MC_output = []
+    W_timeline = []
+    _input_ = []
 
     CT_BG_model.reset_activity()
 
     for _ in range(timesteps):
 
         CT_BG_model.step(parameters, inp, da)
-        
-        if args.mode == 'plot':
-            BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
-            MGV_output.append(CT_BG_model.MGV.output.copy())
-            MC_output.append(CT_BG_model.MC.output.copy())
-            W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
-            _input_.append(inp.copy())
-        
-    if args.mode == 'plot':
-        result = {
-            "BG_dl_output": BG_dl_output.copy(),
-            "MGV_output": MGV_output.copy(),
-            "MC_output": MC_output.copy(),
-            "Weight_timeline": W_timeline,
-            "Inputs_timeline": _input_.copy(),
-        }
     
-    elif args.mode == 'stream':
-        fin_inp = inp.copy()
-        fin_W = CT_BG_model.Ws['inp_DLS'].copy().flatten()
+        BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
+        MGV_output.append(CT_BG_model.MGV.output.copy())
+        MC_output.append(CT_BG_model.MC.output.copy())
+        W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
+        _input_.append(inp.copy())
+    
+    result = {
+        'Seed': np.ones(timesteps) * seed,
+        "Inputs_timeline": _input_.copy(),
+        "BG_dl_output": BG_dl_output.copy(),
+        "MGV_output": MGV_output.copy(),
+        "MC_output": MC_output.copy(),
+        "Weight_timeline": W_timeline
+    }    
 
     if args.mode == "plot":
         plotting(result)
+        input("Press Enter to exit")
+        
     elif args.mode == "stream":
-        mresults = np.hstack((fin_inp, fin_W))
+        inp_end = inp.copy()
+        W_end = CT_BG_model.Ws['inp_DLS'].copy().flatten()
+        mresults = np.hstack((inp_end, W_end))
         print(("{:10.5f} " * len(mresults)).format(*mresults))
-
-    input("Press Enter to exit")
+        
+    elif args.mode == 'save':
+        seed_col = ['Seed']
+        input_cols = [f"Input_{i}" 
+                      for i in range(len(inp.copy()))]
+        BG_dl_cols = [f'BG_dl_Unit_{i}'
+                     for i in range(CT_BG_model.BG_dl.GPi.N)]
+        MGV_cols = [f'MGV_Unit_{i}'
+                     for i in range(CT_BG_model.MGV.N)]
+        MC_cols = [f'MC_Unit_{i}'
+                     for i in range(CT_BG_model.MC.N)]
+        W_cols = [f'Inp_DLS_W_{x}_{y}'
+                  for x in range(CT_BG_model.Ws['inp_DLS'].shape[0])
+                  for y in range(CT_BG_model.Ws['inp_DLS'].shape[1])]
+        cols = seed_col + input_cols + BG_dl_cols + MGV_cols + MC_cols + W_cols
+        
+        values = [np.asanyarray(result[k]).reshape(timesteps, -1)
+                 for k in result.keys()]
+        values_conc = np.concatenate(values, axis=1)
+        df = pd.DataFrame(values_conc, columns=cols)
+        
+        csv_path = "MGV_MC_Testing.csv"
+        
+        if os.path.exists(csv_path):
+            df.to_csv(csv_path, mode="a", header=False, index=False)
+        else:
+            df.to_csv(csv_path, index=False)
+            
+    elif args.mode == 'short_save':
+        fin_inp = inp.copy()
+        fin_W = CT_BG_model.Ws['inp_DLS'].copy().flatten()
+        
+        seed_col = ['Seed']
+        input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
+        W_cols = [f'Inp_DLS_W_{x}_{y}'
+                  for x in range(CT_BG_model.Ws['inp_DLS'].shape[0])
+                  for y in range(CT_BG_model.Ws['inp_DLS'].shape[1])]
+        
+        values = np.concatenate([[seed], fin_inp, fin_W])
+        columns = seed_col + input_cols + W_cols 
+        
+        df = pd.DataFrame([values], columns=columns)
+        
+        csv_path = "MGV_MC_short_test.csv"
+        if os.path.exists(csv_path):
+            df.to_csv(csv_path, mode="a", header=False, index=False)
+        else:
+            df.to_csv(csv_path, index=False)
+                                    

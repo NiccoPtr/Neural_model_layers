@@ -102,7 +102,7 @@ def parse_args():
         "--mode",
         type=str,
         default="stream",
-        help="Output mode ('plot', 'save', 'stream')",
+        help="Output mode ('plot', 'save','short_save', 'stream')",
     )
     parser.add_argument(
         "-n",
@@ -125,13 +125,6 @@ def parse_args():
         default=160.0,
         help='Insert delta for manipulanda input onset'
         )
-    parser.add_argument(
-        '-s',
-        '--save',
-        type=str,
-        default='Yes',
-        help='Report if you want to append run into .csv file, Yes or  No'
-        )
     
     return parser.parse_args()    
 
@@ -151,14 +144,12 @@ if __name__ == "__main__":
     
     bla = BLA_IC_sm(parameters, rng)   
     bla.reset_activity()
-    
-    
-    if args.mode == 'plot':
-        BLA_IC_output = []
-        t_ = []
-        Weight_timeline = []
-        _input_ = []
-            
+
+    BLA_IC_output = []
+    t_ = []
+    Weight_timeline = []
+    _input_ = []
+        
     for t in range(timesteps):
         
         if t == delta:
@@ -168,49 +159,71 @@ if __name__ == "__main__":
             inp[food] = 1.0
             
         bla.step(inp, da)
-        
-        if args.mode == 'plot':
-            BLA_IC_output.append(bla.BLA_IC.output.copy())
-            t_.append(bla.BLA_IC.t.copy())
-            Weight_timeline.append(bla.BLA_IC.W.copy())
-            _input_.append(inp.copy())
-        
-    if args.mode == 'plot':
-        result = {
-                  'BLA_IC_output': BLA_IC_output.copy(),
-                  'Trace': t_.copy(),
-                  'Weight_timeline': Weight_timeline,
-                  'Inputs_timeline': _input_.copy(),
-                  'Delta': delta
-                  }
-    elif args.mode == 'stream':
-        inp_end = inp.copy()
-        W_end = bla.BLA_IC.W.copy().flatten()
-        
-    fin_inp = inp.copy()
-    fin_W = bla.BLA_IC.W.copy().flatten()
-        
-    input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
-    weight_cols = [f"Weight_{i}_{j}" for i in range(4) for j in range(4)]
-    delta_col = [str('Delta')]
-    values = np.concatenate([fin_inp, fin_W, [delta]])
-    columns = input_cols + weight_cols + delta_col
     
-    df = pd.DataFrame([values], columns=columns ,index=[f'run_Delta: {delta}'])
+        BLA_IC_output.append(bla.BLA_IC.output.copy())
+        t_.append(bla.BLA_IC.t.copy())
+        Weight_timeline.append(bla.BLA_IC.W.copy().flatten())
+        _input_.append(inp.copy())
+    
+    result = {
+              'Delta': np.ones(timesteps) * delta,
+              'Inputs_timeline': _input_.copy(),
+              'BLA_IC_output': BLA_IC_output.copy(),
+              'Trace': t_.copy(),
+              'Weight_timeline': Weight_timeline
+              }
         
     if args.mode == "plot":
         plotting(result)
+        input("Press Enter to exit")
+        
     elif args.mode == "stream":
+        inp_end = inp.copy()
+        W_end = bla.BLA_IC.W.copy().flatten()
         mresults = np.hstack((inp_end, W_end, delta))
         print(("{:10.5f} " * len(mresults)).format(*mresults))
-    
-    if args.save == 'Yes':
-        csv_path = r"C:\Users\Nicc\Desktop\CNR_Model\results.csv"
+        
+    elif args.mode == 'save':
+        input_cols = [f"Input_{i}" 
+                      for i in range(len(inp.copy()))]
+        ouput_cols = [f'Output_Unit_{i}' 
+                      for i in range(bla.BLA_IC.N)]
+        trace_cols = [f'Trace_Unit_{i}' 
+                      for i in range(bla.BLA_IC.N)]
+        W_cols = [f'Weight_{x}_{y}' 
+                  for x in range(bla.BLA_IC.W.shape[0])
+                  for y in range(bla.BLA_IC.W.shape[1])]
+        delta_col = ['Delta']
+        cols = delta_col + input_cols + ouput_cols + trace_cols + W_cols
+        
+        values = [np.asanyarray(result[k]).reshape(timesteps, -1)
+                 for k in result.keys()]
+        values_conc = np.concatenate(values, axis=1)
+        df = pd.DataFrame(values_conc, columns=cols)
+        
+        csv_path = "BLA_IC_Testing.csv"
+        
         if os.path.exists(csv_path):
-            df.to_csv(csv_path, mode="a", header=False)
+            df.to_csv(csv_path, mode="a", header=False, index=False)
         else:
-            df.to_csv(csv_path)
+            df.to_csv(csv_path, index=False)
     
-    input("Press Enter to exit")
-    
-    
+    elif args.mode == 'short_save':
+        fin_inp = inp.copy()
+        fin_W = bla.BLA_IC.W.copy().flatten()
+            
+        input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
+        W_cols = [f'Weight_{x}_{y}' 
+                  for x in range(bla.BLA_IC.W.shape[0])
+                  for y in range(bla.BLA_IC.W.shape[1])]
+        delta_col = [str('Delta')]
+        values = np.concatenate([fin_inp, fin_W, [delta]])
+        columns = input_cols + W_cols + delta_col
+        
+        df = pd.DataFrame([values], columns=columns)
+        
+        csv_path = "BLA_IC_short_test.csv"
+        if os.path.exists(csv_path):
+            df.to_csv(csv_path, mode="a", header=False, index=False)
+        else:
+            df.to_csv(csv_path, index=False)

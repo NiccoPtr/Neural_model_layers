@@ -33,14 +33,25 @@ def Simulation(parameters, model = None):
         elif trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][2]:
             phase = 3
             
-        else: 
+        elif trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][3]:
             phase = 4
+            
+        elif trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][4]:
+            phase = 5
+            
+        elif trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][5]:
+            phase = 6
+            
+        elif trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][6]:
+            phase = 7
+        else: 
+            phase = 8
             
         state = parameters.scheduling["states"][phase - 1]
         
         for t in range(parameters.scheduling["timesteps"]):
             
-            model.step(state, learning=True) 
+            model.step(state) 
             
             if np.isnan(model.Ws["BLA_IC_NAc"]).any():
                 
@@ -49,7 +60,7 @@ def Simulation(parameters, model = None):
             
             action = model.MC.output.copy()
             
-            MC_output.append(np.round(action.copy(), 4))
+            MC_output.append(action.copy())
             state_t.append(state.copy())
             
             if np.any(action >= model.MC.threshold):
@@ -162,10 +173,14 @@ if __name__ == "__main__":
     parameters = Parameters()
     parameters.load("prm_file.json" ,mode = "json")
     parameters.scheduling = {
-                            "trials": 10,
-                            "phases": [0.25, 0.50, 0.75, 1.0],
+                            "trials": 20,
+                            "phases": [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0],
                             "timesteps": 1000,
                             "states": np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                       [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                                       [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+                                       [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                                       [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                                        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
                                        [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
                                        [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
