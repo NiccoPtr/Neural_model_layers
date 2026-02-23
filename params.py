@@ -91,20 +91,20 @@ parameters = Parameters(
                                             "LH_VTA": 20.0,
                                             "NAc_SNpci_1": 6.0, "DMS_SNpci_2": 10.0,
                                             "GPi_MGV": 1.5, "GPi_SNpr_P": 1.5, "SNpr_DM": 1.5,
-                                            "MGV_MC": 1.0, "P_PFCd_PPC": 1.2, "DM_PL": 1.2,
-                                            "PL_DM": 1.0, "PL_NAc": 1.0, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2,
-                                            "PFCd_PPC_P": 1.0, "PFCd_PPC_DMS": 1.0, "PFCd_PPC_STNdm": 1.6,
+                                            "MGV_MC": 1.0, "P_PFCd_PPC": 1.0, "DM_PL": 1.0,
+                                            "PL_DM": 1.0, "PL_NAc": 1.2, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2,
+                                            "PFCd_PPC_P": 1.0, "PFCd_PPC_DMS": 1.2, "PFCd_PPC_STNdm": 1.6,
                                             "PFCd_PPC_PL": 1.0, "PFCd_PPC_MC": 1.0,
-                                            "MC_MGV": 1.0, "MC_DLS": 1.0, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2
+                                            "MC_MGV": 1.0, "MC_DLS": 1.2, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2
                                         },
                         
                         DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
                         
                         BLA_Learn = {"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 500, "theta_DA": 0.7, "max_W": 2},
                         
-                        Str_Learn = {"eta_DLS": 2, "eta_DMS": 2, "eta_NAc": 5, 
+                        Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
                                      "theta_DA_DLS": 0.3, "theta_DA_DMS": 0.3, "theta_DA_NAc": 0.5,
-                                     "theta_DLS": 0.1, "theta_DMS": 0.1, "theta_NAc": 0.1,
+                                     "theta_DLS": 0.2, "theta_DMS": 0.2, "theta_NAc": 0.5,
                                      "theta_inp_DLS": 0.5, "theta_inp_DMS": 0.5, "theta_inp_NAc": 0.9,
                                      "max_W_DLS": 1, "max_W_DMS": 1, "max_W_NAc": 2}
                         )

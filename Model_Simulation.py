@@ -115,7 +115,7 @@ def parse_args():
         "-m",
         "--mode",
         type=str,
-        default='plot',
+        default='stream',
         help="Output mode ('plot', 'plot_perphase', 'save','short_save', 'stream')",
     )
     
