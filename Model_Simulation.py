@@ -23,7 +23,7 @@ def plotting(results, save = False):
         axs[i].plot(MC[:, 0], label = "MC Unit_1")
         axs[i].plot(MC[:, 1], label = "MC Unit_2")
         
-        axs[i].set_title(f'Phase: {res["Phase"]}, Input: {res["States_timeline"][0]}')
+        axs[i].set_title(f'Phase: {res["Phase"][0]}, Input: {res["States_timeline"][-1]}')
         axs[i].legend()
         axs[i].set_xlabel('Timestep')
         axs[i].set_ylabel('Activity level')
@@ -42,7 +42,7 @@ def plotting(results, save = False):
     
 def plotting_perphase(results, save = False):
     
-    phases = sorted(set(res["Phase"] for res in results))
+    phases = sorted(set(res["Phase"][0] for res in results))
     
     rows = 1 + len(phases) // 2
     cols = 2
@@ -51,7 +51,7 @@ def plotting_perphase(results, save = False):
     
     for i, phase in enumerate(phases):
 
-        phase_results = [r for r in results if r["Phase"] == phase]
+        phase_results = [r for r in results if r["Phase"][0] == phase]
         phase_final_res = phase_results[-1]
         
         MC = np.array(phase_final_res["MC_Output"])
@@ -59,7 +59,7 @@ def plotting_perphase(results, save = False):
         axs[i].plot(MC[:, 0], label = "MC Unit_1")
         axs[i].plot(MC[:, 1], label = "MC Unit_2")
         
-        axs[i].set_title(f'Phase: {phase_final_res["Phase"]}, Input: {phase_final_res["States_timeline"][0]}')
+        axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
         axs[i].legend()
         axs[i].set_xlabel('Timestep')
         axs[i].set_ylabel('Activity level')
@@ -70,9 +70,9 @@ def plotting_perphase(results, save = False):
 
     plt.tight_layout()
     
-    if save:
-        filename = "Simulation_plot.png"
-        plt.savefig(filename, dpi=300)
+    # if save:
+    #     filename = "Simulation_plot.png"
+    #     plt.savefig(filename, dpi=300)
         
     plt.show()
     
@@ -94,14 +94,14 @@ def parse_args():
         "-tr",
         "--trials",
         type=int,
-        default=10,
+        default=20,
         help="Input amount of trials (int)",
     )
     parser.add_argument(
         "-t",
         "--timesteps",
         type=int,
-        default=500,
+        default=2000,
         help="Input amount of timesteps per trial (int)",
     )
     parser.add_argument(
@@ -109,13 +109,13 @@ def parse_args():
         "--phases",
         type=float,
         default=[0.25, 0.5, 0.75, 1.0],
-        help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.74, 1.0], max of 8 phases",
+        help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.75, 1.0], max of 8 phases",
     )
     parser.add_argument(
         "-m",
         "--mode",
         type=str,
-        default='save',
+        default='plot',
         help="Output mode ('plot', 'plot_perphase', 'save','short_save', 'stream')",
     )
     
@@ -138,9 +138,14 @@ if __name__ == "__main__":
     
     for trial in range(parameters.scheduling["trials"]):
         
+        print(f'Running trial {trial + 1}')
         model.reset_activity()   
         MC_output = []
         state_t = []
+        DLS_output = []
+        DMS_output = []
+        BLA_IC_output = []
+        NAc_output = []
         
         if trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][0]:
             phase = 1
@@ -174,6 +179,10 @@ if __name__ == "__main__":
             
             MC_output.append(action.copy())
             state_t.append(state.copy())
+            DLS_output.append(model.BG_dl.DLS.output.copy())
+            DMS_output.append(model.BG_dm.DMS.output.copy())
+            BLA_IC_output.append(model.BLA_IC.output.copy())
+            NAc_output.append(model.BG_v.NAc.output.copy())
             
             if np.any(action >= model.MC.threshold):
                 
@@ -190,17 +199,25 @@ if __name__ == "__main__":
             "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
             "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,        
             "States_timeline": state_t.copy(),
+            'DLS_output': DLS_output.copy(),
+            'DMS_output': DMS_output.copy(),
+            'BLA_IC_output': BLA_IC_output.copy(),
+            'NAc_output': NAc_output.copy(),
             "MC_Output": MC_output.copy()
             }
         
+        print(f'End trial {trial + 1}')
+        
         results.append(result)
         
+    print(f'Simulation termined: Trials({parameters.scheduling["trials"]}), Timesteps({parameters.scheduling["timesteps"]})')
+        
     if args.mode == "plot":
-        plotting(result)
+        plotting(results)
         input("Press Enter to exit")
         
     elif args.mode == "plot_perphase":
-        plotting_perphase(result)
+        plotting_perphase(results)
         input("Press Enter to exit")
         
     elif args.mode == 'stream':
