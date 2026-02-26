@@ -170,7 +170,7 @@
         "theta_DA_NAc": 0.5,
         "theta_DLS": 0.2,
         "theta_DMS": 0.2,
-        "theta_NAc": 0.5,
+        "theta_NAc": 0.1,
         "theta_inp_DLS": 0.5,
         "theta_inp_DMS": 0.5,
         "theta_inp_NAc": 0.9,

@@ -18,7 +18,7 @@ def plotting(results, save = False):
     
     for i, res in enumerate(results):
         
-        MC = np.array(res["MC_Output"])
+        MC = np.array(results[0]["MC_output"])
         
         axs[i].plot(MC[:, 0], label = "MC Unit_1")
         axs[i].plot(MC[:, 1], label = "MC Unit_2")
@@ -34,9 +34,9 @@ def plotting(results, save = False):
 
     plt.tight_layout()
     
-    if save:
-        filename = "Simulation_plot.png"
-        plt.savefig(filename, dpi=300)
+    # if save:
+    #     filename = "Simulation_plot.png"
+    #     plt.savefig(filename, dpi=300)
         
     plt.show()
     
@@ -54,7 +54,7 @@ def plotting_perphase(results, save = False):
         phase_results = [r for r in results if r["Phase"][0] == phase]
         phase_final_res = phase_results[-1]
         
-        MC = np.array(phase_final_res["MC_Output"])
+        MC = np.array(phase_final_res["MC_output"]) 
         
         axs[i].plot(MC[:, 0], label = "MC Unit_1")
         axs[i].plot(MC[:, 1], label = "MC Unit_2")
@@ -76,6 +76,108 @@ def plotting_perphase(results, save = False):
         
     plt.show()
     
+def plotting_layers_perphase(results):
+    
+    layers = [
+            'MC_output',
+            'BLA_IC_output',
+            'NAc_output',
+            'DMS_output',
+            'DLS_output'
+              ]
+    phases = sorted(set(res["Phase"][0] for res in results))
+    
+    for l in layers:
+    
+        rows = 1 + len(phases) // 2
+        cols = 2
+        fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+        axs = axs.flatten()
+        
+        for i, phase in enumerate(phases):
+    
+            phase_results = [r for r in results if r["Phase"][0] == phase]
+            phase_final_res = phase_results[-1]
+            
+            if l == 'NAc_output' or l == 'DMS_output' or l == 'DLS_output':
+                layer = np.array(phase_final_res[l]) *-1
+                
+            else:
+                layer = np.array(phase_final_res[l])
+                
+            axs[i].plot(layer[:, 0], label = f"{l}_1")
+            axs[i].plot(layer[:, 1], label = f"{l}_2")
+            
+            axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
+            axs[i].legend()
+            axs[i].set_xlabel('Timestep')
+            axs[i].set_ylabel('Activity level')
+            axs[i].set_ylim(0, 1)
+            
+        for j in range(len(phases), len(axs)):
+            fig.delaxes(axs[j])
+    
+        plt.tight_layout()
+        
+        # if save:
+        #     filename = "Simulation_plot.png"
+        #     plt.savefig(filename, dpi=300)
+            
+        plt.show()
+    
+def plotting_Wslearn(results):
+    
+    Ws = [
+        'W_Mani_DLS',
+        'W_Mani_DMS',
+        'W_BLA_IC_NAc'
+        ]
+    
+    phases = sorted(set(res["Phase"][0] for res in results))
+    
+    for W in Ws:
+        
+        rows = 1 + len(phases) // 2
+        cols = 2
+        fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+        axs = axs.flatten()
+        
+        for i, phase in enumerate(phases):
+    
+            phase_results = [r for r in results if r["Phase"][0] == phase]
+            phase_final_res = phase_results[-1]
+            
+            if W == 'W_Mani_DLS' or W == 'W_Mani_DMS':
+                W_learn = np.array(phase_final_res[W])
+                axs[i].plot(W_learn[:, 0, 0], label = f"{W}_0_0")
+                axs[i].plot(W_learn[:, 0, 1], label = f"{W}_0_1")
+                axs[i].plot(W_learn[:, 1, 0], label = f"{W}_1_0")
+                axs[i].plot(W_learn[:, 1, 1], label = f"{W}_1_1")
+                
+            else:
+                W_learn = np.array(phase_final_res[W])
+                axs[i].plot(W_learn[:, 0, 2], label = f"{W}_0_0")
+                axs[i].plot(W_learn[:, 0, 3], label = f"{W}_0_1")
+                axs[i].plot(W_learn[:, 1, 2], label = f"{W}_1_0")
+                axs[i].plot(W_learn[:, 1, 3], label = f"{W}_1_1")
+            
+            axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
+            axs[i].legend()
+            axs[i].set_xlabel('Timestep')
+            axs[i].set_ylabel('Activity level')
+            axs[i].set_ylim(0, 1)
+            
+        for j in range(len(phases), len(axs)):
+            fig.delaxes(axs[j])
+    
+        plt.tight_layout()
+        
+        # if save:
+        #     filename = "Simulation_plot.png"
+        #     plt.savefig(filename, dpi=300)
+            
+        plt.show()
+        
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
     parser.add_argument(
@@ -116,7 +218,7 @@ def parse_args():
         "--mode",
         type=str,
         default='stream',
-        help="Output mode ('plot', 'plot_perphase', 'save','short_save', 'stream')",
+        help="Output mode ('plot', 'plot_perphase', 'plot_layers_perphase', 'plot_matrices_learn','save','short_save', 'stream')",
     )
     
     return parser.parse_args() 
@@ -133,6 +235,9 @@ if __name__ == "__main__":
                             "states": np.array(args.inp)
                             }
     
+    if len(args.inp) != len(args.phases):
+        raise ValueError('Input and Phases must be the same length')
+    
     model = Model(parameters)
     results = []
     
@@ -146,6 +251,10 @@ if __name__ == "__main__":
         DMS_output = []
         BLA_IC_output = []
         NAc_output = []
+        W_BLA_IC_NAc = []
+        W_Mani_DLS = []
+        W_Mani_DMS = []
+        W_BLA_IC = []
         
         if trial <= parameters.scheduling["trials"] * parameters.scheduling["phases"][0]:
             phase = 1
@@ -183,17 +292,24 @@ if __name__ == "__main__":
             DMS_output.append(model.BG_dm.DMS.output.copy())
             BLA_IC_output.append(model.BLA_IC.output.copy())
             NAc_output.append(model.BG_v.NAc.output.copy())
+            W_BLA_IC.append(model.BLA_IC.W.copy())
+            W_BLA_IC_NAc.append(model.Ws['BLA_IC_NAc'])
+            W_Mani_DLS.append(model.Ws['Mani_DLS'])
+            W_Mani_DMS.append(model.Ws['Mani_DMS'])
             
             if np.any(action >= model.MC.threshold):
-                
                 winner = np.argmax(action)
 
-                state[2:4] = 0.0
-                state[2 + winner] = 1.0
+                if state[0] == 1.0 and winner == 0.0:
+                    state[2:4] = 0.0
+                    state[2 + winner] = 1.0
+                    
+                elif state[1] == 1.0 and winner == 1.0:
+                    state[2:4] = 0.0
+                    state[2 + winner] = 1.0
                 
-            else:
-                
-                state[2:4] = 0.0
+                else:
+                    state[2:4] = 0.0
             
         result = {
             "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
@@ -203,7 +319,11 @@ if __name__ == "__main__":
             'DMS_output': DMS_output.copy(),
             'BLA_IC_output': BLA_IC_output.copy(),
             'NAc_output': NAc_output.copy(),
-            "MC_Output": MC_output.copy()
+            "MC_output": MC_output.copy(),
+            'W_BLA_IC': W_BLA_IC,
+            'W_BLA_IC_NAc': W_BLA_IC_NAc,
+            'W_Mani_DLS': W_Mani_DLS,
+            'W_Mani_DMS': W_Mani_DMS
             }
         
         print(f'End trial {trial + 1}')
@@ -219,6 +339,14 @@ if __name__ == "__main__":
     elif args.mode == "plot_perphase":
         plotting_perphase(results)
         input("Press Enter to exit")
+        
+    elif args.mode == 'plot_layers_perphase':
+        plotting_layers_perphase(results)
+        input("Press Enter to exit")
+        
+    elif args.mode == 'plot_matrices_learn':
+        plotting_Wslearn(results)
+        input('Press Enter to exit')
         
     elif args.mode == 'stream':
         fin_state = state.copy()

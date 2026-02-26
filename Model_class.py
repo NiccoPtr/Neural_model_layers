@@ -427,8 +427,8 @@ class Model:
         self.VTA.step(np.dot(self.Ws["LH_VTA"], self.LH_output_pre))
         
         self.BG_v.step((parameters.DA_values["Y_NAc"] + (parameters.DA_values["delta_NAc"] * self.VTA_output_pre)) * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
-                       np.dot(self.Ws["PL_NAc"], self.MC_output_pre),
-                       np.dot(self.Ws["PL_STNv"], self.MC_output_pre)
+                       np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
+                       np.dot(self.Ws["PL_STNv"], self.PL_output_pre)
                        )
         
         self.SNpc.step(np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre),
