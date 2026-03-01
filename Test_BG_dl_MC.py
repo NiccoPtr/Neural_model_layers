@@ -8,86 +8,93 @@ Created on Mon Dec  8 10:59:11 2025
 import argparse
 
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 import numpy as np, pandas as pd, os
 
 from CT_BG_simulation import CT_BG
 from params import Parameters
-
 plt.ion()
 
 def plotting(res):
+    
+    plt.close('all')
+    
+    # Isolating single layers
+    BG_dl = np.array(res['BG_dl_output']) * -1
+    MGV = np.array(res['MGV_output'])
+    MC = np.array(res['MC_output'])
+    W = np.array(res['Weight_timeline'])
+    
+    # Plotting set up
+    plots = [
+        ('BG_dl', [(BG_dl[:, i], f'Unit_{i+1}') for i in range(2)], (0, 1)),
+        ('MGV', [(MGV[:, i], f'Unit_{i+1}') for i in range(2)], (0, 1)),
+        ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (0, 1))
+        ]
+    
+    n_rows = len(plots) + 1
+    fig = plt.figure(figsize=(14, 2.2 * n_rows))
+    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
-    plt.close("all")
-    fig, ax = plt.subplots(1, 1)
+    shared_ax = None
+    
+    for i, (title, lines, ylim) in enumerate(plots):
+        title_ax = fig.add_subplot(gs[i, 0])
+        ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
 
-    BG_dl = np.array(res["BG_dl_output"]) * -1
+        if shared_ax is None:
+            shared_ax = ax
 
-    ax.plot(BG_dl[:, 0], label="Unit_1")
-    ax.plot(BG_dl[:, 1], label="Unit_2")
+        # Left column: titles only
+        title_ax.text(0.5, 0.5, title, ha="center", va="center", fontsize=12)
+        title_ax.axis("off")
 
-    ax.set_title("BG simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
+        # Right column: actual plot
+        for y, label in lines:
+            ax.plot(y, label=label)
 
-    plt.tight_layout()
+        ax.set_ylim(*ylim)
+        ax.legend(loc="upper right", fontsize=5)
 
-    plt.show()
+        # Clean spines
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
 
-    fig, ax = plt.subplots(1, 1)
+        ax.tick_params(labelbottom=False)
+    
+    # Weight heatmap
+    title_ax = fig.add_subplot(gs[-1, 0])
+    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    MGV = np.array(res["MGV_output"])
-
-    ax.plot(MGV[:, 0], label="Unit_1")
-    ax.plot(MGV[:, 1], label="Unit_2")
-
-    ax.set_title("MGV simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
-    fig, ax = plt.subplots(1, 1)
-
-    MC = np.array(res["MC_output"])
-
-    ax.plot(MC[:, 0], label="Unit_1")
-    ax.plot(MC[:, 1], label="Unit_2")
-
-    ax.set_title("MC simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
-    fig, ax = plt.subplots(1, 1)
-
-    W = np.array(res["Weight_timeline"])
+    title_ax.text(0.5, 0.5, "Weights learning", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
 
     im = ax.imshow(
-        W.reshape(-1, 2 * 2).T, interpolation="none", aspect="auto", vmin=0, vmax=1
+        W.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
     )
-    
-    ax.set_title("Weights learning")
-    ax.legend()
-    ax.set_xlabel("Timestep")
+
     ax.set_ylabel("Connections")
     ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
-    plt.colorbar(im, ax=ax)
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    # Shared x-axis
+    ax.set_xlabel("Timestep")
 
     plt.tight_layout()
 
+    xmin, xmax = shared_ax.get_xlim()
+    pad = 0.1 * (xmax - xmin)
+    shared_ax.set_xlim(xmin, xmax + pad)
+    
     plt.show()
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")

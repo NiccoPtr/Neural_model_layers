@@ -8,6 +8,7 @@ Created on Thu Feb 26 10:50:55 2026
 import argparse
 
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 import numpy as np, pandas as pd, os
 
 from CT_BGv_BLA_IC_simulation import CT_BGv_BLA_IC
@@ -17,163 +18,101 @@ plt.ion()
 def plotting(res):
     
     plt.close("all")
-    fig, ax = plt.subplots(1, 1)
 
+    # Isolating single layers
     BLA_IC = np.array(res["BLA_IC"])
-
-    ax.plot(BLA_IC[:, 0], label="Unit_1")
-    ax.plot(BLA_IC[:, 1], label="Unit_2")
-    ax.plot(BLA_IC[:, 2], label="Unit_3")
-    ax.plot(BLA_IC[:, 3], label="Unit_4")
-
-    ax.set_title("BLA_IC simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
-    fig, ax = plt.subplots(1, 1)
-
-    LH = np.array(res["LH"])
-
-    ax.plot(LH[:], label="Unit_1")
-
-    ax.set_title("LH simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
-    fig, ax = plt.subplots(1, 1)
-
-    VTA = np.array(res["VTA"])
-
-    ax.plot(VTA[:], label="Unit_1")
-
-    ax.set_title("VTA simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
+    LH     = np.array(res["LH"])
+    VTA    = np.array(res["VTA"])
+    NAc    = -np.array(res["NAc"])
+    BGv    = -np.array(res["BGv"])
+    DM     = np.array(res["DM"])
+    PL     = np.array(res["PL"])
+    W      = np.array(res["W_timeline"])
+    inp    = np.array(res["Inp_timeline"])
     
-    fig, ax = plt.subplots(1, 1)
-
-    NAc = np.array(res["NAc"]) * -1
-
-    ax.plot(NAc[:, 0], label="Unit_1")
-    ax.plot(NAc[:, 1], label="Unit_2")
-
-    ax.set_title("NAc simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
+    # Plotting set up
+    plots = [
+        ("BLA_IC", [(BLA_IC[:, i], f"Unit_{i+1}") for i in range(4)], (-0.2, 1.2)),
+        ("LH",     [(LH[:], "Unit_1")],                           (-0.2, 1.2)),
+        ("VTA",    [(VTA[:], "Unit_1")],                          (-0.2, 1.2)),
+        ("NAc",    [(NAc[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("BGv",    [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("DM",     [(DM[:, i], f"Unit_{i+1}") for i in range(2)],  (-0.2, 1.2)),
+        ("PL",     [(PL[:, i], f"Unit_{i+1}") for i in range(2)],  (-0.2, 1.2)),
+        ("Input", [
+            (inp[:, 0], "Lever"),
+            (inp[:, 1], "Chain"),
+            (inp[:, 2], "Food_1"),
+            (inp[:, 3], "Food_2"),
+            (inp[:, 4], "Sat_1"),
+            (inp[:, 5], "Sat_2"),
+        ], (-0.2, 1.2)),
+    ]
     
-    fig, ax = plt.subplots(1, 1)
+    n_rows = len(plots) + 1
+    fig = plt.figure(figsize=(14, 2.2 * n_rows))
+    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
+
+    shared_ax = None
     
-    BGv = np.array(res["BGv"]) * -1
+    for i, (title, lines, ylim) in enumerate(plots):
+        title_ax = fig.add_subplot(gs[i, 0])
+        ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
 
-    ax.plot(BGv[:, 0], label="Unit_1")
-    ax.plot(BGv[:, 1], label="Unit_2")
+        if shared_ax is None:
+            shared_ax = ax
 
-    ax.set_title("BGv simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
+        # Left column: titles only
+        title_ax.text(0.5, 0.5, title, ha="center", va="center", fontsize=12)
+        title_ax.axis("off")
 
-    plt.tight_layout()
+        # Right column: actual plot
+        for y, label in lines:
+            ax.plot(y, label=label)
 
-    plt.show()
-    
-    fig, ax = plt.subplots(1, 1)
-    
-    DM = np.array(res["DM"])
+        ax.set_ylim(*ylim)
+        ax.legend(loc="upper right", fontsize=5)
 
-    ax.plot(DM[:, 0], label="Unit_1")
-    ax.plot(DM[:, 1], label="Unit_2")
+        # Clean spines
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
 
-    ax.set_title("DM simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
+        ax.tick_params(labelbottom=False)
 
-    plt.tight_layout()
+    # Weight heatmap
+    title_ax = fig.add_subplot(gs[-1, 0])
+    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    plt.show()
-    
-    fig, ax = plt.subplots(1, 1)
-    
-    PL = np.array(res["PL"])
-
-    ax.plot(PL[:, 0], label="Unit_1")
-    ax.plot(PL[:, 1], label="Unit_2")
-
-    ax.set_title("PL simulation")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
-    fig, ax = plt.subplots(1, 1)
-
-    W = np.array(res["W_timeline"])
+    title_ax.text(0.5, 0.5, "Weights learning", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
 
     im = ax.imshow(
-        W.reshape(-1, 4 * 2).T, interpolation="none", aspect="auto", vmin=0, vmax=1
+        W.reshape(-1, 4 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
     )
-    
-    ax.set_title("Weights learning")
-    ax.legend()
-    ax.set_xlabel("Timestep")
+
     ax.set_ylabel("Connections")
     ax.set_yticks(np.arange(8), [f"W_{j}_{i}" for j in range(2) for i in range(4)])
-    plt.colorbar(im, ax=ax)
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    # Shared x-axis
+    ax.set_xlabel("Timestep")
 
     plt.tight_layout()
 
+    xmin, xmax = shared_ax.get_xlim()
+    pad = 0.1 * (xmax - xmin)
+    shared_ax.set_xlim(xmin, xmax + pad)
+    
     plt.show()
     
-    inp = np.array(res["Inp_timeline"])
-
-    ax.plot(inp[:, 0], label="Lever")
-    ax.plot(inp[:, 1], label="Chain")
-    ax.plot(inp[:, 2], label="Food_1")
-    ax.plot(inp[:, 3], label="Food_2")
-    ax.plot(inp[:, 4], label="Sat_1")
-    ax.plot(inp[:, 5], label="Sat_2")
-
-    ax.set_title("Input timeeline")
-    ax.legend()
-    ax.set_xlabel("Timestep")
-    ax.set_ylabel("Activity level")
-    ax.set_ylim(0, 1)
-
-    plt.tight_layout()
-
-    plt.show()
-
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")
     parser.add_argument(
