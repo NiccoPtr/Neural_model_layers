@@ -7,177 +7,181 @@ Created on Fri Nov 14 17:46:01 2025
 
 from params import Parameters
 from Model_class import Model
+from matplotlib.gridspec import GridSpec
 import numpy as np, matplotlib.pyplot as plt, argparse, pandas as pd, os
 
-def plotting(results, save = False):
+def plotting(results, idx):
     
-    rows = 1 + len(results) // 2
-    cols = 2
-    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
-    axs = axs.flatten()
+    plt.close('all')
     
-    for i, res in enumerate(results):
-        
-        MC = np.array(results[0]["MC_output"])
-        
-        axs[i].plot(MC[:, 0], label = "MC Unit_1")
-        axs[i].plot(MC[:, 1], label = "MC Unit_2")
-        
-        axs[i].set_title(f'Phase: {res["Phase"][0]}, Input: {res["States_timeline"][-1]}')
-        axs[i].legend()
-        axs[i].set_xlabel('Timestep')
-        axs[i].set_ylabel('Activity level')
-        axs[i].set_ylim(0, 1)
-
-    for j in range(len(results), len(axs)):
-        fig.delaxes(axs[j])
-
-    plt.tight_layout()
+    res = results[idx]
     
-    # if save:
-    #     filename = "Simulation_plot.png"
-    #     plt.savefig(filename, dpi=300)
-        
-    plt.show()
+    #Isolating single layers
+    MC = np.array(res['MC_output'])
+    PFCd_PPC = np.array(res['PFCd_PPC_output'])
+    PL = np.array(res['PL_output'])
+    W_BLA_IC = np.array(res['W_BLA_IC'])
+    W_BLA_IC_NAc = np.array(res['W_BLA_IC_NAc'])
+    W_Mani_DLS = np.array(res['W_Mani_DLS'])
+    W_Mani_DMS = np.array(res['W_Mani_DMS'])
+    state = np.array(res['States_timeline'])
     
-def plotting_perphase(results, save = False):
+    rows, cols = np.ix_([0, 1], [2, 3])
+    W_BLA_IC_NAc = W_BLA_IC_NAc[:, rows, cols]
     
-    phases = sorted(set(res["Phase"][0] for res in results))
+    rows, cols = np.ix_([0, 1], [0, 1])
+    W_Mani_DLS = W_Mani_DLS[:, rows, cols]
+    W_Mani_DMS = W_Mani_DMS[:, rows, cols]
     
-    rows = 1 + len(phases) // 2
-    cols = 2
-    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
-    axs = axs.flatten()
-    
-    for i, phase in enumerate(phases):
-
-        phase_results = [r for r in results if r["Phase"][0] == phase]
-        phase_final_res = phase_results[-1]
-        
-        MC = np.array(phase_final_res["MC_output"]) 
-        
-        axs[i].plot(MC[:, 0], label = "MC Unit_1")
-        axs[i].plot(MC[:, 1], label = "MC Unit_2")
-        
-        axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
-        axs[i].legend()
-        axs[i].set_xlabel('Timestep')
-        axs[i].set_ylabel('Activity level')
-        axs[i].set_ylim(0, 1)
-        
-    for j in range(len(phases), len(axs)):
-        fig.delaxes(axs[j])
-
-    plt.tight_layout()
-    
-    # if save:
-    #     filename = "Simulation_plot.png"
-    #     plt.savefig(filename, dpi=300)
-        
-    plt.show()
-    
-def plotting_layers_perphase(results):
-    
-    layers = [
-            'MC_output',
-            'BLA_IC_output',
-            'NAc_output',
-            'DMS_output',
-            'DLS_output'
-              ]
-    phases = sorted(set(res["Phase"][0] for res in results))
-    
-    for l in layers:
-    
-        rows = 1 + len(phases) // 2
-        cols = 2
-        fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
-        axs = axs.flatten()
-        
-        for i, phase in enumerate(phases):
-    
-            phase_results = [r for r in results if r["Phase"][0] == phase]
-            phase_final_res = phase_results[-1]
-            
-            if l == 'NAc_output' or l == 'DMS_output' or l == 'DLS_output':
-                layer = np.array(phase_final_res[l]) *-1
-                
-            else:
-                layer = np.array(phase_final_res[l])
-                
-            axs[i].plot(layer[:, 0], label = f"{l}_1")
-            axs[i].plot(layer[:, 1], label = f"{l}_2")
-            
-            axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
-            axs[i].legend()
-            axs[i].set_xlabel('Timestep')
-            axs[i].set_ylabel('Activity level')
-            axs[i].set_ylim(0, 1)
-            
-        for j in range(len(phases), len(axs)):
-            fig.delaxes(axs[j])
-    
-        plt.tight_layout()
-        
-        # if save:
-        #     filename = "Simulation_plot.png"
-        #     plt.savefig(filename, dpi=300)
-            
-        plt.show()
-    
-def plotting_Wslearn(results):
-    
-    Ws = [
-        'W_Mani_DLS',
-        'W_Mani_DMS',
-        'W_BLA_IC_NAc'
+    #Plotting set up
+    plots = [
+        ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('State',[
+            (state[:, 0], "Lever"),
+            (state[:, 1], "Chain"),
+            (state[:, 2], "Food_1"),
+            (state[:, 3], "Food_2"),
+            (state[:, 4], "Sat_1"),
+            (state[:, 5], "Sat_2"),
+        ], (-0.1, 1.2))
         ]
     
-    phases = sorted(set(res["Phase"][0] for res in results))
+    n_rows = 6 + 1
+    fig = plt.figure(figsize=(14, 2.2 * n_rows))
+    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
+
+    shared_ax = None
     
-    for W in Ws:
-        
-        rows = 1 + len(phases) // 2
-        cols = 2
-        fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
-        axs = axs.flatten()
-        
-        for i, phase in enumerate(phases):
+    for i, (title, lines, ylim) in enumerate(plots):
+        title_ax = fig.add_subplot(gs[i, 0])
+        ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
+
+        if shared_ax is None:
+            shared_ax = ax
+
+        # Left column: titles only
+        title_ax.text(0.5, 0.5, title, ha="center", va="center", fontsize=12)
+        title_ax.axis("off")
+
+        # Right column: actual plot
+        for y, label in lines:
+            ax.plot(y, label=label)
+
+        ax.set_ylim(*ylim)
+        ax.legend(loc="upper right", fontsize=5)
+
+        # Clean spines
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        ax.tick_params(labelbottom=False)
     
-            phase_results = [r for r in results if r["Phase"][0] == phase]
-            phase_final_res = phase_results[-1]
-            
-            if W == 'W_Mani_DLS' or W == 'W_Mani_DMS':
-                W_learn = np.array(phase_final_res[W])
-                axs[i].plot(W_learn[:, 0, 0], label = f"{W}_0_0")
-                axs[i].plot(W_learn[:, 0, 1], label = f"{W}_0_1")
-                axs[i].plot(W_learn[:, 1, 0], label = f"{W}_1_0")
-                axs[i].plot(W_learn[:, 1, 1], label = f"{W}_1_1")
-                
-            else:
-                W_learn = np.array(phase_final_res[W])
-                axs[i].plot(W_learn[:, 0, 2], label = f"{W}_0_0")
-                axs[i].plot(W_learn[:, 0, 3], label = f"{W}_0_1")
-                axs[i].plot(W_learn[:, 1, 2], label = f"{W}_1_0")
-                axs[i].plot(W_learn[:, 1, 3], label = f"{W}_1_1")
-            
-            axs[i].set_title(f'Phase: {phase_final_res["Phase"][0]}, Input: {phase_final_res["States_timeline"][0]}')
-            axs[i].legend()
-            axs[i].set_xlabel('Timestep')
-            axs[i].set_ylabel('Activity level')
-            axs[i].set_ylim(0, 1)
-            
-        for j in range(len(phases), len(axs)):
-            fig.delaxes(axs[j])
+    #Weights plotting -----------------------------
+    title_ax = fig.add_subplot(gs[-4, 0])
+    ax = fig.add_subplot(gs[-4, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "Weights BLA_IC", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_BLA_IC.reshape(-1, 4 * 4).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+    )
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(16), [f"W_{j}_{i}" for j in range(4) for i in range(4)])
     
-        plt.tight_layout()
-        
-        # if save:
-        #     filename = "Simulation_plot.png"
-        #     plt.savefig(filename, dpi=300)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[-3, 0])
+    ax = fig.add_subplot(gs[-3, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "Weights BLA_IC_NAc", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_BLA_IC_NAc.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+    )
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i+2}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[-2, 0])
+    ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "Weights Mani_DLS", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_Mani_DLS.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
+    )
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[-1, 0])
+    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "Weights Mani_DMS", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_Mani_DMS.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
+    )
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    # Shared x-axis
+    ax.set_xlabel("Timestep")
+    
+    xmin, xmax = shared_ax.get_xlim()
+    pad = 0.1 * (xmax - xmin)
+    shared_ax.set_xlim(xmin, xmax + pad)
+    
+    plt.show()
             
-        plt.show()
-        
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
     parser.add_argument(
@@ -188,7 +192,8 @@ def parse_args():
         default=[[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
                 [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
-                [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+                [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
                 ],
         help="Input values (six*phases floats), inp.shape[1] == len(phases)",
     )
@@ -196,7 +201,7 @@ def parse_args():
         "-tr",
         "--trials",
         type=int,
-        default=20,
+        default=50,
         help="Input amount of trials (int)",
     )
     parser.add_argument(
@@ -210,15 +215,22 @@ def parse_args():
         "-ph",
         "--phases",
         type=float,
-        default=[0.25, 0.5, 0.75, 1.0],
+        default=[0.25, 0.5, 0.75, 0.95, 1.0],
         help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.75, 1.0], max of 8 phases",
     )
     parser.add_argument(
         "-m",
         "--mode",
         type=str,
-        default='stream',
-        help="Output mode ('plot', 'plot_perphase', 'plot_layers_perphase', 'plot_matrices_learn','save','short_save', 'stream')",
+        default='plot',
+        help="Output mode ('plot','save','short_save', 'stream')",
+    )
+    parser.add_argument(
+        "-i",
+        "--index",
+        type=int,
+        default=-1,
+        help="Set trial details you want to plot with the plotting function",
     )
     
     return parser.parse_args() 
@@ -234,10 +246,31 @@ if __name__ == "__main__":
                             "timesteps": args.timesteps,
                             "states": np.array(args.inp)
                             }
+    #-----MC parameters
+    parameters.noise['MC']  = 0.4
+    parameters.baseline['GPi'] = 0.2
+    parameters.Matrices_scalars['MC_MGV'] = 2.0
+    parameters.Matrices_scalars['MGV_MC'] = 1.8
+    parameters.Str_Learn['eta_DLS'] = 0.001
+    
+    #-----PFCd/PPC parameters
+    parameters.noise['PFCd_PPC']  = 0.4
+    parameters.baseline['GPi_SNpr'] = 0.2
+    parameters.Matrices_scalars['PFCd_PPC_P'] = 2.0
+    parameters.Matrices_scalars['P_PFCd_PPC'] = 1.8
+    parameters.Str_Learn['eta_DMS'] = 0.001
+    
+    #-----BLA_IC_NAc_PL parameters
+    parameters.BLA_Learn['eta_b'] = 0.1
+    parameters.BLA_Learn['theta_DA'] = 0.5
+    parameters.Str_Learn['theta_inp_NAc'] = 0.8
+    parameters.Str_Learn['theta_NAc'] = 0.4
+    parameters.baseline['SNpr'] = 0.2
     
     if len(args.inp) != len(args.phases):
         raise ValueError('Input and Phases must be the same length')
     
+    idx = args.index
     model = Model(parameters)
     results = []
     
@@ -245,7 +278,10 @@ if __name__ == "__main__":
         
         print(f'Running trial {trial + 1}')
         model.reset_activity()   
+        model.update_output_pre()
         MC_output = []
+        PFCd_PPC_output = []
+        PL_output = []
         state_t = []
         DLS_output = []
         DMS_output = []
@@ -287,15 +323,17 @@ if __name__ == "__main__":
             action = model.MC.output.copy()
             
             MC_output.append(action.copy())
+            PFCd_PPC_output.append(model.PFCd_PPC.output.copy())
+            PL_output.append(model.PL.output.copy())
             state_t.append(state.copy())
             DLS_output.append(model.BG_dl.DLS.output.copy())
             DMS_output.append(model.BG_dm.DMS.output.copy())
             BLA_IC_output.append(model.BLA_IC.output.copy())
             NAc_output.append(model.BG_v.NAc.output.copy())
             W_BLA_IC.append(model.BLA_IC.W.copy())
-            W_BLA_IC_NAc.append(model.Ws['BLA_IC_NAc'])
-            W_Mani_DLS.append(model.Ws['Mani_DLS'])
-            W_Mani_DMS.append(model.Ws['Mani_DMS'])
+            W_BLA_IC_NAc.append(model.Ws['BLA_IC_NAc'].copy())
+            W_Mani_DLS.append(model.Ws['Mani_DLS'].copy())
+            W_Mani_DMS.append(model.Ws['Mani_DMS'].copy())
             
             if np.any(action >= model.MC.threshold):
                 winner = np.argmax(action)
@@ -319,6 +357,8 @@ if __name__ == "__main__":
             'DMS_output': DMS_output.copy(),
             'BLA_IC_output': BLA_IC_output.copy(),
             'NAc_output': NAc_output.copy(),
+            'PL_output': PL_output.copy(),
+            'PFCd_PPC_output' : PFCd_PPC_output.copy(),
             "MC_output": MC_output.copy(),
             'W_BLA_IC': W_BLA_IC,
             'W_BLA_IC_NAc': W_BLA_IC_NAc,
@@ -333,20 +373,8 @@ if __name__ == "__main__":
     print(f'Simulation termined: Trials({parameters.scheduling["trials"]}), Timesteps({parameters.scheduling["timesteps"]})')
         
     if args.mode == "plot":
-        plotting(results)
+        plotting(results, idx)
         input("Press Enter to exit")
-        
-    elif args.mode == "plot_perphase":
-        plotting_perphase(results)
-        input("Press Enter to exit")
-        
-    elif args.mode == 'plot_layers_perphase':
-        plotting_layers_perphase(results)
-        input("Press Enter to exit")
-        
-    elif args.mode == 'plot_matrices_learn':
-        plotting_Wslearn(results)
-        input('Press Enter to exit')
         
     elif args.mode == 'stream':
         fin_state = state.copy()

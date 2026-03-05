@@ -139,7 +139,8 @@ class CT_BGv_BLA_IC():
         self.BLA_IC.step(np.dot(self.Ws["inp_BLA_IC"], inp))
         self.LH.step(np.dot(self.Ws["Food_LH"], inp) + np.dot(self.Ws["BLA_IC_LH"], self.BLA_IC_output_pre))
         self.VTA.step(np.dot(self.Ws["LH_VTA"], self.LH_output_pre))
-        self.BG_v.step((parameters.DA_values["Y_NAc"] + (parameters.DA_values["delta_NAc"] * self.VTA_output_pre)) * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
+        self.BG_v.step((parameters.DA_values["Y_NAc"] + (parameters.DA_values["delta_NAc"] * self.VTA_output_pre))
+                       * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
                        np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
                        np.dot(self.Ws["PL_STNv"], self.PL_output_pre)
                        )

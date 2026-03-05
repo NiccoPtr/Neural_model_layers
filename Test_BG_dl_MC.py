@@ -20,7 +20,7 @@ def plotting(res):
     plt.close('all')
     
     # Isolating single layers
-    BG_dl = np.array(res['BG_dl_output']) * -1
+    BG_dl = -np.array(res['BG_dl_output'])
     MGV = np.array(res['MGV_output'])
     MC = np.array(res['MC_output'])
     W = np.array(res['Weight_timeline'])
@@ -102,7 +102,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=0,
+        default=2,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -132,7 +132,7 @@ def parse_args():
         "--dopamine",
         type=float,
         nargs=2,
-        default=[0.8, 0.8],
+        default=[0.7, 0.7],
         help="Insert dopamine for learnig: float type",
     )
     parser.add_argument(
@@ -153,13 +153,13 @@ def parse_args():
         "-nMC",
         "--noise_MC",
         type=float,
-        default=0.24,
+        default=0.28,
         help="Insert MC noise in simulation",
     )
     parser.add_argument(
         "--MC_MGV_W",
         type=float,
-        default=3.0,
+        default=2.0,
         help="Insert MC_MGV matrix strenght"
     )
     parser.add_argument(
@@ -171,7 +171,7 @@ def parse_args():
     parser.add_argument(
         "--MGV_MC_W",
         type=float,
-        default=1.0,
+        default=1.5,
         help="Insert MGV_MC matrix strenght"
     )
     return parser.parse_args()
@@ -192,8 +192,8 @@ if __name__ == "__main__":
     parameters.Matrices_scalars["MC_MGV"] = args.MC_MGV_W
     parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
     parameters.baseline["GPi"] = args.GPi_baseline
-    parameters.Str_Learn["eta_DLS"] = 0.2
-
+    parameters.Str_Learn['eta_DLS'] = 0.005
+    
     rng = np.random.RandomState(seed)
     CT_BG_model = CT_BG(parameters, rng)
 

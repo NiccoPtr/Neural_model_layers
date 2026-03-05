@@ -101,7 +101,7 @@ def parse_args():
         "-m",
         "--mode",
         type=str,
-        default="stream",
+        default="plot",
         help="Output mode ('plot', 'save','short_save', 'stream')",
     )
     parser.add_argument(

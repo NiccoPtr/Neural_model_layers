@@ -72,11 +72,11 @@ parameters = Parameters(
                                     "PL": 0.0
                                     },
                         
-                        BG_dl_W = {"DLS_GPi_W": 3, "STNdl_GPi_W": 2},
+                        BG_dl_W = {"DLS_GPi_W": 1.8, "STNdl_GPi_W": 1.4},
                         
-                        BG_dm_W = {"DMS_GPiSNpr_W": 3, "STNdm_GPiSNpr_W": 2},
+                        BG_dm_W = {"DMS_GPiSNpr_W": 1.8, "STNdm_GPiSNpr_W": 1.4},
                         
-                        BG_v_W = {"NAc_SNpr_W": 3, "STNv_SNpr_W": 2},
+                        BG_v_W = {"NAc_SNpr_W": 1.8, "STNv_SNpr_W": 1.4},
                         
                         SNpc_W = {"SNpci_1_SNpco_1_W": 1.0, "SNpci_2_SNpco_2_W": 1.0},
                         
@@ -100,11 +100,11 @@ parameters = Parameters(
                         
                         DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
                         
-                        BLA_Learn = {"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 500, "theta_DA": 0.7, "max_W": 2},
+                        BLA_Learn = {"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 200, "theta_DA": 0.7, "max_W": 2},
                         
                         Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
                                      "theta_DA_DLS": 0.3, "theta_DA_DMS": 0.3, "theta_DA_NAc": 0.5,
-                                     "theta_DLS": 0.2, "theta_DMS": 0.2, "theta_NAc": 0.5,
+                                     "theta_DLS": 0.5, "theta_DMS": 0.5, "theta_NAc": 0.5,
                                      "theta_inp_DLS": 0.5, "theta_inp_DMS": 0.5, "theta_inp_NAc": 0.9,
                                      "max_W_DLS": 1, "max_W_DMS": 1, "max_W_NAc": 2}
                         )
