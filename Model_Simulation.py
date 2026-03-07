@@ -48,7 +48,7 @@ def plotting(results, idx):
         ], (-0.1, 1.2))
         ]
     
-    n_rows = 6 + 1
+    n_rows = len(plots) + 4
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -118,7 +118,7 @@ def plotting(results, idx):
     )
 
     ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(4), [f"W_{j}_{i+2}" for j in range(2) for i in range(2)])
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
     
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -189,11 +189,15 @@ def parse_args():
         "--inp",
         type=float,
         nargs=6,
-        default=[[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-                [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
-                [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-                [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        default=[
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
                 ],
         help="Input values (six*phases floats), inp.shape[1] == len(phases)",
     )
@@ -201,21 +205,21 @@ def parse_args():
         "-tr",
         "--trials",
         type=int,
-        default=50,
+        default=500,
         help="Input amount of trials (int)",
     )
     parser.add_argument(
         "-t",
         "--timesteps",
         type=int,
-        default=2000,
+        default=1000,
         help="Input amount of timesteps per trial (int)",
     )
     parser.add_argument(
         "-ph",
         "--phases",
         type=float,
-        default=[0.25, 0.5, 0.75, 0.95, 1.0],
+        default=[0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0],
         help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.75, 1.0], max of 8 phases",
     )
     parser.add_argument(
@@ -252,6 +256,7 @@ if __name__ == "__main__":
     parameters.Matrices_scalars['MC_MGV'] = 2.0
     parameters.Matrices_scalars['MGV_MC'] = 1.8
     parameters.Str_Learn['eta_DLS'] = 0.001
+    parameters.BG_dl_W['STNdl_GPi_W'] = 1.6
     
     #-----PFCd/PPC parameters
     parameters.noise['PFCd_PPC']  = 0.4
@@ -259,13 +264,18 @@ if __name__ == "__main__":
     parameters.Matrices_scalars['PFCd_PPC_P'] = 2.0
     parameters.Matrices_scalars['P_PFCd_PPC'] = 1.8
     parameters.Str_Learn['eta_DMS'] = 0.001
+    parameters.BG_dm_W['STNdm_GPiSNpr_W'] = 1.6
     
-    #-----BLA_IC_NAc_PL parameters
+    #-----PL parameters
+    parameters.baseline['SNpr'] = 0.2
+    parameters.BG_v_W['STNv_SNpr_W'] = 1.6
+    
+    #-----BLA_IC_NAc parameters
     parameters.BLA_Learn['eta_b'] = 0.1
     parameters.BLA_Learn['theta_DA'] = 0.5
     parameters.Str_Learn['theta_inp_NAc'] = 0.8
     parameters.Str_Learn['theta_NAc'] = 0.4
-    parameters.baseline['SNpr'] = 0.2
+    parameters.Str_Learn['eta_NAc'] = 0.1
     
     if len(args.inp) != len(args.phases):
         raise ValueError('Input and Phases must be the same length')
@@ -338,11 +348,11 @@ if __name__ == "__main__":
             if np.any(action >= model.MC.threshold):
                 winner = np.argmax(action)
 
-                if state[0] == 1.0 and winner == 0.0:
+                if state[0] == 1.0 and winner == 0:
                     state[2:4] = 0.0
                     state[2 + winner] = 1.0
                     
-                elif state[1] == 1.0 and winner == 1.0:
+                elif state[1] == 1.0 and winner == 1:
                     state[2:4] = 0.0
                     state[2 + winner] = 1.0
                 
@@ -370,7 +380,7 @@ if __name__ == "__main__":
         
         results.append(result)
         
-    print(f'Simulation termined: Trials({parameters.scheduling["trials"]}), Timesteps({parameters.scheduling["timesteps"]})')
+    print(f'Simulation termined: Trials({parameters.scheduling["trials"]}), Timesteps per-trial({parameters.scheduling["timesteps"]})')
         
     if args.mode == "plot":
         plotting(results, idx)

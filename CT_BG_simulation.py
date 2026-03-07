@@ -58,6 +58,12 @@ class CT_BG():
         self.MGV.reset_activity()
         self.MC.reset_activity()
         
+    def update_output_pre(self):
+        
+        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        self.MGV_output_pre = self.MGV.output.copy()
+        self.MC_output_pre = self.MC.output.copy()
+        
     def delta_Str_learn_USV(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
         
         DA_term = np.maximum(0, DA - theta_DA_str)[:, None]
@@ -104,8 +110,5 @@ class CT_BG():
         
         if learning:
             self.learning(parameters, da, inp)
-        
-        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
-        self.MGV_output_pre = self.MGV.output.copy()
-        self.MC_output_pre = self.MC.output.copy()
-   
+            
+        self.update_output_pre()

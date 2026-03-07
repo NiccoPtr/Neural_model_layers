@@ -102,7 +102,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=2,
+        default=8,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -117,7 +117,7 @@ def parse_args():
         "-t",
         "--timesteps",
         type=int,
-        default=1000,
+        default=5000,
         help="Number of timesteps",
     )
     parser.add_argument(
@@ -192,11 +192,12 @@ if __name__ == "__main__":
     parameters.Matrices_scalars["MC_MGV"] = args.MC_MGV_W
     parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
     parameters.baseline["GPi"] = args.GPi_baseline
-    parameters.Str_Learn['eta_DLS'] = 0.005
+    parameters.Str_Learn['eta_DLS'] = 0.001
+    parameters.BG_dl_W['STNdl_GPi_W'] = 1.6
     
     rng = np.random.RandomState(seed)
     CT_BG_model = CT_BG(parameters, rng)
-
+    CT_BG_model.Ws["inp_DLS"] = np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]])
     
     BG_dl_output = []
     MGV_output = []
@@ -206,8 +207,11 @@ if __name__ == "__main__":
 
     CT_BG_model.reset_activity()
 
-    for _ in range(timesteps):
-
+    for t in range(timesteps):
+        if t == timesteps//2:
+            CT_BG_model.reset_activity()
+            CT_BG_model.update_output_pre()
+            
         CT_BG_model.step(parameters, inp, da)
     
         BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
