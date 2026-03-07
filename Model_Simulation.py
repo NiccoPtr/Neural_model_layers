@@ -185,6 +185,13 @@ def plotting(results, idx):
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
     parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=0,
+        help="Input simulation seed for noise",
+    )
+    parser.add_argument(
         "-p",
         "--inp",
         type=float,
@@ -205,7 +212,7 @@ def parse_args():
         "-tr",
         "--trials",
         type=int,
-        default=500,
+        default=100,
         help="Input amount of trials (int)",
     )
     parser.add_argument(
@@ -250,6 +257,8 @@ if __name__ == "__main__":
                             "timesteps": args.timesteps,
                             "states": np.array(args.inp)
                             }
+    parameters.seed = args.seed
+    
     #-----MC parameters
     parameters.noise['MC']  = 0.4
     parameters.baseline['GPi'] = 0.2
@@ -360,13 +369,10 @@ if __name__ == "__main__":
                     state[2:4] = 0.0
             
         result = {
+            'Seed': np.ones(parameters.scheduling['timesteps']) * parameters.seed,
             "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
             "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,        
             "States_timeline": state_t.copy(),
-            'DLS_output': DLS_output.copy(),
-            'DMS_output': DMS_output.copy(),
-            'BLA_IC_output': BLA_IC_output.copy(),
-            'NAc_output': NAc_output.copy(),
             'PL_output': PL_output.copy(),
             'PFCd_PPC_output' : PFCd_PPC_output.copy(),
             "MC_output": MC_output.copy(),
@@ -393,13 +399,31 @@ if __name__ == "__main__":
         print(("{:10.5f} " * len(mresults)).format(*mresults))
         
     elif args.mode == 'save':
+        seed_col = ['Seed']
         trial_col = ['Trial']
         phase_col = ['Phase']
         state_cols = [f"Input_{i}" 
                     for i in range(len(state.copy()))]
         MC_out_cols = [f'MC_Unit_{i}'
                        for i in range(model.MC.N)]
-        cols = trial_col + phase_col + state_cols + MC_out_cols
+        PFCd_PPC_out_cols = [f'PFCd_PPC_Unit_{i}'
+                       for i in range(model.PFCd_PPC.N)]
+        PL_out_cols = [f'PL_Unit_{i}'
+                       for i in range(model.PL.N)]
+        W_cols_1 = [f'BLA_IC_W{x}_{y}'
+                  for x in range(model.BLA_IC.W.shape[0])
+                  for y in range(model.BLA_IC.W.shape[1])]
+        W_cols_2 = [f'BLA_IC_NAc_W{x}_{y}'
+                  for x in range(model.Ws['BLA_IC_NAc'].shape[0])
+                  for y in range(model.Ws['BLA_IC_NAc'].shape[1])]
+        W_cols_3 = [f'Mani_DLS_W{x}_{y}'
+                  for x in range(model.Ws['Mani_DLS'].shape[0])
+                  for y in range(model.Ws['Mani_DLS'].shape[1])]
+        W_cols_4 = [f'Mani_DMS_W{x}_{y}'
+                  for x in range(model.Ws['Mani_DMS'].shape[0])
+                  for y in range(model.Ws['Mani_DMS'].shape[1])]
+        
+        cols = seed_col + trial_col + phase_col + state_cols + MC_out_cols + PFCd_PPC_out_cols + PL_out_cols + W_cols_1 + W_cols_2 + W_cols_3 + W_cols_4
         df = pd.DataFrame(columns=cols)
         
         for res in results:
@@ -411,7 +435,7 @@ if __name__ == "__main__":
                 [df, df_new], 
                 ignore_index=True
                 )
-            
+        
         csv_path = "Model_Simulation.csv"
         
         if os.path.exists(csv_path):
