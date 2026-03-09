@@ -370,8 +370,9 @@ if __name__ == "__main__":
             
         result = {
             'Seed': np.ones(parameters.scheduling['timesteps']) * parameters.seed,
-            "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
             "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,        
+            "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
+            'Timesteps': np.arange(0, parameters.scheduling['timesteps']),
             "States_timeline": state_t.copy(),
             'PL_output': PL_output.copy(),
             'PFCd_PPC_output' : PFCd_PPC_output.copy(),
@@ -401,6 +402,7 @@ if __name__ == "__main__":
     elif args.mode == 'save':
         seed_col = ['Seed']
         trial_col = ['Trial']
+        timestep_col = ['Timestep']
         phase_col = ['Phase']
         state_cols = [f"Input_{i}" 
                     for i in range(len(state.copy()))]
@@ -423,7 +425,7 @@ if __name__ == "__main__":
                   for x in range(model.Ws['Mani_DMS'].shape[0])
                   for y in range(model.Ws['Mani_DMS'].shape[1])]
         
-        cols = seed_col + trial_col + phase_col + state_cols + MC_out_cols + PFCd_PPC_out_cols + PL_out_cols + W_cols_1 + W_cols_2 + W_cols_3 + W_cols_4
+        cols = seed_col + phase_col + trial_col + timestep_col + state_cols + MC_out_cols + PFCd_PPC_out_cols + PL_out_cols + W_cols_1 + W_cols_2 + W_cols_3 + W_cols_4
         df = pd.DataFrame(columns=cols)
         
         for res in results:
