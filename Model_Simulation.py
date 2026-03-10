@@ -200,10 +200,6 @@ def parse_args():
             [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
             [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
-            [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-            [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
             [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
                 ],
         help="Input values (six*phases floats), inp.shape[1] == len(phases)",
@@ -212,7 +208,7 @@ def parse_args():
         "-tr",
         "--trials",
         type=int,
-        default=100,
+        default=10,
         help="Input amount of trials (int)",
     )
     parser.add_argument(
@@ -226,7 +222,7 @@ def parse_args():
         "-ph",
         "--phases",
         type=float,
-        default=[0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0],
+        default=[0.25, 0.5, 0.75, 1.0],
         help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.75, 1.0], max of 8 phases",
     )
     parser.add_argument(
@@ -426,18 +422,16 @@ if __name__ == "__main__":
                   for y in range(model.Ws['Mani_DMS'].shape[1])]
         
         cols = seed_col + phase_col + trial_col + timestep_col + state_cols + MC_out_cols + PFCd_PPC_out_cols + PL_out_cols + W_cols_1 + W_cols_2 + W_cols_3 + W_cols_4
-        df = pd.DataFrame(columns=cols)
+        dfs = []
         
         for res in results:
             values = [np.asanyarray(res[k]).reshape(parameters.scheduling["timesteps"], -1)
                      for k in res.keys()]
             values_conc = np.concatenate(values, axis=1)
-            df_new = pd.DataFrame(values_conc, columns=df.columns)
-            df = pd.concat(
-                [df, df_new], 
-                ignore_index=True
-                )
+            df_new = pd.DataFrame(values_conc, columns=cols)
+            dfs.append(df_new)
         
+        df = pd.concat(dfs, ignore_index=True)
         csv_path = "Model_Simulation.csv"
         
         if os.path.exists(csv_path):
