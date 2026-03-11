@@ -41,10 +41,10 @@ if __name__ == "__main__":
 
     df = pd.read_csv(args.csv)
 
-    if args.seed not in df['Seed']:
+    if args.seed not in df['Seed'].values:
         raise ValueError(f"Seed {args.seed} not present in Simulation DataFrame")
 
-    if args.trial not in df['Trial']:
+    if args.trial not in df['Trial'].values:
         raise ValueError(f"Trial {args.trial} is not present in Simulation DataFrame")
         
     #Create a 'df_new' that isolates those rows of interest for every column
@@ -53,6 +53,11 @@ if __name__ == "__main__":
         (df["Seed"] == args.seed) &
         (df["Trial"] == args.trial)
         ].sort_values("Timestep").copy()
+    
+    if df_new.empty:
+        raise ValueError(
+            f"No data found for Seed={args.seed}, Trial={args.trial}"
+        )
     
     timesteps = len(df_new)
     
