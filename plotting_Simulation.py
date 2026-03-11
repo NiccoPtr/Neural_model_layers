@@ -24,14 +24,14 @@ def parse_args():
         '-s',
         "--seed",
         type=int,
-        required=True,
+        default=0,
         help="Simulation seed to refer, must match used seeds"
     )
     parser.add_argument(
         '-t',
         "--trial",
         type=int,
-        required=True,
+        default=199,
         help="Define trial to refer for plotting"
     )
     return parser.parse_args()
@@ -55,8 +55,14 @@ if __name__ == "__main__":
         ].sort_values("Timestep").copy()
     
     if df_new.empty:
+        
+        df_check = df[
+            (df["Seed"] == args.seed)
+            ].copy()
+        
+        trials = int(df_check['Trial'].values[-1])
         raise ValueError(
-            f"No data found for Seed={args.seed}, Trial={args.trial}"
+            f'Simulation with Seed {args.seed} has {trials} Trials: Trial {args.trial} exceeds excepted values'
         )
     
     timesteps = len(df_new)
