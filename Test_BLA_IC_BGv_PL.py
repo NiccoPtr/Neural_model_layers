@@ -6,57 +6,65 @@ Created on Thu Feb 26 10:50:55 2026
 """
 
 import argparse
+import os
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from matplotlib.gridspec import GridSpec
-import numpy as np, pandas as pd, os
 
 from CT_BGv_BLA_IC_simulation import CT_BGv_BLA_IC
 from params import Parameters
+
 plt.ion()
 
+
 def plotting(res):
-    
+
     plt.close("all")
 
     # Isolating single layers
     BLA_IC = np.array(res["BLA_IC"])
-    LH     = np.array(res["LH"])
-    VTA    = np.array(res["VTA"])
-    NAc    = -np.array(res["NAc"])
-    BGv    = -np.array(res["BGv"])
-    DM     = np.array(res["DM"])
-    PL     = np.array(res["PL"])
-    W      = np.array(res["W_timeline"])
-    inp    = np.array(res["Inp_timeline"])
-    
-    rows,cols = np.ix_([0, 1], [2, 3])
+    LH = np.array(res["LH"])
+    VTA = np.array(res["VTA"])
+    NAc = -np.array(res["NAc"])
+    BGv = -np.array(res["BGv"])
+    DM = np.array(res["DM"])
+    PL = np.array(res["PL"])
+    W = np.array(res["W_timeline"])
+    inp = np.array(res["Inp_timeline"])
+
+    rows, cols = np.ix_([0, 1], [2, 3])
     W = W[:, rows, cols]
-    
+
     # Plotting set up
     plots = [
-        ("LH",     [(LH[:], "Unit_1")],                           (-0.2, 1.2)),
-        ("VTA",    [(VTA[:], "Unit_1")],                          (-0.2, 1.2)),
-        ("NAc",    [(NAc[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
-        ("BGv",    [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
-        ("DM",     [(DM[:, i], f"Unit_{i+1}") for i in range(2)],  (-0.2, 1.2)),
-        ("PL",     [(PL[:, i], f"Unit_{i+1}") for i in range(2)],  (-0.2, 1.2)),
-        ("Input", [
-            (inp[:, 0], "Lever"),
-            (inp[:, 1], "Chain"),
-            (inp[:, 2], "Food_1"),
-            (inp[:, 3], "Food_2"),
-            (inp[:, 4], "Sat_1"),
-            (inp[:, 5], "Sat_2"),
-        ], (-0.2, 1.2)),
+        ("LH", [(LH[:], "Unit_1")], (-0.2, 1.2)),
+        ("VTA", [(VTA[:], "Unit_1")], (-0.2, 1.2)),
+        ("NAc", [(NAc[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("BGv", [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        (
+            "Input",
+            [
+                (inp[:, 0], "Lever"),
+                (inp[:, 1], "Chain"),
+                (inp[:, 2], "Food_1"),
+                (inp[:, 3], "Food_2"),
+                (inp[:, 4], "Sat_1"),
+                (inp[:, 5], "Sat_2"),
+            ],
+            (-0.2, 1.2),
+        ),
     ]
-    
+
     n_rows = len(plots) + 2
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
     shared_ax = None
-    
+
     for i, (title, lines, ylim) in enumerate(plots):
         title_ax = fig.add_subplot(gs[i, 0])
         ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
@@ -80,7 +88,7 @@ def plotting(res):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
-    
+
     # BLA_IC plotting
     title_ax = fig.add_subplot(gs[-2, 0])
     ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
@@ -97,13 +105,13 @@ def plotting(res):
     )
 
     ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(4), ['L', 'C', 'F_1', 'F_2'])
-    
+    ax.set_yticks(np.arange(4), ["L", "C", "F_1", "F_2"])
+
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
-    
+
     # Weight heatmap
     title_ax = fig.add_subplot(gs[-1, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
@@ -121,7 +129,7 @@ def plotting(res):
 
     ax.set_ylabel("Connections")
     ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
-    
+
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -135,9 +143,10 @@ def plotting(res):
     xmin, xmax = shared_ax.get_xlim()
     pad = 0.1 * (xmax - xmin)
     shared_ax.set_xlim(xmin, xmax + pad)
-    
+
     plt.show()
-    
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")
     parser.add_argument(
@@ -183,25 +192,17 @@ def parse_args():
         help="Insert PL noise in simulation",
     )
     parser.add_argument(
-        "--PL_DM_W",
-        type=float,
-        default=2.0,
-        help="Insert PL_DM matrix strenght"
+        "--PL_DM_W", type=float, default=2.0, help="Insert PL_DM matrix strenght"
     )
     parser.add_argument(
-        "--DM_PL_W",
-        type=float,
-        default=1.8,
-        help="Insert DM_PL matrix strenght"
+        "--DM_PL_W", type=float, default=1.8, help="Insert DM_PL matrix strenght"
     )
     parser.add_argument(
-        "--SNpr_baseline",
-        type=float,
-        default=0.2,
-        help="Insert SNpr baseline value"
+        "--SNpr_baseline", type=float, default=0.2, help="Insert SNpr baseline value"
     )
-    
+
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -211,12 +212,11 @@ if __name__ == "__main__":
     seed = args.seed
 
     parameters = Parameters()
-    parameters.load("prm_file.json", mode="json")
-    parameters.BLA_Learn['eta_b'] = 0.1
-    parameters.BLA_Learn['theta_DA'] = 0.5
-    parameters.Str_Learn['theta_inp_NAc'] = 0.8
-    parameters.Str_Learn['theta_NAc'] = 0.4
-    
+    parameters.BLA_Learn["eta_b"] = 0.1
+    parameters.BLA_Learn["theta_DA"] = 0.5
+    parameters.Str_Learn["theta_inp_NAc"] = 0.8
+    parameters.Str_Learn["theta_NAc"] = 0.4
+
     if args.noise_PL:
         parameters.noise["PL"] = args.noise_PL
     if args.PL_DM_W:
@@ -228,7 +228,7 @@ if __name__ == "__main__":
 
     rng = np.random.RandomState(seed)
     CT_BGv_BLA_IC_model = CT_BGv_BLA_IC(parameters, rng)
-    
+
     BLA_IC_output = []
     LH_output = []
     VTA_output = []
@@ -238,34 +238,34 @@ if __name__ == "__main__":
     PL_output = []
     W_timeline = []
     inp_timeline = []
-    
+
     for _ in range(trials):
         CT_BGv_BLA_IC_model.reset_activity()
-        
+
         if args.inp[0] == 1.0 and args.inp[1] == 0.0:
             inp[2] = 0.0
-        
+
         elif args.inp[1] == 1.0 and args.inp[0] == 0.0:
             inp[3] = 0.0
-            
+
         elif args.inp[0] == 1.0 and args.inp[1] == 1.0:
             inp[2] = 0.0
             inp[3] = 0.0
-            
+
         for t in range(timesteps):
-            
-            if args.inp[0] == 1.0 and args.inp[1] == 0.0 and t == timesteps*0.18:
+
+            if args.inp[0] == 1.0 and args.inp[1] == 0.0 and t == timesteps * 0.18:
                 inp[2] = 1.0
-                
-            elif args.inp[1] == 1.0 and args.inp[0] == 0.0 and t == timesteps*0.18:
+
+            elif args.inp[1] == 1.0 and args.inp[0] == 0.0 and t == timesteps * 0.18:
                 inp[3] = 1.0
-                
-            elif args.inp[0] == 1.0 and args.inp[1] == 1.0 and t == timesteps*0.18:
+
+            elif args.inp[0] == 1.0 and args.inp[1] == 1.0 and t == timesteps * 0.18:
                 inp[2] = 1.0
                 inp[3] = 1.0
-                
+
             CT_BGv_BLA_IC_model.step(parameters, inp)
-            
+
             BLA_IC_output.append(CT_BGv_BLA_IC_model.BLA_IC.output.copy())
             LH_output.append(CT_BGv_BLA_IC_model.LH.output.copy())
             VTA_output.append(CT_BGv_BLA_IC_model.VTA.output.copy())
@@ -273,90 +273,92 @@ if __name__ == "__main__":
             BGv_ouput.append(CT_BGv_BLA_IC_model.BG_v.output_BG_v.copy())
             DM_output.append(CT_BGv_BLA_IC_model.DM.output.copy())
             PL_output.append(CT_BGv_BLA_IC_model.PL.output.copy())
-            W_timeline.append(CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].copy())
+            W_timeline.append(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].copy())
             inp_timeline.append(inp.copy())
-            
-            if t == timesteps-1:
-                
+
+            if t == timesteps - 1:
+
                 result = {
-                    'Seed': np.ones(timesteps) * seed,
-                    'Inp_timeline': inp_timeline,
-                    'W_timeline': W_timeline,
-                    'BLA_IC': BLA_IC_output,
-                    'LH': LH_output,
-                    'VTA': VTA_output,
-                    'NAc': NAc_output,
-                    'BGv': BGv_ouput,
-                    'DM': DM_output,
-                    'PL': PL_output
-                    }
-        
+                    "Seed": np.ones(timesteps) * seed,
+                    "Inp_timeline": inp_timeline,
+                    "W_timeline": W_timeline,
+                    "BLA_IC": BLA_IC_output,
+                    "LH": LH_output,
+                    "VTA": VTA_output,
+                    "NAc": NAc_output,
+                    "BGv": BGv_ouput,
+                    "DM": DM_output,
+                    "PL": PL_output,
+                }
+
     if args.mode == "plot":
         plotting(result)
         input("Press Enter to exit")
-        
+
     elif args.mode == "stream":
         inp_end = inp.copy()
-        W_end = CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].copy().flatten()
+        W_end = CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].copy().flatten()
         mresults = np.hstack((inp_end, W_end))
         print(("{:10.5f} " * len(mresults)).format(*mresults))
-        
-    elif args.mode == 'save':
-        seed_col = ['Seed']
-        input_cols = [f"Input_{i}" 
-                      for i in range(len(inp.copy()))]
-        BLA_IC_cols = [f'BLA_IC_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.BLA_IC.N)]
-        LH_cols = [f'LH_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.LH.N)]
-        VTA_cols = [f'VTA_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.VTA.N)]
-        NAc_cols = [f'NAc_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.BG_v.NAc.N)]
-        BGv_cols = [f'BGv_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.BG_v.SNpr.N)]
-        DM_cols = [f'DM_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.DM.N)]
-        PL_cols = [f'PL_Unit_{i}'
-                     for i in range(CT_BGv_BLA_IC_model.PL.N)]
-        W_cols = [f'Inp_DLS_W_{x}_{y}'
-                  for x in range(CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].shape[0])
-                  for y in range(CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].shape[1])]
-        cols = seed_col + input_cols + BLA_IC_cols + LH_cols + VTA_cols + NAc_cols + BGv_cols + DM_cols + PL_cols + W_cols
-        
-        values = [np.asanyarray(result[k]).reshape(timesteps, -1)
-                 for k in result.keys()]
+
+    elif args.mode == "save":
+        seed_col = ["Seed"]
+        input_cols = [f"Input_{i}" for i in range(len(inp.copy()))]
+        BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.BLA_IC.N)]
+        LH_cols = [f"LH_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.LH.N)]
+        VTA_cols = [f"VTA_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.VTA.N)]
+        NAc_cols = [f"NAc_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.BG_v.NAc.N)]
+        BGv_cols = [f"BGv_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.BG_v.SNpr.N)]
+        DM_cols = [f"DM_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.DM.N)]
+        PL_cols = [f"PL_Unit_{i}" for i in range(CT_BGv_BLA_IC_model.PL.N)]
+        W_cols = [
+            f"Inp_DLS_W_{x}_{y}"
+            for x in range(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].shape[0])
+            for y in range(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].shape[1])
+        ]
+        cols = (
+            seed_col
+            + input_cols
+            + BLA_IC_cols
+            + LH_cols
+            + VTA_cols
+            + NAc_cols
+            + BGv_cols
+            + DM_cols
+            + PL_cols
+            + W_cols
+        )
+
+        values = [np.asanyarray(result[k]).reshape(timesteps, -1) for k in result.keys()]
         values_conc = np.concatenate(values, axis=1)
         df = pd.DataFrame(values_conc, columns=cols)
-        
+
         csv_path = "BLA_IC_BGv_PL_Testing.csv"
-        
+
         if os.path.exists(csv_path):
             df.to_csv(csv_path, mode="a", header=False, index=False)
         else:
             df.to_csv(csv_path, index=False)
-            
-    elif args.mode == 'short_save':
+
+    elif args.mode == "short_save":
         fin_inp = inp.copy()
-        fin_W = CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].flatten()
-        
-        seed_col = ['Seed']
+        fin_W = CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].flatten()
+
+        seed_col = ["Seed"]
         input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
-        W_cols = [f'Inp_DLS_W_{x}_{y}'
-                  for x in range(CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].shape[0])
-                  for y in range(CT_BGv_BLA_IC_model.Ws['BLA_IC_NAc'].shape[1])]
-        
+        W_cols = [
+            f"Inp_DLS_W_{x}_{y}"
+            for x in range(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].shape[0])
+            for y in range(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].shape[1])
+        ]
+
         values = np.concatenate([[seed], fin_inp, fin_W])
-        columns = seed_col + input_cols + W_cols 
-        
+        columns = seed_col + input_cols + W_cols
+
         df = pd.DataFrame([values], columns=columns)
-        
+
         csv_path = "BLA_IC_BGv_PL_short_test.csv"
         if os.path.exists(csv_path):
             df.to_csv(csv_path, mode="a", header=False, index=False)
         else:
             df.to_csv(csv_path, index=False)
-    
-    
-    
-    

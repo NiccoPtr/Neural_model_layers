@@ -74,7 +74,6 @@ if __name__ == "__main__":
     timesteps = args.timesteps
 
     parameters = Parameters()
-    parameters.load("prm_file.json", mode="json")
     parameters.noise["BG_dl"] = args.noise
 
     rng = np.random.RandomState(parameters.seed)

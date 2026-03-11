@@ -6,26 +6,163 @@ Created on Sat Aug 16 11:50:44 2025
 
 from parameter_manager import ParameterManager
 
+
 class Parameters(ParameterManager):
-    def __init__(self,
-                 scheduling = None,
-                 N = None,
-                 threshold = None,
-                 tau = None,
-                 baseline = None,
-                 BG_dl_W = None,
-                 BG_dm_W = None,
-                 BG_v_W = None,
-                 SNpc_W = None, 
-                 seed = None,
-                 noise = None,
-                 Matrices_scalars = None,
-                 DA_values = None,
-                 BLA_Learn = None,
-                 Str_Learn = None
-                 ):
-        
-        self.scheduling = scheduling
+    def __init__(
+        self,
+        seed=2,
+        N={
+            "BG_dl": 2,
+            "BG_dm": 2,
+            "BG_v": 2,
+            "MGV": 2,
+            "MC": 2,
+            "BLA_IC": 4,
+            "SNpc": 2,
+            "PPN": 1,
+            "LH": 1,
+            "VTA": 1,
+            "P": 2,
+            "DM": 2,
+            "PL": 2,
+            "PFCd_PPC": 2,
+        },
+        threshold={
+            "BG_dl": 0.0,
+            "BG_dm": 0.0,
+            "BG_v": 0.0,
+            "MGV": 0.0,
+            "MC": 0.2,
+            "BLA_IC": 0.0,
+            "SNpc": 0.0,
+            "PPN": 0.0,
+            "LH": 0.0,
+            "VTA": 0.0,
+            "P": 0.0,
+            "DM": 0.0,
+            "PL": 0.0,
+            "PFCd_PPC": 0.0,
+        },
+        tau={
+            "MC": 6,
+            "PFCd_PPC": 6,
+            "PL": 6,
+            "MGV": 6,
+            "P": 6,
+            "DM": 6,
+            "BG_dl": 6,
+            "BG_dm": 6,
+            "BG_v": 6,
+            "BLA_IC": [10, 10],
+            "SNpc": 6,
+            "PPN": [2, 10],
+            "LH": [2, 10],
+            "VTA": 6,
+        },
+        baseline={
+            "PPN": 0.0,
+            "LH": 0.0,
+            "VTA": 0.0,
+            "BLA_IC": 0.0,
+            "SNpc": 0.0,
+            "DLS": 0.0,
+            "STNdl": 0.0,
+            "GPi": 0.4,
+            "DMS": 0.0,
+            "STNdm": 0.0,
+            "GPi_SNpr": 0.4,
+            "NAc": 0.0,
+            "STNv": 0.0,
+            "SNpr": 0.4,
+            "MGV": 0.0,
+            "MC": 0.0,
+            "P": 0.0,
+            "PFCd_PPC": 0.0,
+            "DM": 0.0,
+            "PL": 0.0,
+        },
+        BG_dl_W={"DLS_GPi_W": 1.8, "STNdl_GPi_W": 1.4},
+        BG_dm_W={"DMS_GPiSNpr_W": 1.8, "STNdm_GPiSNpr_W": 1.4},
+        BG_v_W={"NAc_SNpr_W": 1.8, "STNv_SNpr_W": 1.4},
+        SNpc_W={"SNpci_1_SNpco_1_W": 1.0, "SNpci_2_SNpco_2_W": 1.0},
+        noise={
+            "BG_dl": 0.0,
+            "BG_dm": 0.0,
+            "BG_v": 0.0,
+            "MGV": 0.0,
+            "MC": 0.2,
+            "BLA_IC": 0.0,
+            "SNpc": 0.0,
+            "PPN": 0.0,
+            "LH": 0.0,
+            "VTA": 0.0,
+            "P": 0.0,
+            "DM": 0.0,
+            "PL": 0.2,
+            "PFCd_PPC": 0.2,
+        },
+        Matrices_scalars={
+            "Mani_DLS": 0.0,
+            "Mani_DMS": 0.0,
+            "Mani_BLA_IC": 5.0,
+            "Food_PPN": 10.0,
+            "Food_BLA_IC": 5.0,
+            "Food_LH": 10.0,
+            "Sat_BLA_IC": 10.0,
+            "PPN_SNpco": 20.0,
+            "BLA_IC_NAc": 0.0,
+            "BLA_IC_LH": 5.0,
+            "LH_VTA": 20.0,
+            "NAc_SNpci_1": 6.0,
+            "DMS_SNpci_2": 10.0,
+            "GPi_MGV": 1.5,
+            "GPi_SNpr_P": 1.5,
+            "SNpr_DM": 1.5,
+            "MGV_MC": 1.0,
+            "P_PFCd_PPC": 1.0,
+            "DM_PL": 1.0,
+            "PL_DM": 1.0,
+            "PL_NAc": 1.2,
+            "PL_STNv": 1.6,
+            "PL_PFCd_PPC": 0.2,
+            "PFCd_PPC_P": 1.0,
+            "PFCd_PPC_DMS": 1.2,
+            "PFCd_PPC_STNdm": 1.6,
+            "PFCd_PPC_PL": 1.0,
+            "PFCd_PPC_MC": 1.0,
+            "MC_MGV": 1.0,
+            "MC_DLS": 1.2,
+            "MC_STNdl": 1.6,
+            "MC_PFCd_PPC": 0.2,
+        },
+        DA_values={
+            "Y_DLS": 0.2,
+            "Y_DMS": 0.5,
+            "Y_NAc": 0.8,
+            "delta_DLS": 4.0,
+            "delta_DMS": 6.5,
+            "delta_NAc": 1.5,
+        },
+        BLA_Learn={"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 200, "theta_DA": 0.7, "max_W": 2},
+        Str_Learn={
+            "eta_DLS": 0.02,
+            "eta_DMS": 0.02,
+            "eta_NAc": 0.05,
+            "theta_DA_DLS": 0.3,
+            "theta_DA_DMS": 0.3,
+            "theta_DA_NAc": 0.5,
+            "theta_DLS": 0.5,
+            "theta_DMS": 0.5,
+            "theta_NAc": 0.5,
+            "theta_inp_DLS": 0.5,
+            "theta_inp_DMS": 0.5,
+            "theta_inp_NAc": 0.9,
+            "max_W_DLS": 1,
+            "max_W_DMS": 1,
+            "max_W_NAc": 2,
+        },
+    ):
+
         self.N = N
         self.threshold = threshold
         self.tau = tau
@@ -33,81 +170,20 @@ class Parameters(ParameterManager):
         self.BG_dl_W = BG_dl_W
         self.BG_dm_W = BG_dm_W
         self.BG_v_W = BG_v_W
-        self.SNpc_W = SNpc_W 
+        self.SNpc_W = SNpc_W
         self.seed = seed
         self.noise = noise
         self.Matrices_scalars = Matrices_scalars
         self.DA_values = DA_values
         self.BLA_Learn = BLA_Learn
         self.Str_Learn = Str_Learn
-        
+
         super(Parameters, self).__init__()
-        
-        
-param_string = "Simulation"
-param_file = "prm_file"
 
-parameters = Parameters(
-                        seed = 2,
-                        
-                        N = {"BG_dl": 2, "BG_dm": 2, "BG_v": 2, "MGV": 2, "MC": 2, "BLA_IC": 4, "SNpc": 2, "PPN": 1, "LH": 1, "VTA": 1, "P": 2, "DM": 2, "PL": 2, "PFCd_PPC": 2},
-                        
-                        threshold = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.2, "BLA_IC": 0.0, "SNpc": 0.0, "PPN": 0.0, "LH": 0.0, "VTA": 0.0, "P": 0.0, "DM": 0.0, "PL": 0.0, "PFCd_PPC": 0.0},
-                        
-                        tau = {"MC": 6, "PFCd_PPC": 6, "PL": 6, "MGV": 6, "P": 6, "DM": 6, "BG_dl": 6, "BG_dm": 6, "BG_v": 6, "BLA_IC": [10, 10], "SNpc": 6, "PPN": [2, 10], "LH": [2, 10], "VTA": 6},
-                        
-                        baseline = {"PPN": 0.0,
-                                    "LH": 0.0,
-                                    "VTA": 0.0,
-                                    "BLA_IC": 0.0,
-                                    "SNpc": 0.0,
-                                    "DLS": 0.0, "STNdl": 0.0, "GPi": 0.4, 
-                                    "DMS": 0.0, "STNdm": 0.0, "GPi_SNpr": 0.4, 
-                                    "NAc": 0.0, "STNv": 0.0, "SNpr": 0.4, 
-                                    "MGV": 0.0,
-                                    "MC": 0.0,
-                                    "P": 0.0,
-                                    "PFCd_PPC": 0.0,
-                                    "DM": 0.0,
-                                    "PL": 0.0
-                                    },
-                        
-                        BG_dl_W = {"DLS_GPi_W": 1.8, "STNdl_GPi_W": 1.4},
-                        
-                        BG_dm_W = {"DMS_GPiSNpr_W": 1.8, "STNdm_GPiSNpr_W": 1.4},
-                        
-                        BG_v_W = {"NAc_SNpr_W": 1.8, "STNv_SNpr_W": 1.4},
-                        
-                        SNpc_W = {"SNpci_1_SNpco_1_W": 1.0, "SNpci_2_SNpco_2_W": 1.0},
-                        
-                        noise = {"BG_dl": 0.0, "BG_dm": 0.0, "BG_v": 0.0, "MGV": 0.0, "MC": 0.2, "BLA_IC": 0.0, "SNpc": 0.0, "PPN": 0.0, "LH": 0.0, "VTA": 0.0, "P": 0.0, "DM": 0.0, "PL": 0.2, "PFCd_PPC": 0.2},
-                        
-                        Matrices_scalars = {
-                                            "Mani_DLS": 0.0, "Mani_DMS": 0.0, "Mani_BLA_IC": 5.0,
-                                            "Food_PPN": 10.0, "Food_BLA_IC": 5.0, "Food_LH": 10.0,
-                                            "Sat_BLA_IC": 10.0,
-                                            "PPN_SNpco": 20.0,
-                                            "BLA_IC_NAc": 0.0, "BLA_IC_LH": 5.0,
-                                            "LH_VTA": 20.0,
-                                            "NAc_SNpci_1": 6.0, "DMS_SNpci_2": 10.0,
-                                            "GPi_MGV": 1.5, "GPi_SNpr_P": 1.5, "SNpr_DM": 1.5,
-                                            "MGV_MC": 1.0, "P_PFCd_PPC": 1.0, "DM_PL": 1.0,
-                                            "PL_DM": 1.0, "PL_NAc": 1.2, "PL_STNv": 1.6, "PL_PFCd_PPC": 0.2,
-                                            "PFCd_PPC_P": 1.0, "PFCd_PPC_DMS": 1.2, "PFCd_PPC_STNdm": 1.6,
-                                            "PFCd_PPC_PL": 1.0, "PFCd_PPC_MC": 1.0,
-                                            "MC_MGV": 1.0, "MC_DLS": 1.2, "MC_STNdl": 1.6, "MC_PFCd_PPC": 0.2
-                                        },
-                        
-                        DA_values = {"Y_DLS": 0.2, "Y_DMS": 0.5, "Y_NAc": 0.8, "delta_DLS": 4.0, "delta_DMS": 6.5, "delta_NAc": 1.5},
-                        
-                        BLA_Learn = {"eta_b": 0.08, "alpha_t": 50.0, "tau_t": 200, "theta_DA": 0.7, "max_W": 2},
-                        
-                        Str_Learn = {"eta_DLS": 0.02, "eta_DMS": 0.02, "eta_NAc": 0.05, 
-                                     "theta_DA_DLS": 0.3, "theta_DA_DMS": 0.3, "theta_DA_NAc": 0.5,
-                                     "theta_DLS": 0.5, "theta_DMS": 0.5, "theta_NAc": 0.5,
-                                     "theta_inp_DLS": 0.5, "theta_inp_DMS": 0.5, "theta_inp_NAc": 0.9,
-                                     "max_W_DLS": 1, "max_W_DMS": 1, "max_W_NAc": 2}
-                        )
 
-parameters.update(param_string)
-parameters.save(param_file + ".json", mode="json")
+# param_string = "Simulation"
+# param_file = "prm_file"
+
+
+# parameters.update(param_string)
+# parameters.save(param_file + ".json", mode="json")

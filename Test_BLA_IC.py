@@ -6,54 +6,61 @@ Created on Fri Feb  6 11:13:28 2026
 """
 
 import argparse
+import os
 
 import matplotlib.pyplot as plt
-import numpy as np, pandas as pd, os
+import numpy as np
+import pandas as pd
 
 from BLA_IC_simulation import BLA_IC_sm
 from params import Parameters
 
 plt.ion()
 
+
 def plotting(result):
-    
+
     plt.close("all")
     fig, ax = plt.subplots(1, 1)
-    
-    BLA_IC = np.array(result['BLA_IC_output'])
-    ax.plot(BLA_IC[:, 0], label = 'Unit_1')
-    ax.plot(BLA_IC[:, 1], label = 'Unit_2')
-    ax.plot(BLA_IC[:, 2], label = 'Unit_3')
-    ax.plot(BLA_IC[:, 3], label = 'Unit_4')
-        
-    ax.set_title('BLA_IC simulation')
+
+    BLA_IC = np.array(result["BLA_IC_output"])
+    ax.plot(BLA_IC[:, 0], label="Unit_1")
+    ax.plot(BLA_IC[:, 1], label="Unit_2")
+    ax.plot(BLA_IC[:, 2], label="Unit_3")
+    ax.plot(BLA_IC[:, 3], label="Unit_4")
+
+    ax.set_title("BLA_IC simulation")
     ax.legend()
-    ax.set_xlabel('Timestep')
-    ax.set_ylabel('Activity level')
+    ax.set_xlabel("Timestep")
+    ax.set_ylabel("Activity level")
     ax.set_ylim(0, 1)
 
-    plt.show()    
-    
-    fig, ax = plt.subplots(1, 1)
-    
-    t = np.array(result['Trace'])
-    ax.plot(t[:, 0], label = 'Unit_1')
-    ax.plot(t[:, 1], label = 'Unit_2')
-    ax.plot(t[:, 2], label = 'Unit_3')
-    ax.plot(t[:, 3], label = 'Unit_4')
-        
-    ax.set_title('Trace simulation')
-    ax.legend()
-    ax.set_xlabel('Timestep')
-    ax.set_ylabel('Activity level')
+    plt.show()
 
-    plt.show()  
-    
     fig, ax = plt.subplots(1, 1)
-    
-    W_timeline = np.array(result['Weight_timeline'])
+
+    t = np.array(result["Trace"])
+    ax.plot(t[:, 0], label="Unit_1")
+    ax.plot(t[:, 1], label="Unit_2")
+    ax.plot(t[:, 2], label="Unit_3")
+    ax.plot(t[:, 3], label="Unit_4")
+
+    ax.set_title("Trace simulation")
+    ax.legend()
+    ax.set_xlabel("Timestep")
+    ax.set_ylabel("Activity level")
+
+    plt.show()
+
+    fig, ax = plt.subplots(1, 1)
+
+    W_timeline = np.array(result["Weight_timeline"])
     im = ax.imshow(
-        W_timeline.reshape(-1, 4 * 4).T, interpolation="none", aspect="auto", vmin=0, vmax=0.02
+        W_timeline.reshape(-1, 4 * 4).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=0.02,
     )
     ax.set_title("Weights learning")
     ax.legend()
@@ -65,7 +72,8 @@ def plotting(result):
     plt.tight_layout()
 
     plt.show()
-    
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
     parser.add_argument(
@@ -112,24 +120,25 @@ def parse_args():
         help="Insert BG_dl noise in simulation",
     )
     parser.add_argument(
-        '-da',
-        '--dopamine',
+        "-da",
+        "--dopamine",
         type=float,
         default=2.0,
-        help='Insert Dopaminergic modulation for BLA_IC learning'
-        )
+        help="Insert Dopaminergic modulation for BLA_IC learning",
+    )
     parser.add_argument(
-        '-de',
-        '--delta',
+        "-de",
+        "--delta",
         type=float,
         default=160.0,
-        help='Insert delta for manipulanda input onset'
-        )
-    
-    return parser.parse_args()    
+        help="Insert delta for manipulanda input onset",
+    )
+
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
-    
+
     args = parse_args()
     da = args.dopamine
     timesteps = args.timesteps
@@ -137,92 +146,91 @@ if __name__ == "__main__":
     food = args.food
     delta = args.delta
     inp = np.array(args.inp)
-    
+
     parameters = Parameters()
-    parameters.load("prm_file.json" ,mode = "json")
-    parameters.noise['BLA_IC'] = args.noise
+    parameters.noise["BLA_IC"] = args.noise
     rng = np.random.RandomState(parameters.seed)
-    
-    bla = BLA_IC_sm(parameters, rng)   
+
+    bla = BLA_IC_sm(parameters, rng)
     bla.reset_activity()
 
     BLA_IC_output = []
     t_ = []
     Weight_timeline = []
     _input_ = []
-        
+
     for t in range(timesteps):
-        
+
         if t == delta:
             inp[mani] = 1.0
-            
+
         if t == timesteps // 2:
             inp[food] = 1.0
-            
+
         bla.step(inp, da)
-    
+
         BLA_IC_output.append(bla.BLA_IC.output.copy())
         t_.append(bla.BLA_IC.t.copy())
         Weight_timeline.append(bla.BLA_IC.W.copy().flatten())
         _input_.append(inp.copy())
-    
+
     result = {
-              'Delta': np.ones(timesteps) * delta,
-              'Inputs_timeline': _input_.copy(),
-              'BLA_IC_output': BLA_IC_output.copy(),
-              'Trace': t_.copy(),
-              'Weight_timeline': Weight_timeline
-              }
-        
+        "Delta": np.ones(timesteps) * delta,
+        "Inputs_timeline": _input_.copy(),
+        "BLA_IC_output": BLA_IC_output.copy(),
+        "Trace": t_.copy(),
+        "Weight_timeline": Weight_timeline,
+    }
+
     if args.mode == "plot":
         plotting(result)
         input("Press Enter to exit")
-        
+
     elif args.mode == "stream":
         inp_end = inp.copy()
         W_end = bla.BLA_IC.W.copy().flatten()
         mresults = np.hstack((inp_end, W_end, delta))
         print(("{:10.5f} " * len(mresults)).format(*mresults))
-        
-    elif args.mode == 'save':
-        input_cols = [f"Input_{i}" 
-                      for i in range(len(inp.copy()))]
-        ouput_cols = [f'Output_Unit_{i}' 
-                      for i in range(bla.BLA_IC.N)]
-        trace_cols = [f'Trace_Unit_{i}' 
-                      for i in range(bla.BLA_IC.N)]
-        W_cols = [f'Weight_{x}_{y}' 
-                  for x in range(bla.BLA_IC.W.shape[0])
-                  for y in range(bla.BLA_IC.W.shape[1])]
-        delta_col = ['Delta']
+
+    elif args.mode == "save":
+        input_cols = [f"Input_{i}" for i in range(len(inp.copy()))]
+        ouput_cols = [f"Output_Unit_{i}" for i in range(bla.BLA_IC.N)]
+        trace_cols = [f"Trace_Unit_{i}" for i in range(bla.BLA_IC.N)]
+        W_cols = [
+            f"Weight_{x}_{y}"
+            for x in range(bla.BLA_IC.W.shape[0])
+            for y in range(bla.BLA_IC.W.shape[1])
+        ]
+        delta_col = ["Delta"]
         cols = delta_col + input_cols + ouput_cols + trace_cols + W_cols
-        
-        values = [np.asanyarray(result[k]).reshape(timesteps, -1)
-                 for k in result.keys()]
+
+        values = [np.asanyarray(result[k]).reshape(timesteps, -1) for k in result.keys()]
         values_conc = np.concatenate(values, axis=1)
         df = pd.DataFrame(values_conc, columns=cols)
-        
+
         csv_path = "BLA_IC_Testing.csv"
-        
+
         if os.path.exists(csv_path):
             df.to_csv(csv_path, mode="a", header=False, index=False)
         else:
             df.to_csv(csv_path, index=False)
-    
-    elif args.mode == 'short_save':
+
+    elif args.mode == "short_save":
         fin_inp = inp.copy()
         fin_W = bla.BLA_IC.W.copy().flatten()
-            
+
         input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
-        W_cols = [f'Weight_{x}_{y}' 
-                  for x in range(bla.BLA_IC.W.shape[0])
-                  for y in range(bla.BLA_IC.W.shape[1])]
-        delta_col = [str('Delta')]
+        W_cols = [
+            f"Weight_{x}_{y}"
+            for x in range(bla.BLA_IC.W.shape[0])
+            for y in range(bla.BLA_IC.W.shape[1])
+        ]
+        delta_col = [str("Delta")]
         values = np.concatenate([fin_inp, fin_W, [delta]])
         columns = input_cols + W_cols + delta_col
-        
+
         df = pd.DataFrame([values], columns=columns)
-        
+
         csv_path = "BLA_IC_short_test.csv"
         if os.path.exists(csv_path):
             df.to_csv(csv_path, mode="a", header=False, index=False)
