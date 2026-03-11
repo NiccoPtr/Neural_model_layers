@@ -60,7 +60,7 @@ if __name__ == "__main__":
             (df["Seed"] == args.seed)
             ].copy()
         
-        trials = int(df_check['Trial'].values[-1])
+        trials = int(df_check['Trial'].iloc[-1])
         raise ValueError(
             f'Simulation with Seed {args.seed} has {trials} Trials: Trial {args.trial} exceeds excepted values'
         )
@@ -155,6 +155,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=2,
+        cmap='viridis'
     )
 
     ax.set_ylabel("Connections")
@@ -179,6 +180,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=2,
+        cmap='viridis'
     )
 
     ax.set_ylabel("Connections")
@@ -203,6 +205,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=1,
+        cmap='viridis'
     )
 
     ax.set_ylabel("Connections")
@@ -227,6 +230,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=1,
+        cmap='viridis'
     )
 
     ax.set_ylabel("Connections")
