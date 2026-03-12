@@ -212,40 +212,6 @@ def parse_args():
         help="Input simulation seed for noise",
     )
     parser.add_argument(
-        "-p",
-        "--inp",
-        type=float,
-        nargs=6,
-        default=[
-            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
-            [1.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-        ],
-        help="Input values (six*phases floats), inp.shape[1] == len(phases)",
-    )
-    parser.add_argument(
-        "-tr",
-        "--trials",
-        type=int,
-        default=10,
-        help="Input amount of trials (int)",
-    )
-    parser.add_argument(
-        "-t",
-        "--timesteps",
-        type=int,
-        default=1000,
-        help="Input amount of timesteps per trial (int)",
-    )
-    parser.add_argument(
-        "-ph",
-        "--phases",
-        type=float,
-        default=[0.25, 0.5, 0.75, 1.0],
-        help="Input amount of phases thorugh percentage (float) [eg...0.25, 0.5, 0.75, 1.0], max of 8 phases",
-    )
-    parser.add_argument(
         "-m",
         "--mode",
         type=str,
@@ -269,42 +235,15 @@ if __name__ == "__main__":
     parameters = Parameters()
     if Path("sim_params.json").exists():
         parameters.load("sim_params.json", mode="json")
-
+        
     scheduling = Scheduling()
     if args.scheduling is not None:
         scheduling.load(args.scheduling, mode="json")
     parameters.scheduling = scheduling._params_to_dict()
     parameters.seed = args.seed
 
-    # -----MC parameters
-    parameters.noise["MC"] = 0.4
-    parameters.baseline["GPi"] = 0.2
-    parameters.Matrices_scalars["MC_MGV"] = 2.0
-    parameters.Matrices_scalars["MGV_MC"] = 1.8
-    parameters.Str_Learn["eta_DLS"] = 0.001
-    parameters.BG_dl_W["STNdl_GPi_W"] = 1.6
-
-    # -----PFCd/PPC parameters
-    parameters.noise["PFCd_PPC"] = 0.4
-    parameters.baseline["GPi_SNpr"] = 0.2
-    parameters.Matrices_scalars["PFCd_PPC_P"] = 2.0
-    parameters.Matrices_scalars["P_PFCd_PPC"] = 1.8
-    parameters.Str_Learn["eta_DMS"] = 0.001
-    parameters.BG_dm_W["STNdm_GPiSNpr_W"] = 1.6
-
-    # -----PL parameters
-    parameters.baseline["SNpr"] = 0.2
-    parameters.BG_v_W["STNv_SNpr_W"] = 1.6
-
-    # -----BLA_IC_NAc parameters
-    parameters.BLA_Learn["eta_b"] = 0.1
-    parameters.BLA_Learn["theta_DA"] = 0.5
-    parameters.Str_Learn["theta_inp_NAc"] = 0.8
-    parameters.Str_Learn["theta_NAc"] = 0.4
-    parameters.Str_Learn["eta_NAc"] = 0.1
-
-    if len(args.inp) != len(args.phases):
-        raise ValueError("Input and Phases must be the same length")
+    if len(scheduling.states) != len(scheduling.phases):
+        raise ValueError("Input and Phases must have same length")
 
     idx = args.index
     model = Model(parameters)
