@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument(
         "--csv",
         type=str,
-        default="Model_Simulation.csv",
+        default="sim_seed0/Model_Simulation.csv",
         help="Path to CSV file"
     )
     parser.add_argument(
@@ -31,7 +31,7 @@ def parse_args():
         '-t',
         "--trial",
         type=int,
-        default=199,
+        default=0,
         help="Define trial to refer for plotting"
     )
     return parser.parse_args()

@@ -447,8 +447,8 @@ class SNpc_Layer:
         
         self.SNpci_1 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
         self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
-        self.SNpco_1 = Leaky_units_exc(N, tau, baseline, rng, noise, threshold)
-        self.SNpco_2 = Leaky_units_exc(N, tau, baseline, rng, noise, threshold)
+        self.SNpco_1 = Leaky_units_exc(N, tau, baseline*0, rng, noise, threshold)
+        self.SNpco_2 = Leaky_units_exc(N, tau, baseline*0, rng, noise, threshold)
         self.output_1 = np.zeros(N)
         self.output_2 = np.zeros(N)
         self.output_SNpci_1_pre = np.zeros(N)

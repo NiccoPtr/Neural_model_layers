@@ -6,8 +6,8 @@ scheduling=$(cat << EOF
     "timesteps": 1000,
     "states": [[0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
 		[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-		[1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
-		[1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+		[1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+		[0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 		],
     "phases": [0.25, 0.5, 0.75, 1.0]
 }   
@@ -16,7 +16,7 @@ EOF
 
 params=$(cat << EOF 
 {
-        noise={
+        "noise":{
             "BG_dl": 0.0,
             "BG_dm": 0.0,
             "BG_v": 0.0,
@@ -30,15 +30,15 @@ params=$(cat << EOF
             "P": 0.0,
             "DM": 0.0,
             "PL": __nPL__,
-            "PFCd_PPC": __nPFCd_PPC__,
+            "PFCd_PPC": __nPFCd_PPC__
         },
 
-	baseline={
+	"baseline":{
             "PPN": 0.0,
             "LH": 0.0,
             "VTA": 0.0,
             "BLA_IC": 0.0,
-            "SNpc": 0.0,
+            "SNpc": 0.3,
             "DLS": 0.0,
             "STNdl": 0.0,
             "GPi": __bGPi__,
@@ -53,10 +53,10 @@ params=$(cat << EOF
             "P": 0.0,
             "PFCd_PPC": 0.0,
             "DM": 0.0,
-            "PL": 0.0,
+            "PL": 0.0
         },
 
-	Matrices_scalars={
+	"Matrices_scalars":{
             "Mani_DLS": 0.0,
             "Mani_DMS": 0.0,
             "Mani_BLA_IC": 5.0,
@@ -88,10 +88,10 @@ params=$(cat << EOF
             "MC_MGV": __wMC_MGV__,
             "MC_DLS": 1.2,
             "MC_STNdl": 1.6,
-            "MC_PFCd_PPC": 0.2,
+            "MC_PFCd_PPC": 0.2
         },
 
-	Str_Learn={
+	"Str_Learn":{
             "eta_DLS": __eta_DLS__,
             "eta_DMS": __eta_DMS__,
             "eta_NAc": __eta_NAc__,
@@ -106,17 +106,17 @@ params=$(cat << EOF
             "theta_inp_NAc": __theta_inp_NAc__,
             "max_W_DLS": 1,
             "max_W_DMS": 1,
-            "max_W_NAc": 2,
+            "max_W_NAc": 2
         },
 
-	BG_dl_W={"DLS_GPi_W": 1.8, "STNdl_GPi_W": __wSTNdl_GPi__},
+	"BG_dl_W":{"DLS_GPi_W": 1.8, "STNdl_GPi_W": __wSTNdl_GPi__},
 
-        BG_dm_W={"DMS_GPiSNpr_W": 1.8, "STNdm_GPiSNpr_W": __wSTNdm_GPiSNpr__},
+        "BG_dm_W":{"DMS_GPiSNpr_W": 1.8, "STNdm_GPiSNpr_W": __wSTNdm_GPiSNpr__},
 
-        BG_v_W={"NAc_SNpr_W": 1.8, "STNv_SNpr_W": __wSTNv_SNpr__},
+        "BG_v_W":{"NAc_SNpr_W": 1.8, "STNv_SNpr_W": __wSTNv_SNpr__},
 
-	BLA_Learn={"eta_b": __eta_b__, "alpha_t": 50.0, "tau_t": 200, "theta_DA": __theta_DA__, "max_W": 2}
-    }
+	"BLA_Learn":{"eta_b": __eta_b__, "alpha_t": 50.0, "tau_t": 200, "theta_DA": __theta_DA__, "max_W": 2}
+}
 EOF
 )
 
@@ -154,34 +154,34 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-for seed in $(seq 0 1 1); do
+for seed in $(seq 0 1 0); do
     SIM=sim_seed${seed}
     mkdir -p $SIM
     cd $SIM
 
     echo "$scheduling" > scheduling.json
-    params=$("$params" | sed -E "s/__nMC__/${__nMC__}/)
-    params=$("$params" | sed -E "s/__nPL__/${__nPL__}/)
-    params=$("$params" | sed -E "s/__nPFCd_PPC__/${__nPFCd_PPC__}/)
-    params=$("$params" | sed -E "s/__bGPi__/${__bGPi__}/)
-    params=$("$params" | sed -E "s/__bGPi_SNpr__/${__bGPi_SNpr__}/)
-    params=$("$params" | sed -E "s/__bSNpr__/${__bSNpr__}/)
-    params=$("$params" | sed -E "s/__wMGV_MC__/${__wMGV_MC__}/)
-    params=$("$params" | sed -E "s/__wMC_MGV__/${__wMC_MGV__}/)
-    params=$("$params" | sed -E "s/__wP_PFCd_PPC__/${__wP_PFCd_PPC__}/)
-    params=$("$params" | sed -E "s/__wPFCd_PPC_P__/${__wPFCd_PPC_P__}/)
-    params=$("$params" | sed -E "s/__wDM_PL__/${__wDM_PL__}/)
-    params=$("$params" | sed -E "s/__wPL_DM__/${__wPL_DM__}/)
-    params=$("$params" | sed -E "s/__eta_DLS__/${__eta_DLS__}/)
-    params=$("$params" | sed -E "s/__eta_DMS__/${__eta_DMS__}/)
-    params=$("$params" | sed -E "s/__eta_NAc__/${__eta_NAc__}/)
-    params=$("$params" | sed -E "s/__theta_NAc__/${__theta_NAc__}/)
-    params=$("$params" | sed -E "s/__theta_inp_NAc__/${__theta_inp_NAc__}/)
-    params=$("$params" | sed -E "s/__wSTNdl_GPi__/${__wSTNdl_GPi__}/)
-    params=$("$params" | sed -E "s/__wSTNdm_GPiSNpr__/${__wSTNdm_GPiSNpr__}/)
-    params=$("$params" | sed -E "s/__wSTNv_SNpr__/${__wSTNv_SNpr__}/)
-    params=$("$params" | sed -E "s/__eta_b__/${__eta_b__}/)
-    params=$("$params" | sed -E "s/__theta_DA__/${__theta_DA__}/)
+    params=$(echo "$params" | sed -E "s/__nMC__/${__nMC__}/")
+    params=$(echo "$params" | sed -E "s/__nPL__/${__nPL__}/")
+    params=$(echo "$params" | sed -E "s/__nPFCd_PPC__/${__nPFCd_PPC__}/")
+    params=$(echo "$params" | sed -E "s/__bGPi__/${__bGPi__}/")
+    params=$(echo "$params" | sed -E "s/__bGPi_SNpr__/${__bGPi_SNpr__}/")
+    params=$(echo "$params" | sed -E "s/__bSNpr__/${__bSNpr__}/")
+    params=$(echo "$params" | sed -E "s/__wMGV_MC__/${__wMGV_MC__}/")
+    params=$(echo "$params" | sed -E "s/__wMC_MGV__/${__wMC_MGV__}/")
+    params=$(echo "$params" | sed -E "s/__wP_PFCd_PPC__/${__wP_PFCd_PPC__}/")
+    params=$(echo "$params" | sed -E "s/__wPFCd_PPC_P__/${__wPFCd_PPC_P__}/")
+    params=$(echo "$params" | sed -E "s/__wDM_PL__/${__wDM_PL__}/")
+    params=$(echo "$params" | sed -E "s/__wPL_DM__/${__wPL_DM__}/")
+    params=$(echo "$params" | sed -E "s/__eta_DLS__/${__eta_DLS__}/")
+    params=$(echo "$params" | sed -E "s/__eta_DMS__/${__eta_DMS__}/")
+    params=$(echo "$params" | sed -E "s/__eta_NAc__/${__eta_NAc__}/")
+    params=$(echo "$params" | sed -E "s/__theta_NAc__/${__theta_NAc__}/")
+    params=$(echo "$params" | sed -E "s/__theta_inp_NAc__/${__theta_inp_NAc__}/")
+    params=$(echo "$params" | sed -E "s/__wSTNdl_GPi__/${__wSTNdl_GPi__}/")
+    params=$(echo "$params" | sed -E "s/__wSTNdm_GPiSNpr__/${__wSTNdm_GPiSNpr__}/")
+    params=$(echo "$params" | sed -E "s/__wSTNv_SNpr__/${__wSTNv_SNpr__}/")
+    params=$(echo "$params" | sed -E "s/__eta_b__/${__eta_b__}/")
+    params=$(echo "$params" | sed -E "s/__theta_DA__/${__theta_DA__}/")
     
     echo "$params" > sim_params.json
     echo "Running simulation with seed= $seed"

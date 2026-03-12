@@ -64,7 +64,7 @@ class Parameters(ParameterManager):
             "LH": 0.0,
             "VTA": 0.0,
             "BLA_IC": 0.0,
-            "SNpc": 0.0,
+            "SNpc": 0.3,
             "DLS": 0.0,
             "STNdl": 0.0,
             "GPi": 0.4,
