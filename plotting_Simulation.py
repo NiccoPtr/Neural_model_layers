@@ -93,25 +93,19 @@ if __name__ == "__main__":
     W_Mani_DLS = W_Mani_DLS[:, rows, cols]
     W_Mani_DMS = W_Mani_DMS[:, rows, cols]
     
-    sns.set_theme(style="whitegrid")
+    #State
+    state = df_new.filter(like='Input').to_numpy()
+    
     plt.close('all')
     
     #Plotting set up
     plots = [
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('State',[
-            (state[:, 0], "Lever"),
-            (state[:, 1], "Chain"),
-            (state[:, 2], "Food_1"),
-            (state[:, 3], "Food_2"),
-            (state[:, 4], "Sat_1"),
-            (state[:, 5], "Sat_2"),
-        ], (-0.1, 1.2))
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2))
         ]
     
-    n_rows = len(plots) + 4
+    n_rows = len(plots) + 5
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
     
@@ -141,6 +135,35 @@ if __name__ == "__main__":
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
+        
+    #State plotting
+    title_ax = fig.add_subplot(gs[-5, 0])
+    ax = fig.add_subplot(gs[-5, 1], sharex=shared_ax)
+    
+    title_ax.text(0.5, 0.5, "State", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+    
+    im = ax.imshow(
+        state.T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+        cmap='YlOrRd'
+    )
+    
+    ax.set_yticks(np.arange(6), ['Lever',
+                                 'Chain',
+                                 'Food_1',
+                                 'Food_2',
+                                 'Sat_1',
+                                 'Sat_2']
+                  )
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
     
     #Weights plotting 
     title_ax = fig.add_subplot(gs[-4, 0])
@@ -155,7 +178,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=2,
-        cmap='viridis'
+        cmap='YlOrRd'
     )
 
     ax.set_ylabel("Connections")
@@ -180,7 +203,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=2,
-        cmap='viridis'
+        cmap='YlOrRd'
     )
 
     ax.set_ylabel("Connections")
@@ -205,7 +228,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=1,
-        cmap='viridis'
+        cmap='YlOrRd'
     )
 
     ax.set_ylabel("Connections")
@@ -230,7 +253,7 @@ if __name__ == "__main__":
         aspect="auto",
         vmin=0,
         vmax=1,
-        cmap='viridis'
+        cmap='YlOrRd'
     )
 
     ax.set_ylabel("Connections")
