@@ -161,10 +161,8 @@ class Leaky_onset_units_exc:
             
             - activity_uo will be used as output of the onset unit
         """
-        net_input_uo = net_input - self.activity_ui
-        if net_input_uo > 0:
-            raise ValueError('Positive value')
-        uo_input = np.maximum(0, net_input_uo)
+       
+        uo_input = net_input - np.maximum(0, self.activity_ui)
         
         uo_dot = (1 / self.tau_uo) * (uo_input - self.activity_uo)
     

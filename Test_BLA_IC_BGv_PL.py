@@ -173,14 +173,14 @@ def parse_args():
         "--inp",
         type=float,
         nargs=6,
-        default=[1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        default=[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
         "-t",
         "--trials",
         type=int,
-        default=1,
+        default=10,
         help="Number of trials",
     )
     parser.add_argument(
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     parameters.Matrices_scalars['Sat_BLA_IC'] = 100.0
     parameters.tau['BLA_IC'][0] = 2
     parameters.tau['BLA_IC'][1] = 10
-    parameters.BLA_Learn["eta_b"] = 0.1
+    parameters.BLA_Learn["eta_b"] = 0.01
     parameters.BLA_Learn['alpha_t'] = 50
     parameters.BLA_Learn['tau_t'] = 20
     parameters.BLA_Learn["theta_DA"] = 0.5
@@ -307,7 +307,7 @@ if __name__ == "__main__":
 
     if args.mode == "plot":
         plotting(result)
-        # input("Press Enter to exit")
+        input("Press Enter to exit")
 
     elif args.mode == "stream":
         inp_end = inp.copy()
