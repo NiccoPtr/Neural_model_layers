@@ -242,10 +242,10 @@ class Model:
         self.Ws = {
             "inp_BLA_IC": np.array(
                 [
-                    [5.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 5.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 5.0, 0.0, -10.0, 0.0],
-                    [0.0, 0.0, 0.0, 5.0, 0.0, -10.0],
+                    [1.0 * self.parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0 * self.parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
+                    [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC']],
                 ]
             ),
             "Mani_DLS": np.array(

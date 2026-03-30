@@ -81,9 +81,9 @@ class CT_BG():
     
     def learning(self, parameters, da, inp):
         
-        delta_W_inp_DLS = self.delta_Str_learn_USV(parameters.Str_Learn["eta_DLS"],
+        self.delta_W_inp_DLS = self.delta_Str_learn_USV(parameters.Str_Learn["eta_DLS"],
                                            da,
-                                           self.BG_dl.output_DLS_pre * -1,
+                                           np.abs(self.BG_dl.output_DLS_pre),
                                            inp,
                                            parameters.Str_Learn["theta_DA_DLS"],
                                            parameters.Str_Learn["theta_DLS"],
@@ -93,10 +93,10 @@ class CT_BG():
                                            self.Ws["inp_DLS"]
                                            )
         
-        self.Ws['inp_DLS'] += delta_W_inp_DLS
+        self.Ws['inp_DLS'] += self.delta_W_inp_DLS
         
         
-    def step(self, parameters, inp, da, PFCd_PPC_inp = [0.0, 0.0], learning = True):
+    def step(self, parameters, inp, da, PFCd_PPC_inp = [0.0, 0.0], learn = True):
         
         self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
                    np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
@@ -108,7 +108,7 @@ class CT_BG():
         self.MC.step(np.dot(self.Ws["MGV_MC"], self.MGV_output_pre) +
                     np.dot(self.Ws['PFCd_PPC_MC'], np.array(PFCd_PPC_inp)))
         
-        if learning:
+        if learn:
             self.learning(parameters, da, inp)
             
         self.update_output_pre()

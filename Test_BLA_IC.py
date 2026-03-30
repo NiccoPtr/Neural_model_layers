@@ -149,6 +149,11 @@ if __name__ == "__main__":
 
     parameters = Parameters()
     parameters.noise["BLA_IC"] = args.noise
+    parameters.tau['BLA_IC'][0] = 10
+    parameters.tau['BLA_IC'][1] = 10
+    parameters.BLA_Learn['eta_b'] = 0.05
+    parameters.BLA_Learn['tau_t'] = 500
+    parameters.BLA_Learn['theta_DA'] = 0.5
     rng = np.random.RandomState(parameters.seed)
 
     bla = BLA_IC_sm(parameters, rng)

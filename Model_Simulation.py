@@ -46,22 +46,10 @@ def plotting(results, idx):
     plots = [
         ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
         ("PFCd_PPC", [(PFCd_PPC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
-        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
-        (
-            "State",
-            [
-                (state[:, 0], "Lever"),
-                (state[:, 1], "Chain"),
-                (state[:, 2], "Food_1"),
-                (state[:, 3], "Food_2"),
-                (state[:, 4], "Sat_1"),
-                (state[:, 5], "Sat_2"),
-            ],
-            (-0.1, 1.2),
-        ),
+        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2))
     ]
 
-    n_rows = len(plots) + 4
+    n_rows = len(plots) + 5
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -90,6 +78,35 @@ def plotting(results, idx):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
+    
+    #States plotting
+    title_ax = fig.add_subplot(gs[-5, 0])
+    ax = fig.add_subplot(gs[-5, 1], sharex=shared_ax)
+    
+    title_ax.text(0.5, 0.5, "State", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+    
+    im = ax.imshow(
+        state.T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+        cmap='YlOrRd'
+    )
+    
+    ax.set_yticks(np.arange(6), ['Lever',
+                                 'Chain',
+                                 'Food_1',
+                                 'Food_2',
+                                 'Sat_1',
+                                 'Sat_2']
+                  )
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
     # Weights plotting -----------------------------
     title_ax = fig.add_subplot(gs[-4, 0])
@@ -195,6 +212,104 @@ def plotting(results, idx):
 
     plt.show()
 
+def plot_CTBG(results, idx):
+    
+    plt.close("all")
+
+    res = results[idx]
+
+    # Isolating single layers
+    MC = np.array(res["MC_output"])
+    PFCd_PPC = np.array(res["PFCd_PPC_output"])
+    PL = np.array(res["PL_output"])
+    MGV = np.array(res["MGV_output"])
+    P = np.array(res["P_output"])
+    DM = np.array(res["DM_output"])
+    BGdl = np.array(res["BGdl_output"]) * -1
+    BGdm = np.array(res["BGdm_output"]) * -1
+    BGv = np.array(res["BGv_output"]) * -1
+    state = np.array(res["States_timeline"])
+    
+    # Plotting set up
+    plots = [
+        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("BGdl", [(BGdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("PFCd_PPC", [(PFCd_PPC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("P", [(P[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("BGdm", [(BGdm[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2)),
+        ("BGv", [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2))
+       ]
+
+    n_rows = len(plots) + 1
+    fig = plt.figure(figsize=(14, 2.2 * n_rows))
+    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
+
+    shared_ax = None
+
+    for i, (title, lines, ylim) in enumerate(plots):
+        title_ax = fig.add_subplot(gs[i, 0])
+        ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
+
+        if shared_ax is None:
+            shared_ax = ax
+
+        # Left column: titles only
+        title_ax.text(0.5, 0.5, title, ha="center", va="center", fontsize=12)
+        title_ax.axis("off")
+
+        # Right column: actual plot
+        for y, label in lines:
+            ax.plot(y, label=label)
+
+        ax.set_ylim(*ylim)
+        ax.legend(loc="upper right", fontsize=5)
+
+        # Clean spines
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        ax.tick_params(labelbottom=False)
+    
+    #States plotting
+    title_ax = fig.add_subplot(gs[-1, 0])
+    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
+    
+    title_ax.text(0.5, 0.5, "State", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+    
+    im = ax.imshow(
+        state.T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+        cmap='YlOrRd'
+    )
+    
+    ax.set_yticks(np.arange(6), ['Lever',
+                                 'Chain',
+                                 'Food_1',
+                                 'Food_2',
+                                 'Sat_1',
+                                 'Sat_2']
+                  )
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    # Shared x-axis
+    ax.set_xlabel("Timestep")
+    
+    xmin, xmax = shared_ax.get_xlim()
+    pad = 0.1 * (xmax - xmin)
+    shared_ax.set_xlim(xmin, xmax + pad)
+    
+    plt.show()
 
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
@@ -216,7 +331,7 @@ def parse_args():
         "--mode",
         type=str,
         default="plot",
-        help="Output mode ('plot','save','short_save', 'stream')",
+        help="Output mode ('plot','plot_CTBG, 'save','short_save', 'stream')",
     )
     parser.add_argument(
         "-i",
@@ -262,6 +377,12 @@ if __name__ == "__main__":
         DMS_output = []
         BLA_IC_output = []
         NAc_output = []
+        BGv_output = []
+        BGdm_output = []
+        BGdl_output = []
+        MGV_output = []
+        P_output = []
+        DM_output = []
         W_BLA_IC_NAc = []
         W_Mani_DLS = []
         W_Mani_DMS = []
@@ -305,6 +426,12 @@ if __name__ == "__main__":
         state = np.asanyarray(parameters.scheduling["states"][phase - 1])
 
         for t in range(parameters.scheduling["timesteps"]):
+            
+            if t < 50:
+                state[0:2] = 0.0
+                
+            elif t == 50:
+                state = np.asanyarray(parameters.scheduling["states"][phase - 1])
 
             model.step(state)
             action = model.MC.output.copy()
@@ -317,6 +444,12 @@ if __name__ == "__main__":
             DMS_output.append(model.BG_dm.DMS.output.copy())
             BLA_IC_output.append(model.BLA_IC.output.copy())
             NAc_output.append(model.BG_v.NAc.output.copy())
+            BGv_output.append(model.BG_v.SNpr.output.copy())
+            BGdm_output.append(model.BG_dm.GPi_SNpr.output.copy())
+            BGdl_output.append(model.BG_dl.GPi.output.copy())
+            MGV_output.append(model.MGV.output.copy())
+            P_output.append(model.P.output.copy())
+            DM_output.append(model.DM.output.copy())
             W_BLA_IC.append(model.BLA_IC.W.copy())
             W_BLA_IC_NAc.append(model.Ws["BLA_IC_NAc"].copy())
             W_Mani_DLS.append(model.Ws["Mani_DLS"].copy())
@@ -332,26 +465,51 @@ if __name__ == "__main__":
                 elif state[1] == 1.0 and winner == 1:
                     state[2:4] = 0.0
                     state[2 + winner] = 1.0
-
-                else:
-                    state[2:4] = 0.0
-
-        result = {
-            "Seed": np.ones(parameters.scheduling["timesteps"]) * parameters.seed,
-            "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,
-            "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
-            "Timesteps": np.arange(0, parameters.scheduling["timesteps"]),
-            "States_timeline": state_t.copy(),
-            "PL_output": PL_output.copy(),
-            "PFCd_PPC_output": PFCd_PPC_output.copy(),
-            "MC_output": MC_output.copy(),
-            "W_BLA_IC": W_BLA_IC,
-            "W_BLA_IC_NAc": W_BLA_IC_NAc,
-            "W_Mani_DLS": W_Mani_DLS,
-            "W_Mani_DMS": W_Mani_DMS,
-        }
-
-        print(f"End trial {trial + 1}")
+        
+        if args.mode == 'plot_CTBG':
+            result = {
+                "Seed": np.ones(parameters.scheduling["timesteps"]) * parameters.seed,
+                "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,
+                "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
+                "Timesteps": np.arange(0, parameters.scheduling["timesteps"]),
+                "States_timeline": state_t.copy(),
+                "PL_output": PL_output.copy(),
+                "PFCd_PPC_output": PFCd_PPC_output.copy(),
+                "MC_output": MC_output.copy(),
+                "BLA_IC_output": BLA_IC_output.copy(),
+                "BGv_output": BGv_output.copy(),
+                "BGdm_output": BGdm_output.copy(),
+                "BGdl_output": BGdl_output.copy(),
+                "MGV_output": MGV_output.copy(),
+                "P_output": P_output.copy(),
+                "DM_output": DM_output.copy(),
+                "W_BLA_IC": W_BLA_IC,
+                "W_BLA_IC_NAc": W_BLA_IC_NAc,
+                "W_Mani_DLS": W_Mani_DLS,
+                "W_Mani_DMS": W_Mani_DMS,
+            }
+    
+            print(f"End trial {trial + 1}")
+            
+        elif args.mode == 'plot' or args.mode == 'save':
+            result = {
+                "Seed": np.ones(parameters.scheduling["timesteps"]) * parameters.seed,
+                "Phase": np.ones(parameters.scheduling["timesteps"]) * phase,
+                "Trial": np.ones(parameters.scheduling["timesteps"]) * trial,
+                "Timesteps": np.arange(0, parameters.scheduling["timesteps"]),
+                "States_timeline": state_t.copy(),
+                "BLA_IC_output": BLA_IC_output.copy(),
+                "NAc_output": NAc_output.copy(),
+                "MC_output": MC_output.copy(),
+                "PFCd_PPC_output": PFCd_PPC_output.copy(),
+                "PL_output": PL_output.copy(),
+                "W_BLA_IC": W_BLA_IC,
+                "W_BLA_IC_NAc": W_BLA_IC_NAc,
+                "W_Mani_DLS": W_Mani_DLS,
+                "W_Mani_DMS": W_Mani_DMS,
+            }
+    
+            print(f"End trial {trial + 1}")
 
         results.append(result)
 
@@ -362,6 +520,10 @@ if __name__ == "__main__":
     if args.mode == "plot":
         plotting(results, idx)
         input("Press Enter to exit")
+        
+    elif args.mode == "plot_CTBG":
+        plot_CTBG(results, idx)
+        input("Press Enter to exit")
 
     elif args.mode == "stream":
         fin_state = state.copy()
@@ -370,11 +532,16 @@ if __name__ == "__main__":
         print(("{:10.5f} " * len(mresults)).format(*mresults))
 
     elif args.mode == "save":
+        print(
+            "Saving results"
+            )
         seed_col = ["Seed"]
         trial_col = ["Trial"]
         timestep_col = ["Timestep"]
         phase_col = ["Phase"]
         state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
+        BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
+        NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.NAc.N)]
         MC_out_cols = [f"MC_Unit_{i}" for i in range(model.MC.N)]
         PFCd_PPC_out_cols = [f"PFCd_PPC_Unit_{i}" for i in range(model.PFCd_PPC.N)]
         PL_out_cols = [f"PL_Unit_{i}" for i in range(model.PL.N)]
@@ -405,6 +572,8 @@ if __name__ == "__main__":
             + trial_col
             + timestep_col
             + state_cols
+            + BLA_IC_cols
+            + NAc_cols
             + MC_out_cols
             + PFCd_PPC_out_cols
             + PL_out_cols
@@ -431,7 +600,11 @@ if __name__ == "__main__":
             df.to_csv(csv_path, mode="a", header=False, index=False)
         else:
             df.to_csv(csv_path, index=False)
-
+            
+        print(
+            f"File {str(csv_path)} saved succesfully"
+            )
+        
     elif args.mode == "short_save":
         fin_state = state.copy()
         fin_MC_output = model.MC.output.copy()

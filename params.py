@@ -10,7 +10,7 @@ from parameter_manager import ParameterManager
 class Parameters(ParameterManager):
     def __init__(
         self,
-        seed=2,
+        seed=0,
         N={
             "BG_dl": 2,
             "BG_dm": 2,
@@ -64,7 +64,7 @@ class Parameters(ParameterManager):
             "LH": 0.0,
             "VTA": 0.0,
             "BLA_IC": 0.0,
-            "SNpc": 0.3,
+            "SNpc": 0.7,
             "DLS": 0.0,
             "STNdl": 0.0,
             "GPi": 0.4,

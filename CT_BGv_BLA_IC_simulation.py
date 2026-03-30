@@ -12,7 +12,6 @@ class CT_BGv_BLA_IC():
     
     def __init__(self, parameters, rng):
         
-        
         self.BLA_IC = BLA_IC_Layer(parameters.N["BLA_IC"],
                               parameters.tau["BLA_IC"][0],
                               parameters.tau["BLA_IC"][1],
@@ -64,10 +63,11 @@ class CT_BGv_BLA_IC():
                              parameters.noise["PL"],
                              parameters.threshold["PL"])
         
-        self.Ws = {'inp_BLA_IC': np.array([[5.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                [0.0, 5.0, 0.0, 0.0, 0.0, 0.0],
-                                [0.0, 0.0, 5.0, 0.0, -10.0, 0.0],
-                                [0.0, 0.0, 0.0, 5.0, 0.0, -10.0]]),
+        self.Ws = {'inp_BLA_IC': np.array([
+                                        [1.0 * parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0],
+                                        [0.0, 1.0 * parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0],
+                                        [0.0, 0.0, 1.0 * parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
+                                        [0.0, 0.0, 0.0, 1.0 * parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * parameters.Matrices_scalars['Sat_BLA_IC']]]),
                    'Food_LH': np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0]) * parameters.Matrices_scalars["Food_LH"],
                    "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0]) * parameters.Matrices_scalars["BLA_IC_LH"],
                    'LH_VTA': np.array([1.0]) * parameters.Matrices_scalars["LH_VTA"],
@@ -100,6 +100,16 @@ class CT_BGv_BLA_IC():
         self.BG_v.reset_activity()
         self.DM.reset_activity()
         self.PL.reset_activity()
+        
+    def update_output_pre(self):
+        
+        self.LH_output_pre = self.LH.output.copy()
+        self.VTA_output_pre = self.VTA.output.copy()
+        self.BLA_IC_output_pre = self.BLA_IC.output.copy()
+        self.BG_v_output_pre = self.BG_v.output_BG_v.copy()
+        self.NAc_output_pre = self.BG_v.NAc.output.copy()
+        self.DM_output_pre = self.DM.output.copy()
+        self.PL_output_pre = self.PL.output.copy()
         
     def delta_Str_learn_USV(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
         
@@ -150,11 +160,5 @@ class CT_BGv_BLA_IC():
         if learning:
             self.learning(parameters)
             
-        self.LH_output_pre = self.LH.output.copy()
-        self.VTA_output_pre = self.VTA.output.copy()
-        self.BLA_IC_output_pre = self.BLA_IC.output.copy()
-        self.BG_v_output_pre = self.BG_v.output_BG_v.copy()
-        self.NAc_output_pre = self.BG_v.NAc.output.copy()
-        self.DM_output_pre = self.DM.output.copy()
-        self.PL_output_pre = self.PL.output.copy()
+        self.update_output_pre()
         

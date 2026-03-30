@@ -24,19 +24,24 @@ def plotting(res):
     plt.close("all")
 
     # Isolating single layers
-    BG_dl = -np.array(res["BG_dl_output"])
+    DLS = np.array(res["DLS_output"]) * -1
+    STNdl = np.array(res["STNdl_output"])
+    BG_dl = np.array(res["BG_dl_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
+    actions = np.array(res['Action_selection'])
     W = np.array(res["Weight_timeline"])
 
     # Plotting set up
     plots = [
-        ("BG_dl", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (0, 1)),
-        ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (0, 1)),
-        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (0, 1)),
+        ("DLS", [(DLS[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("STNdl", [(STNdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("BG_dl", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
     ]
 
-    n_rows = len(plots) + 1
+    n_rows = len(plots) + 2
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -65,6 +70,26 @@ def plotting(res):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
+    #Action selection
+    title_ax = fig.add_subplot(gs[-2, 0])
+    ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        actions.reshape(-1, 1).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2
+    )
+    
+    ax.set_yticks([])  
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
     # Weight heatmap
     title_ax = fig.add_subplot(gs[-1, 0])
@@ -100,14 +125,13 @@ def plotting(res):
 
     plt.show()
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")
     parser.add_argument(
         "-s",
         "--seed",
         type=int,
-        default=8,
+        default=0,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -115,14 +139,14 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=[1.0, 1.0],
+        default=[1.0, 0.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
         "-t",
         "--timesteps",
         type=int,
-        default=5000,
+        default=1000,
         help="Number of timesteps",
     )
     parser.add_argument(
@@ -137,7 +161,7 @@ def parse_args():
         "--dopamine",
         type=float,
         nargs=2,
-        default=[0.7, 0.7],
+        default=[0.9, 0.0],
         help="Insert dopamine for learnig: float type",
     )
     parser.add_argument(
@@ -158,29 +182,29 @@ def parse_args():
         "-nMC",
         "--noise_MC",
         type=float,
-        default=0.28,
+        default=0.4,
         help="Insert MC noise in simulation",
     )
     parser.add_argument(
-        "--MC_MGV_W", type=float, default=2.0, help="Insert MC_MGV matrix strenght"
+        "--MC_MGV_W", type=float, default=2.3, help="Insert MC_MGV matrix strenght"
     )
     parser.add_argument(
-        "--GPi_baseline", type=float, default=0.2, help="Insert GPi baseline value"
+        "--MGV_MC_W", type=float, default=1.8, help="Insert MGV_MC matrix strenght"
     )
     parser.add_argument(
-        "--MGV_MC_W", type=float, default=1.5, help="Insert MGV_MC matrix strenght"
+        "--GPi_baseline", type=float, default=0.3, help="Insert GPi baseline value"
     )
+    
     return parser.parse_args()
-
 
 if __name__ == "__main__":
     args = parse_args()
     inp = np.array(args.inp)
     timesteps = args.timesteps
     da = np.array(args.dopamine)
-    seed = args.seed
 
     parameters = Parameters()
+    parameters.seed = args.seed
     parameters.noise["BG_dl"] = args.noise_BG_dl
     parameters.noise["MGV"] = args.noise_MGV
     parameters.noise["MC"] = args.noise_MC
@@ -188,42 +212,58 @@ if __name__ == "__main__":
     parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
     parameters.baseline["GPi"] = args.GPi_baseline
     parameters.Str_Learn["eta_DLS"] = 0.001
-    parameters.BG_dl_W["STNdl_GPi_W"] = 1.6
+    parameters.Str_Learn["theta_DLS"] = 0.12
+    parameters.Str_Learn["theta_inp_DLS"] = 0.5
+    parameters.threshold['MC'] = 0.4
+    parameters.tau['MC'] = 6
+    parameters.BG_dl_W['DLS_GPi_W'] = 1.8
+    parameters.BG_dl_W['STNdl_GPi_W'] = 1.6
 
-    rng = np.random.RandomState(seed)
+    rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)
-    CT_BG_model.Ws["inp_DLS"] = np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]])
 
+    DLS_output = []
+    STNdl_output = []
     BG_dl_output = []
     MGV_output = []
     MC_output = []
     W_timeline = []
     _input_ = []
+    actions = []
 
     CT_BG_model.reset_activity()
 
     for t in range(timesteps):
-        if t == timesteps // 2:
-            CT_BG_model.reset_activity()
-            CT_BG_model.update_output_pre()
 
         CT_BG_model.step(parameters, inp, da)
-
+        
+        action = CT_BG_model.MC.output.copy()
+        if np.any(action >= CT_BG_model.MC.threshold):
+            winner = np.argmax(action) + 1
+        else:
+            winner = np.array(0)
+         
+        DLS_output.append(CT_BG_model.BG_dl.DLS.output.copy())
+        STNdl_output.append(CT_BG_model.BG_dl.STNdl.output.copy())
         BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
         MGV_output.append(CT_BG_model.MGV.output.copy())
         MC_output.append(CT_BG_model.MC.output.copy())
         W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
         _input_.append(inp.copy())
+        actions.append(winner.copy())
 
     result = {
-        "Seed": np.ones(timesteps) * seed,
+        "Seed": np.ones(timesteps) * parameters.seed,
         "Inputs_timeline": _input_,
+        'DLS_output': DLS_output,
+        'STNdl_output': STNdl_output,
         "BG_dl_output": BG_dl_output,
         "MGV_output": MGV_output,
         "MC_output": MC_output,
         "Weight_timeline": W_timeline,
+        'Action_selection': actions
     }
-
+    
     if args.mode == "plot":
         plotting(result)
         input("Press Enter to exit")
@@ -270,7 +310,7 @@ if __name__ == "__main__":
             for y in range(CT_BG_model.Ws["inp_DLS"].shape[1])
         ]
 
-        values = np.concatenate([[seed], fin_inp, fin_W])
+        values = np.concatenate([[parameters.seed], fin_inp, fin_W])
         columns = seed_col + input_cols + W_cols
 
         df = pd.DataFrame([values], columns=columns)

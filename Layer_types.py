@@ -151,35 +151,26 @@ class Leaky_onset_units_exc:
             - activity_ui will be used as inhibition for input income in uo
         """
         net_input = np.dot(self.W, self.output) + (inputs + (self.rng.randn() * self.noise)) + self.baseline
-        # net_input = np.clip(net_input, -1e6, 1e6)
-        # net_input = np.nan_to_num(net_input)
         
         ui_dot = (1 / self.tau_ui) * (net_input - self.activity_ui)
-        # ui_dot = np.nan_to_num(ui_dot)
-        # ui_dot = np.clip(ui_dot, -1e6, 1e6)
     
         self.activity_ui += ui_dot
-        # self.activity_ui = np.clip(self.activity_ui, -1e6, 1e6)
-        # self.activity_ui = np.nan_to_num(self.activity_ui)
         
         """
         Set  component uo activity:
             
             - activity_uo will be used as output of the onset unit
         """
-        uo_input = np.maximum(0, net_input - self.activity_ui)
-        # uo_input = np.nan_to_num(uo_input)
-    
+        net_input_uo = net_input - self.activity_ui
+        if net_input_uo > 0:
+            raise ValueError('Positive value')
+        uo_input = np.maximum(0, net_input_uo)
+        
         uo_dot = (1 / self.tau_uo) * (uo_input - self.activity_uo)
-        # uo_dot = np.nan_to_num(uo_dot)
-        # uo_dot = np.clip(uo_dot, -1e6, 1e6)
     
         self.activity_uo += uo_dot
-        # self.activity_uo = np.clip(self.activity_uo, -1e6, 1e6)
-        # self.activity_uo = np.nan_to_num(self.activity_uo)
         
-        act = np.tanh(self.activity_uo)      
-        # act = np.nan_to_num(act)
+        act = np.tanh(self.activity_uo)
     
         self.output = np.maximum(0, act)     
         
@@ -231,7 +222,6 @@ class BG_v_Layer:
             "STNv_SNpr" : np.ones((N, N)).astype(float) * self.STNv_SNpr_W
             }
         
-
     def reset_activity(self):
         """ 
         Reset activity values for each Layer object through the Layre's function for activity reset
@@ -239,6 +229,10 @@ class BG_v_Layer:
         self.NAc.reset_activity()
         self.STNv.reset_activity()
         self.SNpr.reset_activity()
+        self.output_BG_v *= 0
+        self.output_NAc_pre *= 0
+        self.output_STNv_pre *= 0
+        
         
     def step(self, inputs, inp_feedback_NAc, inp_feedback_STNv):
         """
@@ -304,6 +298,9 @@ class BG_dm_Layer:
         self.DMS.reset_activity()
         self.STNdm.reset_activity()
         self.GPi_SNpr.reset_activity()
+        self.output_BG_dm *= 0
+        self.output_DMS_pre *= 0
+        self.output_STNdm_pre *= 0
         
     def step(self, inputs, inp_feedback_DMS, inp_feedback_STNdm):
         """
@@ -369,6 +366,9 @@ class BG_dl_Layer:
         self.DLS.reset_activity()
         self.STNdl.reset_activity()
         self.GPi.reset_activity()
+        self.output_BG_dl *= 0
+        self.output_DLS_pre *= 0
+        self.output_STNdl_pre *= 0
         
     def step(self, inputs, inp_feedback_DLS, inp_feedback_STNdl):
         """
@@ -467,17 +467,21 @@ class SNpc_Layer:
         self.SNpci_2.reset_activity()
         self.SNpco_1.reset_activity()
         self.SNpco_2.reset_activity()
+        self.output_1 *= 0
+        self.output_2 *= 0
+        self.output_SNpci_1_pre *= 0
+        self.output_SNpci_2_pre *= 0
         
     def step(self, inp_NAc, inp_DMS, inp_PPN):
         
         self.SNpci_1.step(inp_NAc)
         output_i_1 = self.SNpci_1.output.copy()
-        self.SNpco_1.step(self.output_SNpci_1_pre + inp_PPN)
+        self.SNpco_1.step(np.dot(self.SNpc_Ws['SNpci_1_SNpco_1_W'], self.output_SNpci_1_pre) + inp_PPN)
         self.output_1 = self.SNpco_1.output.copy()
         
         self.SNpci_2.step(inp_DMS)
         output_i_2 = self.SNpci_2.output.copy()
-        self.SNpco_2.step(self.output_SNpci_2_pre + inp_PPN)
+        self.SNpco_2.step(np.dot(self.SNpc_Ws['SNpci_2_SNpco_2_W'], self.output_SNpci_2_pre) + inp_PPN)
         self.output_2 = self.SNpco_2.output.copy()
         
         if np.any(self.SNpco_1.output.copy() > 1.0) or np.any(self.SNpco_2.output.copy() > 1.0):

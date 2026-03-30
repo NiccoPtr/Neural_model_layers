@@ -17,21 +17,14 @@ def parse_args():
     parser.add_argument(
         "--csv",
         type=str,
-        default="sim_seed0/Model_Simulation.csv",
+        default="sim_seed3/Model_Simulation.csv",
         help="Path to CSV file"
-    )
-    parser.add_argument(
-        '-s',
-        "--seed",
-        type=int,
-        default=0,
-        help="Simulation seed to refer, must match used seeds"
     )
     parser.add_argument(
         '-t',
         "--trial",
         type=int,
-        default=0,
+        default=299,
         help="Define trial to refer for plotting"
     )
     return parser.parse_args()
@@ -39,38 +32,28 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
+    print(f'Reading file {str(args.csv)}')
     df = pd.read_csv(args.csv)
 
-    if args.seed not in df['Seed'].values:
-        raise ValueError(f"Seed {args.seed} not present in Simulation DataFrame")
-
     if args.trial not in df['Trial'].values:
-        raise ValueError(f"Trial {args.trial} is not present in Simulation DataFrame")
-        
+        raise ValueError(f"Trial {args.trial} is not present, simulation contains {int(df['Trial'].iloc[-1])} Trials")
+            
     #Create a 'df_new' that isolates those rows of interest for every column
-    #Take into account Seed and Trial specified by args    
+    #Take into account Seed and Trial specified by args  
+    print(f'Creating DataFrame isolated to Trial {str(args.trial)}')
     df_new = df[
-        (df["Seed"] == args.seed) &
         (df["Trial"] == args.trial)
         ].sort_values("Timestep").copy()
     
-    if df_new.empty:
-        
-        df_check = df[
-            (df["Seed"] == args.seed)
-            ].copy()
-        
-        trials = int(df_check['Trial'].iloc[-1])
-        raise ValueError(
-            f'Simulation with Seed {args.seed} has {trials} Trials: Trial {args.trial} exceeds excepted values'
-        )
-    
+    print('Generating plotting image')
     timesteps = len(df_new)
     
     #Layers
     MC = df_new.filter(like="MC_Unit").to_numpy()
     PFCd_PPC = df_new.filter(like="PFCd_PPC_Unit").to_numpy()
     PL = df_new.filter(like="PL_Unit").to_numpy()
+    BLA_IC = df_new.filter(like="BLA_IC_Unit").to_numpy()
+    NAc = df_new.filter(like="NAc_Unit").to_numpy() * -1
     state = df_new.filter(like="Input_").to_numpy()
     
     #Matrices
@@ -100,6 +83,8 @@ if __name__ == "__main__":
     
     #Plotting set up
     plots = [
+        ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(4)], (-0.1, 1.2)),
+        ('NAc', [(NAc[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2))

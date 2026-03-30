@@ -32,6 +32,7 @@ def plotting(res):
     DM = np.array(res["DM"])
     PL = np.array(res["PL"])
     W = np.array(res["W_timeline"])
+    W_BLA_IC = np.array(res['W_BLA_IC_NAc'])
     inp = np.array(res["Inp_timeline"])
 
     rows, cols = np.ix_([0, 1], [2, 3])
@@ -41,25 +42,14 @@ def plotting(res):
     plots = [
         ("LH", [(LH[:], "Unit_1")], (-0.2, 1.2)),
         ("VTA", [(VTA[:], "Unit_1")], (-0.2, 1.2)),
+        ("BLA_IC", [(BLA_IC[:, i], f"Unit_{i+1}") for i in range(4)], (-0.2, 1.2)),
         ("NAc", [(NAc[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("BGv", [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
-        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
-        (
-            "Input",
-            [
-                (inp[:, 0], "Lever"),
-                (inp[:, 1], "Chain"),
-                (inp[:, 2], "Food_1"),
-                (inp[:, 3], "Food_2"),
-                (inp[:, 4], "Sat_1"),
-                (inp[:, 5], "Sat_2"),
-            ],
-            (-0.2, 1.2),
-        ),
+        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2))
     ]
 
-    n_rows = len(plots) + 2
+    n_rows = len(plots) + 3
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -88,16 +78,15 @@ def plotting(res):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
+    #Input plotting
+    title_ax = fig.add_subplot(gs[-3, 0])
+    ax = fig.add_subplot(gs[-3, 1], sharex=shared_ax)
 
-    # BLA_IC plotting
-    title_ax = fig.add_subplot(gs[-2, 0])
-    ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
-
-    title_ax.text(0.5, 0.5, "BLA_IC", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "Input", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
-        BLA_IC.reshape(-1, 4).T,
+        inp.reshape(-1, 6).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
@@ -105,18 +94,41 @@ def plotting(res):
     )
 
     ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(4), ["L", "C", "F_1", "F_2"])
+    ax.set_yticks(np.arange(6), ["L", "C", "F_1", "F_2", "S_1", "S_2"])
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    # BLA_IC learning Weight
+    title_ax = fig.add_subplot(gs[-2, 0])
+    ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
+
+    title_ax.text(0.5, 0.5, "BLA_IC Weight", ha="center", va="center", fontsize=12)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_BLA_IC.reshape(-1, 4 * 4).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+    )
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(16), [f"W_{j}_{i}" for j in range(4) for i in range(4)])
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
-    # Weight heatmap
+    # BLA_IC NAc Weight learning
     title_ax = fig.add_subplot(gs[-1, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights learning", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "BLA_IC_NAc Weight", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -153,7 +165,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=0,
+        default=1,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -161,20 +173,20 @@ def parse_args():
         "--inp",
         type=float,
         nargs=6,
-        default=[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        default=[1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
         "-t",
         "--trials",
         type=int,
-        default=20,
+        default=1,
         help="Number of trials",
     )
     parser.add_argument(
         "--timesteps",
         type=int,
-        default=600,
+        default=500,
         help="Number of timesteps",
     )
     parser.add_argument(
@@ -188,11 +200,11 @@ def parse_args():
         "-nPL",
         "--noise_PL",
         type=float,
-        default=0.25,
+        default=0.4,
         help="Insert PL noise in simulation",
     )
     parser.add_argument(
-        "--PL_DM_W", type=float, default=2.0, help="Insert PL_DM matrix strenght"
+        "--PL_DM_W", type=float, default=2.3, help="Insert PL_DM matrix strenght"
     )
     parser.add_argument(
         "--DM_PL_W", type=float, default=1.8, help="Insert DM_PL matrix strenght"
@@ -212,10 +224,17 @@ if __name__ == "__main__":
     seed = args.seed
 
     parameters = Parameters()
+    parameters.Matrices_scalars['Sat_BLA_IC'] = 100.0
+    parameters.tau['BLA_IC'][0] = 2
+    parameters.tau['BLA_IC'][1] = 10
     parameters.BLA_Learn["eta_b"] = 0.1
+    parameters.BLA_Learn['alpha_t'] = 50
+    parameters.BLA_Learn['tau_t'] = 20
     parameters.BLA_Learn["theta_DA"] = 0.5
+    parameters.Str_Learn['eta_NAc'] = 0.05
     parameters.Str_Learn["theta_inp_NAc"] = 0.8
-    parameters.Str_Learn["theta_NAc"] = 0.4
+    parameters.Str_Learn['theta_DA_NAc'] = 0.5
+    parameters.Str_Learn["theta_NAc"] = 0.12
 
     if args.noise_PL:
         parameters.noise["PL"] = args.noise_PL
@@ -237,31 +256,24 @@ if __name__ == "__main__":
     DM_output = []
     PL_output = []
     W_timeline = []
+    W_BLA_IC_NAc = []
     inp_timeline = []
 
-    for _ in range(trials):
+    for k in range(trials):
         CT_BGv_BLA_IC_model.reset_activity()
-
-        if args.inp[0] == 1.0 and args.inp[1] == 0.0:
-            inp[2] = 0.0
-
-        elif args.inp[1] == 1.0 and args.inp[0] == 0.0:
-            inp[3] = 0.0
-
-        elif args.inp[0] == 1.0 and args.inp[1] == 1.0:
-            inp[2] = 0.0
-            inp[3] = 0.0
+        CT_BGv_BLA_IC_model.update_output_pre()
+        inp[2:4] = 0.0
 
         for t in range(timesteps):
+            if t < 50:
+                inp[0:2] = 0.0
+            elif t == 50:
+                inp = np.array(args.inp)
 
-            if args.inp[0] == 1.0 and args.inp[1] == 0.0 and t == timesteps * 0.18:
+            if args.inp[0] == 1.0 and t == timesteps * 0.18:
                 inp[2] = 1.0
 
-            elif args.inp[1] == 1.0 and args.inp[0] == 0.0 and t == timesteps * 0.18:
-                inp[3] = 1.0
-
-            elif args.inp[0] == 1.0 and args.inp[1] == 1.0 and t == timesteps * 0.18:
-                inp[2] = 1.0
+            elif args.inp[1] == 1.0 and t == timesteps * 0.18:
                 inp[3] = 1.0
 
             CT_BGv_BLA_IC_model.step(parameters, inp)
@@ -274,26 +286,28 @@ if __name__ == "__main__":
             DM_output.append(CT_BGv_BLA_IC_model.DM.output.copy())
             PL_output.append(CT_BGv_BLA_IC_model.PL.output.copy())
             W_timeline.append(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc"].copy())
+            W_BLA_IC_NAc.append(CT_BGv_BLA_IC_model.BLA_IC.W.copy())
             inp_timeline.append(inp.copy())
 
-            if t == timesteps - 1:
+            if k == trials - 1:
 
                 result = {
-                    "Seed": np.ones(timesteps) * seed,
+                    "Seed": np.ones(timesteps * trials) * seed,
                     "Inp_timeline": inp_timeline,
                     "W_timeline": W_timeline,
+                    'W_BLA_IC_NAc': W_BLA_IC_NAc,
                     "BLA_IC": BLA_IC_output,
                     "LH": LH_output,
                     "VTA": VTA_output,
                     "NAc": NAc_output,
                     "BGv": BGv_ouput,
                     "DM": DM_output,
-                    "PL": PL_output,
+                    "PL": PL_output
                 }
 
     if args.mode == "plot":
         plotting(result)
-        input("Press Enter to exit")
+        # input("Press Enter to exit")
 
     elif args.mode == "stream":
         inp_end = inp.copy()
