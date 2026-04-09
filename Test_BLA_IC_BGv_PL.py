@@ -165,7 +165,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=1,
+        default=0,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -180,7 +180,7 @@ def parse_args():
         "-t",
         "--trials",
         type=int,
-        default=10,
+        default=20,
         help="Number of trials",
     )
     parser.add_argument(
@@ -224,10 +224,10 @@ if __name__ == "__main__":
     seed = args.seed
 
     parameters = Parameters()
-    parameters.Matrices_scalars['Sat_BLA_IC'] = 100.0
+    parameters.Matrices_scalars['Sat_BLA_IC'] = 20.0
     parameters.tau['BLA_IC'][0] = 2
     parameters.tau['BLA_IC'][1] = 10
-    parameters.BLA_Learn["eta_b"] = 0.01
+    parameters.BLA_Learn["eta_b"] = 0.005
     parameters.BLA_Learn['alpha_t'] = 50
     parameters.BLA_Learn['tau_t'] = 20
     parameters.BLA_Learn["theta_DA"] = 0.5
@@ -263,12 +263,18 @@ if __name__ == "__main__":
         CT_BGv_BLA_IC_model.reset_activity()
         CT_BGv_BLA_IC_model.update_output_pre()
         inp[2:4] = 0.0
-
+        
+        if k >= trials*0.7:
+            inp[-1] = 1.0
+            
         for t in range(timesteps):
             if t < 50:
                 inp[0:2] = 0.0
             elif t == 50:
                 inp = np.array(args.inp)
+                
+                if k >= trials*0.7:
+                    inp[-1] = 1.0
 
             if args.inp[0] == 1.0 and t == timesteps * 0.18:
                 inp[2] = 1.0

@@ -2,12 +2,12 @@
 
 scheduling=$(cat << EOF 
 {
-    "trials": 20,
+    "trials": 200,
     "timesteps": 1000,
-    "states": [[0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+    "states": [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+		[0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
 		[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-		[1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-		[0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+		[0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
 		],
     "phases": [0.25, 0.5, 0.75, 1.0]
 }   
@@ -31,6 +31,23 @@ params=$(cat << EOF
             "PPN": [2, 10],
             "LH": [2, 10],
             "VTA": 6
+        },
+
+	"threshold":{
+            "BG_dl": 0.0,
+            "BG_dm": 0.0,
+            "BG_v": 0.0,
+            "MGV": 0.0,
+            "MC": 0.4,
+            "BLA_IC": 0.0,
+            "SNpc": 0.0,
+            "PPN": 0.0,
+            "LH": 0.0,
+            "VTA": 0.0,
+            "P": 0.0,
+            "DM": 0.0,
+            "PL": 0.0,
+            "PFCd_PPC": 0.0
         },
 
         "noise":{
@@ -80,7 +97,7 @@ params=$(cat << EOF
             "Food_PPN": 10.0,
             "Food_BLA_IC": 5.0,
             "Food_LH": 10.0,
-            "Sat_BLA_IC": 50.0,
+            "Sat_BLA_IC": 20.0,
             "PPN_SNpco": 20.0,
             "BLA_IC_NAc": 0.0,
             "BLA_IC_LH": 5.0,
@@ -148,9 +165,9 @@ params=$(cat << EOF
 EOF
 )
 
-__tauMC__=10
-__tauPFCd_PPC__=10
-__tauPL__=10
+__tauMC__=6
+__tauPFCd_PPC__=6
+__tauPL__=6
 __tauBLA_IC_uo__=2
 
 __nMC__=0.4
@@ -163,15 +180,15 @@ __bSNpr__=0.3
 __bSNpc__=0.3
 
 __wMGV_MC__=1.8
-__wMC_MGV__=2.0
+__wMC_MGV__=2.3
 __wP_PFCd_PPC__=1.8
-__wPFCd_PPC_P__=2.0
+__wPFCd_PPC_P__=2.3
 __wDM_PL__=1.8
-__wPL_DM__=2.0
+__wPL_DM__=2.3
 
 __eta_DLS__=0.001
 __eta_DMS__=0.001
-__eta_NAc__=0.1
+__eta_NAc__=0.05
 __theta_DLS__=0.12
 __theta_DMS__=0.12
 __theta_NAc__=0.12
@@ -181,7 +198,7 @@ __wSTNdl_GPi__=1.6
 __wSTNdm_GPiSNpr__=1.6
 __wSTNv_SNpr__=1.6
 
-__eta_b__=0.1
+__eta_b__=0.005
 __tau_t__=20
 __theta_DA__=0.5
 
