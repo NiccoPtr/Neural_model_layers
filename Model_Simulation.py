@@ -7,6 +7,7 @@ Created on Fri Nov 14 17:46:01 2025
 
 import argparse
 import os
+import joblib
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -17,7 +18,6 @@ from matplotlib.gridspec import GridSpec
 from Model_class import Model
 from params import Parameters
 from scheduling import Scheduling
-
 
 def plotting(results, idx):
 
@@ -601,6 +601,8 @@ if __name__ == "__main__":
         else:
             df.to_csv(csv_path, index=False)
             
+        model_path = f'Model_{int(parameters.seed)}.joblib'
+        joblib.dump(model, model_path)
         print(
             f"File {str(csv_path)} saved succesfully"
             )

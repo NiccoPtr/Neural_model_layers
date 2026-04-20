@@ -7,6 +7,7 @@ Created on Wed Apr 15 13:23:51 2026
 
 import argparse
 import os
+import joblib
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -17,7 +18,6 @@ from matplotlib.gridspec import GridSpec
 from Model_class import Model
 from params import Parameters
 from scheduling import Scheduling
-
 
 def plotting(results, idx):
 
@@ -348,20 +348,23 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    if Path("sim_params.json").exists():
-        parameters.load("sim_params.json", mode="json")
+    parameters.seed = args.seed
+    if Path(f"sim_seed{int(parameters.seed)}/sim_params.json").exists():
+        parameters.load(f"sim_seed{int(parameters.seed)}/sim_params.json", mode="json")
         
     scheduling = Scheduling()
     if args.scheduling is not None:
         scheduling.load(args.scheduling, mode="json")
     parameters.scheduling = scheduling._params_to_dict()
-    parameters.seed = args.seed
 
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
     idx = args.index
-    model = Model(parameters)
+    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
+    model.MC.noise = 0.0
+    model.PFCd_PPC.noise = 0.0
+    model.PL.noise = 0.0
     results = []
 
     for trial in range(parameters.scheduling["trials"]):
@@ -583,7 +586,7 @@ if __name__ == "__main__":
             dfs.append(df_new)
 
         df = pd.concat(dfs, ignore_index=True)
-        csv_path = "Model_Simulation.csv"
+        csv_path = "Test_Simulation.csv"
 
         if os.path.exists(csv_path):
             df.to_csv(csv_path, mode="a", header=False, index=False)

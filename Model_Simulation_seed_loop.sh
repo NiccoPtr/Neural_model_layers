@@ -82,11 +82,11 @@ params=$(cat << EOF
             "NAc": 0.0,
             "STNv": 0.0,
             "SNpr": __bSNpr__,
-            "MGV": 0.0,
+            "MGV": 0.2,
             "MC": 0.0,
-            "P": 0.0,
+            "P": 0.1,
             "PFCd_PPC": 0.0,
-            "DM": 0.0,
+            "DM": 0.1,
             "PL": 0.0
         },
 
@@ -117,8 +117,8 @@ params=$(cat << EOF
             "PFCd_PPC_P": __wPFCd_PPC_P__,
             "PFCd_PPC_DMS": 1.2,
             "PFCd_PPC_STNdm": 1.6,
-            "PFCd_PPC_PL": 1.0,
-            "PFCd_PPC_MC": 1.0,
+            "PFCd_PPC_PL": 0.3,
+            "PFCd_PPC_MC": 0.3,
             "MC_MGV": __wMC_MGV__,
             "MC_DLS": 1.2,
             "MC_STNdl": 1.6,
@@ -158,7 +158,7 @@ params=$(cat << EOF
 
         "BG_v_W":{"NAc_SNpr_W": 1.8, "STNv_SNpr_W": __wSTNv_SNpr__},
 
-	"SNpc_W":{"SNpci_1_SNpco_1_W": 1.0, "SNpci_2_SNpco_2_W": 1.0},
+	"SNpc_W":{"SNpci_1_SNpco_1_W": 2.2, "SNpci_2_SNpco_2_W": 2.2},
 
 	"BLA_Learn":{"eta_b": __eta_b__, "alpha_t": 50.0, "tau_t": __tau_t__, "theta_DA": __theta_DA__, "max_W": 2}
 }
@@ -174,13 +174,13 @@ __nMC__=0.4
 __nPL__=0.4
 __nPFCd_PPC__=0.4
 
-__bGPi__=0.3
-__bGPi_SNpr__=0.3
-__bSNpr__=0.3
-__bSNpc__=0.3
+__bGPi__=0.4
+__bGPi_SNpr__=0.4
+__bSNpr__=0.4
+__bSNpc__=0.9
 
 __wMGV_MC__=1.8
-__wMC_MGV__=2.3
+__wMC_MGV__=2.2
 __wP_PFCd_PPC__=1.8
 __wPFCd_PPC_P__=2.3
 __wDM_PL__=1.8
@@ -188,10 +188,10 @@ __wPL_DM__=2.3
 
 __eta_DLS__=0.001
 __eta_DMS__=0.001
-__eta_NAc__=0.05
-__theta_DLS__=0.12
-__theta_DMS__=0.12
-__theta_NAc__=0.12
+__eta_NAc__=0.02
+__theta_DLS__=0.2
+__theta_DMS__=0.2
+__theta_NAc__=0.2
 __theta_inp_NAc__=0.8
 
 __wSTNdl_GPi__=1.6
@@ -208,7 +208,7 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-for seed in $(seq 0 1 0); do
+for seed in $(seq 5 1 5); do
     SIM=sim_seed${seed}
     mkdir -p $SIM
     cd $SIM
@@ -257,5 +257,3 @@ for seed in $(seq 0 1 0); do
 
     cd $CURR_DIR  
 done
-      
-

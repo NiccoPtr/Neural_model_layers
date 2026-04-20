@@ -17,14 +17,14 @@ def parse_args():
     parser.add_argument(
         "--csv",
         type=str,
-        default="sim_seed3/Model_Simulation.csv",
+        default="sim_seed0/Model_Simulation.csv",
         help="Path to CSV file"
     )
     parser.add_argument(
         '-t',
         "--trial",
         type=int,
-        default=299,
+        default=149,
         help="Define trial to refer for plotting"
     )
     return parser.parse_args()

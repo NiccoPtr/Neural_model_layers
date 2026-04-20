@@ -131,7 +131,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=0,
+        default=2,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -139,7 +139,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=[1.0, 0.0],
+        default=[1.0, 1.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -161,7 +161,7 @@ def parse_args():
         "--dopamine",
         type=float,
         nargs=2,
-        default=[0.9, 0.0],
+        default=[0.0, 0.0],
         help="Insert dopamine for learnig: float type",
     )
     parser.add_argument(
@@ -182,17 +182,17 @@ def parse_args():
         "-nMC",
         "--noise_MC",
         type=float,
-        default=0.4,
+        default=0.0,
         help="Insert MC noise in simulation",
     )
     parser.add_argument(
-        "--MC_MGV_W", type=float, default=2.3, help="Insert MC_MGV matrix strenght"
+        "--MC_MGV_W", type=float, default=2.2, help="Insert MC_MGV matrix strenght"
     )
     parser.add_argument(
         "--MGV_MC_W", type=float, default=1.8, help="Insert MGV_MC matrix strenght"
     )
     parser.add_argument(
-        "--GPi_baseline", type=float, default=0.3, help="Insert GPi baseline value"
+        "--GPi_baseline", type=float, default=0.4, help="Insert GPi baseline value"
     )
     
     return parser.parse_args()
@@ -211,8 +211,9 @@ if __name__ == "__main__":
     parameters.Matrices_scalars["MC_MGV"] = args.MC_MGV_W
     parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
     parameters.baseline["GPi"] = args.GPi_baseline
+    parameters.baseline['MGV'] = 0.2
     parameters.Str_Learn["eta_DLS"] = 0.001
-    parameters.Str_Learn["theta_DLS"] = 0.12
+    parameters.Str_Learn["theta_DLS"] = 0.2
     parameters.Str_Learn["theta_inp_DLS"] = 0.5
     parameters.threshold['MC'] = 0.4
     parameters.tau['MC'] = 6
@@ -234,8 +235,12 @@ if __name__ == "__main__":
     CT_BG_model.reset_activity()
 
     for t in range(timesteps):
+        
+        # if t == timesteps//2:
+        #     inp[1] += 0.2
 
-        CT_BG_model.step(parameters, inp, da)
+        CT_BG_model.step(parameters, inp, da, learn=False)
+        CT_BG_model.Ws['inp_DLS'] = np.eye(parameters.N["BG_dl"]) * 0.2
         
         action = CT_BG_model.MC.output.copy()
         if np.any(action >= CT_BG_model.MC.threshold):
@@ -266,7 +271,14 @@ if __name__ == "__main__":
     
     if args.mode == "plot":
         plotting(result)
-        input("Press Enter to exit")
+        print(f"""
+              Seed: {args.seed}
+              Input: {args.inp}
+              MC Noise: {args.noise_MC}
+              GPi Baseline: {args.GPi_baseline}
+              MGV Baseline: {parameters.baseline['MGV']}
+              """)
+        # input("Press Enter to exit")
 
     elif args.mode == "stream":
         inp_end = inp.copy()

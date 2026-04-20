@@ -43,7 +43,7 @@ class CT_BG():
               "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],
               "MC_DLS": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS"],
               "MC_STNdl": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_STNdl"],
-              "PFCd_PPC_MC": np.eye(parameters.N["MC"])
+              "PFCd_PPC_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars['PFCd_PPC_MC']
               }
         
         self.W_learn_mask = np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]])
@@ -96,7 +96,7 @@ class CT_BG():
         self.Ws['inp_DLS'] += self.delta_W_inp_DLS
         
         
-    def step(self, parameters, inp, da, PFCd_PPC_inp = [0.0, 0.0], learn = True):
+    def step(self, parameters, inp, da, PFCd_PPC_inp = (0.9, 0.4), learn = True):
         
         self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
                    np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
