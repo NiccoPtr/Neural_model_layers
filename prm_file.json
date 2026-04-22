@@ -61,7 +61,7 @@
         "LH": 0.0,
         "VTA": 0.0,
         "BLA_IC": 0.0,
-        "SNpc": 0.9,
+        "SNpc": 2.0,
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.4,
@@ -91,8 +91,8 @@
         "STNv_SNpr_W": 1.6
     },
     "SNpc_W": {
-        "SNpci_1_SNpco_1_W": 2.2,
-        "SNpci_2_SNpco_2_W": 2.2
+        "SNpci_1_SNpco_1_W": 12.0,
+        "SNpci_2_SNpco_2_W": 12.0
     },
     "seed": 0,
     "noise": {
@@ -119,12 +119,12 @@
         "Food_BLA_IC": 5.0,
         "Food_LH": 10.0,
         "Sat_BLA_IC": 20.0,
-        "PPN_SNpco": 20.0,
+        "PPN_SNpco": 10.0,
         "BLA_IC_NAc": 0.0,
         "BLA_IC_LH": 5.0,
         "LH_VTA": 20.0,
-        "NAc_SNpci_1": 6.0,
-        "DMS_SNpci_2": 10.0,
+        "NAc_SNpci_1": 3.0,
+        "DMS_SNpci_2": 3.0,
         "GPi_MGV": 1.5,
         "GPi_SNpr_P": 1.5,
         "SNpr_DM": 1.5,

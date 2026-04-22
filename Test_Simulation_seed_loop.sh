@@ -19,13 +19,14 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-seed=7
-SIM=test_seed${seed}
-mkdir -p $SIM
-cd $SIM
+for seed in $(seq 1 1 9); do
+    SIM=test_seed${seed}
+    mkdir -p $SIM
+    cd $SIM
 
-echo "$scheduling" > scheduling.json
-echo "Running simulation with seed= $seed"
-python ${SRC}/Test_Simulation.py -m save -d scheduling.json -s $seed
+    echo "$scheduling" > scheduling.json
+    echo "Running simulation with seed= $seed"
+    python ${SRC}/Test_Simulation.py -m save -d scheduling.json -s $seed
 
-cd $CURR_DIR  
+    cd $CURR_DIR  
+done
