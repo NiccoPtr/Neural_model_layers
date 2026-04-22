@@ -20,7 +20,7 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-for seed in $(seq 5 1 5); do
+for seed in $(seq 6 1 6); do
     SIM=sim_seed${seed}
     mkdir -p $SIM
     cd $SIM
