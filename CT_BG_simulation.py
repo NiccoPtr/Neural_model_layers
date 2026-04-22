@@ -96,7 +96,7 @@ class CT_BG():
         self.Ws['inp_DLS'] += self.delta_W_inp_DLS
         
         
-    def step(self, parameters, inp, da, PFCd_PPC_inp = (0.9, 0.4), learn = True):
+    def step(self, parameters, inp, da, PFCd_PPC_inp = (0.0, 0.0), learn = True):
         
         self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
                    np.dot(self.Ws["MC_DLS"], self.MC_output_pre),

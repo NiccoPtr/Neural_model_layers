@@ -184,6 +184,6 @@ class Parameters(ParameterManager):
 # param_string = "Simulation"
 # param_file = "prm_file"
 
-
+# parameters = Parameters()
 # parameters.update(param_string)
 # parameters.save(param_file + ".json", mode="json")

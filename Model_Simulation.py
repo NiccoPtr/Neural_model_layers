@@ -348,8 +348,11 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    if Path("sim_params.json").exists():
-        parameters.load("sim_params.json", mode="json")
+    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
+        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
+        print('Imported parameters succesfully')
+    else:
+        raise ValueError('Parameters file not found')
         
     scheduling = Scheduling()
     if args.scheduling is not None:

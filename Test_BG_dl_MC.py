@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.gridspec import GridSpec
+from pathlib import Path
 
 from CT_BG_simulation import CT_BG
 from params import Parameters
@@ -131,7 +132,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=2,
+        default=1,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -139,7 +140,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=[1.0, 1.0],
+        default=[0.0, 0.0],
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -194,6 +195,12 @@ def parse_args():
     parser.add_argument(
         "--GPi_baseline", type=float, default=0.4, help="Insert GPi baseline value"
     )
+    parser.add_argument(
+        "--PFCd_PPC_1", type=float, default=0.0, help="Insert PFCd_PPC_1 input value"
+    )
+    parser.add_argument(
+        "--PFCd_PPC_2", type=float, default=0.0, help="Insert PFCd_PPC_2 input value"
+    )
     
     return parser.parse_args()
 
@@ -204,21 +211,9 @@ if __name__ == "__main__":
     da = np.array(args.dopamine)
 
     parameters = Parameters()
+    if Path("prm_file.json").exists():
+        parameters.load("prm_file.json", mode="json")
     parameters.seed = args.seed
-    parameters.noise["BG_dl"] = args.noise_BG_dl
-    parameters.noise["MGV"] = args.noise_MGV
-    parameters.noise["MC"] = args.noise_MC
-    parameters.Matrices_scalars["MC_MGV"] = args.MC_MGV_W
-    parameters.Matrices_scalars["MGV_MC"] = args.MGV_MC_W
-    parameters.baseline["GPi"] = args.GPi_baseline
-    parameters.baseline['MGV'] = 0.2
-    parameters.Str_Learn["eta_DLS"] = 0.001
-    parameters.Str_Learn["theta_DLS"] = 0.2
-    parameters.Str_Learn["theta_inp_DLS"] = 0.5
-    parameters.threshold['MC'] = 0.4
-    parameters.tau['MC'] = 6
-    parameters.BG_dl_W['DLS_GPi_W'] = 1.8
-    parameters.BG_dl_W['STNdl_GPi_W'] = 1.6
 
     rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)
@@ -239,7 +234,7 @@ if __name__ == "__main__":
         # if t == timesteps//2:
         #     inp[1] += 0.2
 
-        CT_BG_model.step(parameters, inp, da, learn=False)
+        CT_BG_model.step(parameters, inp, da, PFCd_PPC_inp=(args.PFCd_PPC_1, args.PFCd_PPC_2), learn=False)
         CT_BG_model.Ws['inp_DLS'] = np.eye(parameters.N["BG_dl"]) * 0.2
         
         action = CT_BG_model.MC.output.copy()
@@ -274,9 +269,10 @@ if __name__ == "__main__":
         print(f"""
               Seed: {args.seed}
               Input: {args.inp}
-              MC Noise: {args.noise_MC}
-              GPi Baseline: {args.GPi_baseline}
+              MC Noise: {parameters.noise['MC']}
+              GPi Baseline: {parameters.baseline['GPi']}
               MGV Baseline: {parameters.baseline['MGV']}
+              PFCd_PPC inp: {(args.PFCd_PPC_1, args.PFCd_PPC_2)}
               """)
         # input("Press Enter to exit")
 

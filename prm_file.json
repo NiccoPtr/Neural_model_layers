@@ -1,5 +1,4 @@
 {
-    "scheduling": null,
     "N": {
         "BG_dl": 2,
         "BG_dm": 2,
@@ -21,7 +20,7 @@
         "BG_dm": 0.0,
         "BG_v": 0.0,
         "MGV": 0.0,
-        "MC": 0.2,
+        "MC": 0.4,
         "BLA_IC": 0.0,
         "SNpc": 0.0,
         "PPN": 0.0,
@@ -43,7 +42,7 @@
         "BG_dm": 6,
         "BG_v": 6,
         "BLA_IC": [
-            10,
+            2,
             10
         ],
         "SNpc": 6,
@@ -62,7 +61,7 @@
         "LH": 0.0,
         "VTA": 0.0,
         "BLA_IC": 0.0,
-        "SNpc": 0.0,
+        "SNpc": 0.9,
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.4,
@@ -72,36 +71,36 @@
         "NAc": 0.0,
         "STNv": 0.0,
         "SNpr": 0.4,
-        "MGV": 0.0,
+        "MGV": 0.2,
         "MC": 0.0,
-        "P": 0.0,
+        "P": 0.2,
         "PFCd_PPC": 0.0,
-        "DM": 0.0,
+        "DM": 0.2,
         "PL": 0.0
     },
     "BG_dl_W": {
         "DLS_GPi_W": 1.8,
-        "STNdl_GPi_W": 1.4
+        "STNdl_GPi_W": 1.6
     },
     "BG_dm_W": {
         "DMS_GPiSNpr_W": 1.8,
-        "STNdm_GPiSNpr_W": 1.4
+        "STNdm_GPiSNpr_W": 1.6
     },
     "BG_v_W": {
         "NAc_SNpr_W": 1.8,
-        "STNv_SNpr_W": 1.4
+        "STNv_SNpr_W": 1.6
     },
     "SNpc_W": {
-        "SNpci_1_SNpco_1_W": 1.0,
-        "SNpci_2_SNpco_2_W": 1.0
+        "SNpci_1_SNpco_1_W": 2.2,
+        "SNpci_2_SNpco_2_W": 2.2
     },
-    "seed": 2,
+    "seed": 0,
     "noise": {
         "BG_dl": 0.0,
         "BG_dm": 0.0,
         "BG_v": 0.0,
         "MGV": 0.0,
-        "MC": 0.2,
+        "MC": 0.4,
         "BLA_IC": 0.0,
         "SNpc": 0.0,
         "PPN": 0.0,
@@ -109,8 +108,8 @@
         "VTA": 0.0,
         "P": 0.0,
         "DM": 0.0,
-        "PL": 0.2,
-        "PFCd_PPC": 0.2
+        "PL": 0.4,
+        "PFCd_PPC": 0.4
     },
     "Matrices_scalars": {
         "Mani_DLS": 0.0,
@@ -119,7 +118,7 @@
         "Food_PPN": 10.0,
         "Food_BLA_IC": 5.0,
         "Food_LH": 10.0,
-        "Sat_BLA_IC": 10.0,
+        "Sat_BLA_IC": 20.0,
         "PPN_SNpco": 20.0,
         "BLA_IC_NAc": 0.0,
         "BLA_IC_LH": 5.0,
@@ -129,22 +128,22 @@
         "GPi_MGV": 1.5,
         "GPi_SNpr_P": 1.5,
         "SNpr_DM": 1.5,
-        "MGV_MC": 1.0,
-        "P_PFCd_PPC": 1.0,
-        "DM_PL": 1.0,
-        "PL_DM": 1.0,
+        "MGV_MC": 1.8,
+        "P_PFCd_PPC": 1.8,
+        "DM_PL": 1.8,
+        "PL_DM": 2.2,
         "PL_NAc": 1.2,
         "PL_STNv": 1.6,
-        "PL_PFCd_PPC": 0.2,
-        "PFCd_PPC_P": 1.0,
+        "PL_PFCd_PPC": 0.1,
+        "PFCd_PPC_P": 2.2,
         "PFCd_PPC_DMS": 1.2,
         "PFCd_PPC_STNdm": 1.6,
-        "PFCd_PPC_PL": 1.0,
-        "PFCd_PPC_MC": 1.0,
-        "MC_MGV": 1.0,
+        "PFCd_PPC_PL": 0.2,
+        "PFCd_PPC_MC": 0.2,
+        "MC_MGV": 2.2,
         "MC_DLS": 1.2,
         "MC_STNdl": 1.6,
-        "MC_PFCd_PPC": 0.2
+        "MC_PFCd_PPC": 0.1
     },
     "DA_values": {
         "Y_DLS": 0.2,
@@ -155,25 +154,25 @@
         "delta_NAc": 1.5
     },
     "BLA_Learn": {
-        "eta_b": 0.08,
+        "eta_b": 0.01,
         "alpha_t": 50.0,
-        "tau_t": 200,
-        "theta_DA": 0.7,
+        "tau_t": 20,
+        "theta_DA": 0.5,
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS": 0.02,
-        "eta_DMS": 0.02,
-        "eta_NAc": 0.05,
+        "eta_DLS": 0.002,
+        "eta_DMS": 0.002,
+        "eta_NAc": 0.03,
         "theta_DA_DLS": 0.3,
         "theta_DA_DMS": 0.3,
         "theta_DA_NAc": 0.5,
-        "theta_DLS": 0.5,
-        "theta_DMS": 0.5,
-        "theta_NAc": 0.5,
+        "theta_DLS": 0.2,
+        "theta_DMS": 0.2,
+        "theta_NAc": 0.2,
         "theta_inp_DLS": 0.5,
         "theta_inp_DMS": 0.5,
-        "theta_inp_NAc": 0.9,
+        "theta_inp_NAc": 0.8,
         "max_W_DLS": 1,
         "max_W_DMS": 1,
         "max_W_NAc": 2
