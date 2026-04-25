@@ -25,20 +25,27 @@ def plotting(res):
     plt.close("all")
 
     # Isolating single layers
+    
+    SNpr = np.array(res["SNpr_output"]) * -1
     DM = np.array(res["DM_output"])
     PL = np.array(res["PL_output"])
+    GPi_SNpr = np.array(res["GPi_SNpr_output"]) * -1
     P = np.array(res["P_output"])
     PFCd_PPC = np.array(res["PFCd_PPC_output"])
+    GPi = np.array(res["GPi_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
     actions = np.array(res['Action_selection'])
 
     # Plotting set up
     plots = [
+        ("SNpr", [(SNpr[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("GPi_SNpr", [(GPi_SNpr[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("P", [(P[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("PFCd_PPC", [(PFCd_PPC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("GPi", [(GPi[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
     ]
@@ -114,11 +121,19 @@ def parse_args():
         help="Seed for random number generation",
     )
     parser.add_argument(
-        "-p",
-        "--inp",
+        "-i",
+        "--inp_i",
         type=float,
         nargs=2,
-        default=[-0.6, -0.6],
+        default=(-0.0, -0.0),
+        help="Input values (two floats)",
+    )
+    parser.add_argument(
+        "-e",
+        "--inp_e",
+        type=float,
+        nargs=2,
+        default=(0.3, 0.3),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -140,7 +155,8 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    inp = np.array(args.inp)
+    inp_i = np.array(args.inp_i)
+    inp_e = np.array(args.inp_e)
     timesteps = args.timesteps
 
     parameters = Parameters()
@@ -151,43 +167,55 @@ if __name__ == "__main__":
     rng = np.random.RandomState(parameters.seed)
     C_Model = Cortex(parameters, rng)
 
+    SNpr_output = []
     DM_output = []
     PL_output = []
+    GPi_SNpr_output = []
     P_output = []
     PFCd_PPC_output = []
+    GPi_output = []
     MGV_output = []
     MC_output = []
-    _input_ = []
+    _inp_i = []
+    _inp_e = []
     actions = []
 
     C_Model.reset_activity()
 
     for t in range(timesteps):
     
-        C_Model.step(inp)
+        C_Model.step(inp_i, inp_e)
         
         action = C_Model.MC.output.copy()
         if np.any(action >= C_Model.MC.threshold):
             winner = np.argmax(action) + 1
         else:
             winner = np.array(0)
-         
+            
+        SNpr_output.append(C_Model.SNpr.output.copy()) 
         DM_output.append(C_Model.DM.output.copy())
         PL_output.append(C_Model.PL.output.copy())
+        GPi_SNpr_output.append(C_Model.GPi_SNpr.output.copy())
         P_output.append(C_Model.P.output.copy())
         PFCd_PPC_output.append(C_Model.PFCd_PPC.output.copy())
+        GPi_output.append(C_Model.GPi.output.copy())
         MGV_output.append(C_Model.MGV.output.copy())
         MC_output.append(C_Model.MC.output.copy())
-        _input_.append(inp.copy())
+        _inp_i.append(inp_i.copy())
+        _inp_e.append(inp_e.copy())
         actions.append(winner.copy())
 
     result = {
         "Seed": np.ones(timesteps) * parameters.seed,
-        "Inputs_timeline": _input_,
+        "Inp_i_timeline": _inp_i.copy,
+        "Inp_e_timeline": _inp_e.copy,
+        "SNpr_output": SNpr_output,
         "DM_output": DM_output,
         "PL_output": PL_output,
+        "GPi_SNpr_output": GPi_SNpr_output,
         "P_output": P_output,
         "PFCd_PPC_output": PFCd_PPC_output,
+        "GPi_output": GPi_output,
         "MGV_output": MGV_output,
         "MC_output": MC_output,
         'Action_selection': actions
@@ -197,7 +225,8 @@ if __name__ == "__main__":
         plotting(result)
         print(f"""
               Seed: {args.seed}
-              Input: {args.inp}
+              Input_I: {args.inp_i}
+              Input_E: {args.inp_e}
               Cortex Noise: {parameters.noise['MC']}
               Thalamus Baseline: {parameters.baseline['MGV']}
               """)
