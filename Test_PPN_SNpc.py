@@ -103,7 +103,7 @@ def parse_args():
     parser.add_argument(
         "--NAc",
         type=int,
-        default=(0.0, 0.0),
+        default=(0.9, 0.4),
         help="NAc input",
     )
     parser.add_argument(
@@ -139,8 +139,8 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        if t == timesteps//2:
-            PPN_SNpc_model.reset_activity()
+        # if t == timesteps//2:
+        #     PPN_SNpc_model.reset_activity()
 
         PPN_SNpc_model.step(inp, NAc_inp = np.array(args.NAc) * -1, DMS_inp = np.array(args.DMS) * -1)
          

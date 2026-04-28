@@ -14,10 +14,8 @@ import pandas as pd
 from matplotlib.gridspec import GridSpec
 from pathlib import Path
 
-from Cortex_simulation import Cortex
+from Cortex_Th_BG_simulation import Cortex
 from params import Parameters
-
-plt.ion()
 
 
 def plotting(res):
@@ -122,20 +120,38 @@ def parse_args():
     )
     parser.add_argument(
         "-i",
-        "--inp_i",
+        "--inp_BLA",
         type=float,
         nargs=2,
-        default=(-0.0, -0.0),
+        default=(0.0, 0.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
         "-e",
-        "--inp_e",
+        "--inp",
         type=float,
         nargs=2,
-        default=(0.3, 0.3),
+        default=(0.0, 0.0),
         help="Input values (two floats)",
     )
+    parser.add_argument(
+        "--W_inp",
+        type=float,
+        default=0.2,
+        help='Scalar Matrix Input to Basal Ganglia'
+        )
+    parser.add_argument(
+        "--W_C",
+        type=float,
+        default=1.0,
+        help='Scalar Matrices Cortex'
+        )
+    parser.add_argument(
+        "--W_BLA",
+        type=float,
+        default=0.8,
+        help='Scalar Matrix Input to Basal Ganglia'
+        )
     parser.add_argument(
         "-t",
         "--timesteps",
@@ -148,24 +164,28 @@ def parse_args():
         "--mode",
         type=str,
         default="plot",
-        help="Output mode ('plot', 'save', 'short_save' 'stream')",
+        help="Output mode ('plot')",
     )
     
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = parse_args()
-    inp_i = np.array(args.inp_i)
-    inp_e = np.array(args.inp_e)
+    inp_BLA = np.array(args.inp_BLA)
+    inp = np.array(args.inp)
     timesteps = args.timesteps
 
     parameters = Parameters()
-    if Path("prm_file.json").exists():
-        parameters.load("prm_file.json", mode="json")
+    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
+        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
     parameters.seed = args.seed
+    parameters.Matrices_scalars['PL_PFCd_PPC'] *= args.W_C
+    parameters.Matrices_scalars['PFCd_PPC_PL'] *= args.W_C
+    parameters.Matrices_scalars['PFCd_PPC_MC'] *= args.W_C
+    parameters.Matrices_scalars['MC_PFCd_PPC'] *= args.W_C
 
     rng = np.random.RandomState(parameters.seed)
-    C_Model = Cortex(parameters, rng)
+    C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
 
     SNpr_output = []
     DM_output = []
@@ -176,15 +196,15 @@ if __name__ == "__main__":
     GPi_output = []
     MGV_output = []
     MC_output = []
-    _inp_i = []
-    _inp_e = []
+    _inp_BLA = []
+    _inp = []
     actions = []
 
     C_Model.reset_activity()
 
     for t in range(timesteps):
     
-        C_Model.step(inp_i, inp_e)
+        C_Model.step(inp_BLA, inp)
         
         action = C_Model.MC.output.copy()
         if np.any(action >= C_Model.MC.threshold):
@@ -192,23 +212,23 @@ if __name__ == "__main__":
         else:
             winner = np.array(0)
             
-        SNpr_output.append(C_Model.SNpr.output.copy()) 
+        SNpr_output.append(C_Model.BG_v.SNpr.output.copy()) 
         DM_output.append(C_Model.DM.output.copy())
         PL_output.append(C_Model.PL.output.copy())
-        GPi_SNpr_output.append(C_Model.GPi_SNpr.output.copy())
+        GPi_SNpr_output.append(C_Model.BG_dm.GPi_SNpr.output.copy())
         P_output.append(C_Model.P.output.copy())
         PFCd_PPC_output.append(C_Model.PFCd_PPC.output.copy())
-        GPi_output.append(C_Model.GPi.output.copy())
+        GPi_output.append(C_Model.BG_dl.GPi.output.copy())
         MGV_output.append(C_Model.MGV.output.copy())
         MC_output.append(C_Model.MC.output.copy())
-        _inp_i.append(inp_i.copy())
-        _inp_e.append(inp_e.copy())
+        _inp_BLA.append(inp_BLA.copy())
+        _inp.append(inp.copy())
         actions.append(winner.copy())
 
     result = {
         "Seed": np.ones(timesteps) * parameters.seed,
-        "Inp_i_timeline": _inp_i.copy,
-        "Inp_e_timeline": _inp_e.copy,
+        "Inp_BLA_timeline": _inp_BLA.copy,
+        "Inp_timeline": _inp.copy,
         "SNpr_output": SNpr_output,
         "DM_output": DM_output,
         "PL_output": PL_output,
@@ -222,12 +242,13 @@ if __name__ == "__main__":
     }
     
     if args.mode == "plot":
-        plotting(result)
         print(f"""
               Seed: {args.seed}
-              Input_I: {args.inp_i}
-              Input_E: {args.inp_e}
+              Input_BLA: {args.inp_BLA}
+              Input: {args.inp}
+              Matrices Cortex: {args.W_C}
               Cortex Noise: {parameters.noise['MC']}
               Thalamus Baseline: {parameters.baseline['MGV']}
               """)
-        # input("Press Enter to exit")
+        plotting(result)
+        plt.show()

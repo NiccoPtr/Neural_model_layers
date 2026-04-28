@@ -37,7 +37,7 @@ def plotting(res):
     plots = [
         ("DLS", [(DLS[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("STNdl", [(STNdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("BG_dl", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("GPi", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
     ]
@@ -132,7 +132,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=1,
+        default=0,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -140,7 +140,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=[0.0, 0.0],
+        default=(1.0, 0.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -155,51 +155,21 @@ def parse_args():
         "--mode",
         type=str,
         default="plot",
-        help="Output mode ('plot', 'save', 'short_save' 'stream')",
+        help="Output mode ('plot')",
     )
     parser.add_argument(
         "-da",
         "--dopamine",
         type=float,
         nargs=2,
-        default=[0.0, 0.0],
+        default=(2.0, 0.0),
         help="Insert dopamine for learnig: float type",
     )
     parser.add_argument(
-        "-nBG_DL",
-        "--noise_BG_dl",
-        type=float,
-        default=0.0,
-        help="Insert BG_dl noise in simulation",
+        "--PFCd_PPC_1", type=float, default=0.2, help="Insert PFCd_PPC_1 input value"
     )
     parser.add_argument(
-        "-nMGV",
-        "--noise_MGV",
-        type=float,
-        default=0.0,
-        help="Insert MGV noise in simulation",
-    )
-    parser.add_argument(
-        "-nMC",
-        "--noise_MC",
-        type=float,
-        default=0.0,
-        help="Insert MC noise in simulation",
-    )
-    parser.add_argument(
-        "--MC_MGV_W", type=float, default=2.2, help="Insert MC_MGV matrix strenght"
-    )
-    parser.add_argument(
-        "--MGV_MC_W", type=float, default=1.8, help="Insert MGV_MC matrix strenght"
-    )
-    parser.add_argument(
-        "--GPi_baseline", type=float, default=0.4, help="Insert GPi baseline value"
-    )
-    parser.add_argument(
-        "--PFCd_PPC_1", type=float, default=0.0, help="Insert PFCd_PPC_1 input value"
-    )
-    parser.add_argument(
-        "--PFCd_PPC_2", type=float, default=0.0, help="Insert PFCd_PPC_2 input value"
+        "--PFCd_PPC_2", type=float, default=0.2, help="Insert PFCd_PPC_2 input value"
     )
     
     return parser.parse_args()
@@ -231,11 +201,10 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        # if t == timesteps//2:
-        #     inp[1] += 0.2
+        # if t == timesteps*0.15:
+        #     da *= 0.0
 
-        CT_BG_model.step(parameters, inp, da, PFCd_PPC_inp=(args.PFCd_PPC_1, args.PFCd_PPC_2), learn=False)
-        CT_BG_model.Ws['inp_DLS'] = np.eye(parameters.N["BG_dl"]) * 0.2
+        CT_BG_model.step(parameters, inp, da, PFCd_PPC_inp=(args.PFCd_PPC_1, args.PFCd_PPC_2), learn=True)
         
         action = CT_BG_model.MC.output.copy()
         if np.any(action >= CT_BG_model.MC.threshold):
@@ -265,7 +234,6 @@ if __name__ == "__main__":
     }
     
     if args.mode == "plot":
-        plotting(result)
         print(f"""
               Seed: {args.seed}
               Input: {args.inp}
@@ -274,57 +242,5 @@ if __name__ == "__main__":
               MGV Baseline: {parameters.baseline['MGV']}
               PFCd_PPC inp: {(args.PFCd_PPC_1, args.PFCd_PPC_2)}
               """)
-        # input("Press Enter to exit")
-
-    elif args.mode == "stream":
-        inp_end = inp.copy()
-        W_end = CT_BG_model.Ws["inp_DLS"].copy().flatten()
-        mresults = np.hstack((inp_end, W_end))
-        print(("{:10.5f} " * len(mresults)).format(*mresults))
-
-    elif args.mode == "save":
-        seed_col = ["Seed"]
-        input_cols = [f"Input_{i}" for i in range(len(inp.copy()))]
-        BG_dl_cols = [f"BG_dl_Unit_{i}" for i in range(CT_BG_model.BG_dl.GPi.N)]
-        MGV_cols = [f"MGV_Unit_{i}" for i in range(CT_BG_model.MGV.N)]
-        MC_cols = [f"MC_Unit_{i}" for i in range(CT_BG_model.MC.N)]
-        W_cols = [
-            f"Inp_DLS_W_{x}_{y}"
-            for x in range(CT_BG_model.Ws["inp_DLS"].shape[0])
-            for y in range(CT_BG_model.Ws["inp_DLS"].shape[1])
-        ]
-        cols = seed_col + input_cols + BG_dl_cols + MGV_cols + MC_cols + W_cols
-
-        values = [np.asanyarray(result[k]).reshape(timesteps, -1) for k in result.keys()]
-        values_conc = np.concatenate(values, axis=1)
-        df = pd.DataFrame(values_conc, columns=cols)
-
-        csv_path = "MGV_MC_Testing.csv"
-
-        if os.path.exists(csv_path):
-            df.to_csv(csv_path, mode="a", header=False, index=False)
-        else:
-            df.to_csv(csv_path, index=False)
-
-    elif args.mode == "short_save":
-        fin_inp = inp.copy()
-        fin_W = CT_BG_model.Ws["inp_DLS"].copy().flatten()
-
-        seed_col = ["Seed"]
-        input_cols = [f"Input_{i}" for i in range(len(fin_inp))]
-        W_cols = [
-            f"Inp_DLS_W_{x}_{y}"
-            for x in range(CT_BG_model.Ws["inp_DLS"].shape[0])
-            for y in range(CT_BG_model.Ws["inp_DLS"].shape[1])
-        ]
-
-        values = np.concatenate([[parameters.seed], fin_inp, fin_W])
-        columns = seed_col + input_cols + W_cols
-
-        df = pd.DataFrame([values], columns=columns)
-
-        csv_path = "MGV_MC_short_test.csv"
-        if os.path.exists(csv_path):
-            df.to_csv(csv_path, mode="a", header=False, index=False)
-        else:
-            df.to_csv(csv_path, index=False)
+        plotting(result)
+        plt.show()

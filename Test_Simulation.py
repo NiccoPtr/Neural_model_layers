@@ -364,9 +364,9 @@ if __name__ == "__main__":
 
     idx = args.index
     model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
-    model.MC.noise = 0.0
-    model.PFCd_PPC.noise = 0.0
-    model.PL.noise = 0.0
+    model.MC.noise = 0.4
+    model.PFCd_PPC.noise = 0.4
+    model.PL.noise = 0.4
     # model.Ws['BLA_IC_NAc'] = np.array([[0.0, 0.0, 1.0, 0.0],
     #                                    [0.0, 0.0, 0.0, 1.0]]) * 2.0
     # model.Ws['Mani_DLS'] = np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],

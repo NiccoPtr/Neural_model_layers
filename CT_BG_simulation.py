@@ -98,9 +98,11 @@ class CT_BG():
         
     def step(self, parameters, inp, da, PFCd_PPC_inp = (0.0, 0.0), learn = True):
         
-        self.BG_dl.step(np.dot(self.Ws["inp_DLS"], inp),
-                   np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
-                   np.dot(self.Ws["MC_STNdl"], self.MC_output_pre))
+        self.BG_dl.step(
+            (parameters.DA_values["Y_DLS"] + parameters.DA_values["delta_DLS"] * da) * np.dot(self.Ws["inp_DLS"], inp),
+            np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+            np.dot(self.Ws["MC_STNdl"], self.MC_output_pre)
+            )
         
         self.MGV.step(np.dot(self.Ws["GPi_MGV"], self.BG_dl_output_pre) +
                  np.dot(self.Ws["MC_MGV"], self.MC_output_pre))

@@ -5,21 +5,25 @@ Created on Fri Apr 24 11:44:25 2026
 @author: Nicc
 """
 
-from Layer_types import Leaky_units_exc, Leaky_units_inh
+from Layer_types import Leaky_units_exc, BG_dl_Layer, BG_dm_Layer, BG_v_Layer
 import numpy as np
 
 class Cortex():
     
-    def __init__(self, parameters, rng):
+    def __init__(self, parameters, rng, scalar_inp_BLA, scalar_inp):
         
-        self.GPi = Leaky_units_inh(
-            parameters.N['BG_dl'],
-            parameters.tau['BG_dl'],
-            parameters.baseline['GPi'],
+        self.BG_dl = BG_dl_Layer(
+            parameters.N["BG_dl"],
+            parameters.tau["BG_dl"],
+            parameters.baseline["DLS"],
+            parameters.baseline["STNdl"],
+            parameters.baseline["GPi"],
+            parameters.BG_dl_W["DLS_GPi_W"],
+            parameters.BG_dl_W["STNdl_GPi_W"],
             rng,
-            parameters.noise['BG_dl'],
-            parameters.threshold['BG_dl']
-            )
+            parameters.noise["BG_dl"],
+            parameters.threshold["BG_dl"],
+        )
         
         self.MGV = Leaky_units_exc(
             parameters.N["MGV"],
@@ -39,14 +43,18 @@ class Cortex():
             parameters.threshold["MC"],
         )
         
-        self.GPi_SNpr = Leaky_units_inh(
-            parameters.N['BG_dm'],
-            parameters.tau['BG_dm'],
-            parameters.baseline['GPi_SNpr'],
+        self.BG_dm = BG_dm_Layer(
+            parameters.N["BG_dm"],
+            parameters.tau["BG_dm"],
+            parameters.baseline["DMS"],
+            parameters.baseline["STNdm"],
+            parameters.baseline["GPi_SNpr"],
+            parameters.BG_dm_W["DMS_GPiSNpr_W"],
+            parameters.BG_dm_W["STNdm_GPiSNpr_W"],
             rng,
-            parameters.noise['BG_dm'],
-            parameters.threshold['BG_dm']
-            )
+            parameters.noise["BG_dm"],
+            parameters.threshold["BG_dm"],
+        )
         
         self.P = Leaky_units_exc(
             parameters.N["P"],
@@ -66,14 +74,18 @@ class Cortex():
             parameters.threshold["PFCd_PPC"],
         )
         
-        self.SNpr = Leaky_units_inh(
-            parameters.N['BG_v'],
-            parameters.tau['BG_v'],
-            parameters.baseline['SNpr'],
+        self.BG_v = BG_v_Layer(
+            parameters.N["BG_v"],
+            parameters.tau["BG_v"],
+            parameters.baseline["NAc"],
+            parameters.baseline["STNv"],
+            parameters.baseline["SNpr"],
+            parameters.BG_v_W["NAc_SNpr_W"],
+            parameters.BG_v_W["STNv_SNpr_W"],
             rng,
-            parameters.noise['BG_v'],
-            parameters.threshold['BG_v']
-            )
+            parameters.noise["BG_v"],
+            parameters.threshold["BG_v"],
+        )
         
         self.DM = Leaky_units_exc(
             parameters.N["DM"],
@@ -94,8 +106,8 @@ class Cortex():
         )
         
         self.Ws = {
-            "inp_i_BG": np.eye(2),
-            "inp_e_BG": np.ones((2, 2)),
+            "inp_BLA_BG": np.eye(parameters.N["BG_v"]) * scalar_inp_BLA,
+            "inp_BG": np.eye(parameters.N["BG_dl"]) * scalar_inp,
             "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],
             "GPi_SNpr_P": np.eye(parameters.N["P"]) * parameters.Matrices_scalars["GPi_SNpr_P"],
             "SNpr_DM": np.eye(parameters.N["DM"]) * parameters.Matrices_scalars["SNpr_DM"],
@@ -108,7 +120,13 @@ class Cortex():
             "PFCd_PPC_PL": np.eye(parameters.N["PL"]) * parameters.Matrices_scalars["PFCd_PPC_PL"],
             "PFCd_PPC_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["PFCd_PPC_MC"],
             "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
-            "MC_PFCd_PPC": np.eye(parameters.N["PFCd_PPC"]) * parameters.Matrices_scalars["MC_PFCd_PPC"]
+            "MC_PFCd_PPC": np.eye(parameters.N["PFCd_PPC"]) * parameters.Matrices_scalars["MC_PFCd_PPC"],
+            "PL_STNv": np.eye(parameters.N["BG_v"]) * parameters.Matrices_scalars["PL_STNv"],
+            "PL_NAc": np.eye(parameters.N["BG_v"]) * parameters.Matrices_scalars["PL_NAc"],
+            "PFCd_PPC_STNdm": np.eye(parameters.N["BG_dm"]) * parameters.Matrices_scalars["PFCd_PPC_STNdm"],
+            "PFCd_PPC_DMS": np.eye(parameters.N["BG_dm"]) * parameters.Matrices_scalars["PFCd_PPC_DMS"],
+            "MC_DLS": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS"],
+            "MC_STNdl": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_STNdl"]
             }
         
         self.GPi_output_pre = np.zeros(parameters.N['BG_dl'])
@@ -123,9 +141,9 @@ class Cortex():
         
     def reset_activity(self):
         
-        self.GPi.reset_activity()
-        self.GPi_SNpr.reset_activity()
-        self.SNpr.reset_activity()
+        self.BG_dl.reset_activity()
+        self.BG_dm.reset_activity()
+        self.BG_v.reset_activity()
         self.MGV.reset_activity()
         self.MC.reset_activity()
         self.P.reset_activity()
@@ -135,9 +153,9 @@ class Cortex():
         
     def update_output_pre(self):
         
-        self.GPi_output_pre =self.GPi.output.copy()
-        self.GPi_SNpr_output_pre = self.GPi_SNpr.output.copy() 
-        self.SNpr_output_pre = self.SNpr.output.copy() 
+        self.GPi_output_pre =self.BG_dl.GPi.output.copy()
+        self.GPi_SNpr_output_pre = self.BG_dm.GPi_SNpr.output.copy()
+        self.SNpr_output_pre = self.BG_v.SNpr.output.copy()
         self.MGV_output_pre = self.MGV.output.copy()
         self.MC_output_pre = self.MC.output.copy()
         self.P_output_pre = self.P.output.copy()
@@ -145,20 +163,23 @@ class Cortex():
         self.DM_output_pre = self.DM.output.copy()
         self.PL_output_pre = self.PL.output.copy()
         
-    def step(self, inp_i, inp_e):
+    def step(self, inp_BLA, inp):
         
         #Basal Ganglia
-        self.GPi.step(
-            np.dot(self.Ws['inp_i_BG'], inp_i)
-            + np.dot(self.Ws['inp_e_BG'], inp_e)
+        self.BG_v.step(
+            np.dot(self.Ws['inp_BLA_BG'], inp_BLA),
+            np.dot(self.Ws['PL_NAc'], self.PL_output_pre),
+            np.dot(self.Ws['PL_STNv'], self.PL_output_pre)
             )
-        self.GPi_SNpr.step(
-            np.dot(self.Ws['inp_i_BG'], inp_i)
-            + np.dot(self.Ws['inp_e_BG'], inp_e)
+        self.BG_dm.step(
+            np.dot(self.Ws['inp_BG'], inp),
+            np.dot(self.Ws['PFCd_PPC_DMS'], self.PFCd_PPC_output_pre),
+            np.dot(self.Ws['PFCd_PPC_STNdm'], self.PFCd_PPC_output_pre)
             )
-        self.SNpr.step(
-            np.dot(self.Ws['inp_i_BG'], inp_i)
-            + np.dot(self.Ws['inp_e_BG'], inp_e)
+        self.BG_dl.step(
+            np.dot(self.Ws['inp_BG'], inp),
+            np.dot(self.Ws['MC_DLS'], self.MC_output_pre),
+            np.dot(self.Ws['MC_STNdl'], self.MC_output_pre)
             )
         
         #Thalamus
