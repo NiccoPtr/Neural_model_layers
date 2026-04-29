@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.gridspec import GridSpec
 
-from Model_class import Model
 from params import Parameters
 from scheduling import Scheduling
 
@@ -348,8 +347,8 @@ if __name__ == "__main__":
     args = parse_args()
     parameters = Parameters()
     parameters.seed = args.seed
-    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/sim_seed{int(parameters.seed)}/params.json").exists():
-        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/sim_seed{int(parameters.seed)}/params.json", mode="json")
+    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/params.json").exists():
+        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/params.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
@@ -363,23 +362,7 @@ if __name__ == "__main__":
         raise ValueError("Input and Phases must have same length")
 
     idx = args.index
-    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
-    model.MC.noise = 0.4
-    model.PFCd_PPC.noise = 0.4
-    model.PL.noise = 0.4
-    # model.Ws['BLA_IC_NAc'] = np.array([[0.0, 0.0, 1.0, 0.0],
-    #                                    [0.0, 0.0, 0.0, 1.0]]) * 2.0
-    # model.Ws['Mani_DLS'] = np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    #                                  [0.0, 1.0, 0.0, 0.0, 0.0, 0.0]])
-    # model.Ws['Mani_DMS'] = np.array([[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    #                                  [0.0, 1.0, 0.0, 0.0, 0.0, 0.0]])
-    # model.BLA_IC.W = np.ones((4, 4)) * 0.0
-    # model.BLA_IC.W[2, 0] = 1.0
-    # model.BLA_IC.W[3, 1] = 1.0
-    # model.Ws['PFCd_PPC_PL'] *= 0.2
-    # model.Ws['PFCd_PPC_MC'] *= 0.2
-    # model.Ws['MC_PFCd_PPC'] *= 0.1
-    # model.Ws['PL_PFCd_PPC'] *= 0.1
+    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
     results = []
 
     for trial in range(parameters.scheduling["trials"]):
