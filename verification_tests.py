@@ -32,12 +32,18 @@ if __name__ == '__main__':
     args = parse_args()
     fin_results = []
     
+    print('Starting verification')
     for seed in range(1, args.seeds + 1):
-        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testing/test_seed{seed}/Test_Simulation.csv")
         
-        for data in range(int(((df.iloc[-1]['Trial'] + 1) // 2) + 1), int(((df.iloc[-1]['Trial'] + 1) * 0.75))):
+        print(f'Reading file with seed {seed}')
+        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testing_{args.id}/test_seed{seed}/Test_Simulation.csv")
+        
+        print('Starting data extraction')
+        for data in range(int(((df.iloc[-1]['Trial'] + 1) // 2) + 1),
+                          int(((df.iloc[-1]['Trial'] + 1) * 0.75))):
             verification = {}
             verification["Seed"] = seed
+            verification["Trial"] = data - 50.0
             
             lim_1 = data
             lim_2 = data + 25.0
@@ -86,6 +92,9 @@ if __name__ == '__main__':
                 
             fin_results.append(verification.copy())
         
+        print(f'Data extraction file with seed {seed} termined successfully')
+        
+    print('Strating conditions sums')
     sum_cond1 = 0.0 
     sum_cond2 = 0.0
     
@@ -96,6 +105,43 @@ if __name__ == '__main__':
     res_cond1 = sum_cond1 / len(fin_results)
     res_cond2 = sum_cond2 / len(fin_results)
     
+    print('Sums termined successfully')
+    
+    print('Isolating unsuccessful testings seeds')
+    failed_seeds = []
+    for ver in fin_results:
+        if ver["Condition_1"] == 0.0 or ver["Condition_2"] == 0.0:
+            if ver['Seed'] not in failed_seeds:
+                failed_seeds.append(ver['Seed'])
+            
+    print('Unsuccessful seeds saving termined successfully')
+    
+    print('Collecting failed trials per seed')
+    failed_trials = []
+    for ver in fin_results:
+        if ver['Seed'] in failed_seeds:
+            if ver['Condition_1'] == 0.0 and ver['Condition_2'] == 0.0:
+                failed_trials.append(
+                    ('Seed_' + str(ver['Seed']),
+                     'Trial_' + str(ver['Trial']) + ' and Trial_' + str(ver['Trial']+ 25.0))
+                    )
+                                      
+            
+            elif ver['Condition_1'] == 0.0:
+                failed_trials.append(
+                    ('Seed_' + str(ver['Seed']),
+                     'Trial_' + str(ver['Trial']))
+                    )
+                
+            elif ver['Condition_2'] == 0.0:
+                failed_trials.append(
+                    ('Seed_' + str(ver['Seed']), 
+                     'Trial_' + str(ver['Trial'] + 25.0))
+                    )
+                
+    print('Unsuccessful seeds trials saving termined successfully')
+    
+    print('Creating .txt results file')
     output_path = f"verification/verification_results_{args.id}.txt"
 
     with open(output_path, "w") as f:
@@ -109,7 +155,11 @@ if __name__ == '__main__':
         f.write(f"Condition 1 success rate: {res_cond1:.4f}\n")
         f.write(f"Condition 2 success rate: {res_cond2:.4f}\n")
         
+        f.write("Unsuccessful simulations seeds:\n")
+        f.write(f"{failed_seeds}\n\n")
         
+        f.write("Unsuccessful simulations trials per unsuccessful seed:\n")
+        f.write(f"{failed_trials}")
         
-        
+    print('Verification and results saving termined successfully')
         

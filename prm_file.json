@@ -147,7 +147,7 @@
     },
     "DA_values": {
         "Y_DLS": 0.2,
-        "Y_DMS": 0.5,
+        "Y_DMS": 0.2,
         "Y_NAc": 0.8,
         "delta_DLS": 4.0,
         "delta_DMS": 6.5,

@@ -363,6 +363,7 @@ if __name__ == "__main__":
 
     idx = args.index
     model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
+    model.parameters = parameters
     results = []
 
     for trial in range(parameters.scheduling["trials"]):

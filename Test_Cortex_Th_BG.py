@@ -123,7 +123,7 @@ def parse_args():
         "--inp_BLA",
         type=float,
         nargs=2,
-        default=(0.0, 0.0),
+        default=(0.0, 1.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
