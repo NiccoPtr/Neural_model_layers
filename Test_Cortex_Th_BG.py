@@ -115,7 +115,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=0,
+        default=4,
         help="Seed for random number generation",
     )
     parser.add_argument(
@@ -123,7 +123,7 @@ def parse_args():
         "--inp_BLA",
         type=float,
         nargs=2,
-        default=(0.0, 1.0),
+        default=(0.0, 0.9),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -131,7 +131,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=(0.0, 0.0),
+        default=(1.0, 1.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -186,6 +186,8 @@ if __name__ == "__main__":
 
     rng = np.random.RandomState(parameters.seed)
     C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
+    C_Model.Ws["inp_BG"][1, 1] = 0.2
+    C_Model.Ws["inp_BLA_BG"][1, 1] = 0.8
 
     SNpr_output = []
     DM_output = []

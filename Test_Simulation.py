@@ -313,6 +313,12 @@ def plot_CTBG(results, idx):
 def parse_args():
     parser = argparse.ArgumentParser(description="BLA_IC simulation")
     parser.add_argument(
+        "-i",
+        "--id",
+        type=int,
+        help="ID simulation",
+    )
+    parser.add_argument(
         "-d",
         "--scheduling",
         type=str,
@@ -333,7 +339,6 @@ def parse_args():
         help="Output mode ('plot','plot_CTBG, 'save','short_save', 'stream')",
     )
     parser.add_argument(
-        "-i",
         "--index",
         type=int,
         default=-1,
@@ -347,8 +352,8 @@ if __name__ == "__main__":
     args = parse_args()
     parameters = Parameters()
     parameters.seed = args.seed
-    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/params.json").exists():
-        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/params.json", mode="json")
+    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(parameters.seed)}/params.json").exists():
+        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{int(args.id)}/sim_seed{int(parameters.seed)}/params.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
@@ -362,7 +367,7 @@ if __name__ == "__main__":
         raise ValueError("Input and Phases must have same length")
 
     idx = args.index
-    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/training/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
+    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
     model.parameters = parameters
     results = []
 

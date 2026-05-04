@@ -158,6 +158,10 @@ def plotting(results, idx):
     # -----------------------------------------------
 
     title_ax = fig.add_subplot(gs[-2, 0])
+    # -----------------------------------------------
+
+    title_ax = fig.add_subplot(gs[-2, 0])
+    ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
     ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
 
     title_ax.text(0.5, 0.5, "Weights Mani_DLS", ha="center", va="center", fontsize=12)
