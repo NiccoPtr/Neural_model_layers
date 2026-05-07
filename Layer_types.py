@@ -441,12 +441,12 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
     
 class SNpc_Layer:
     
-    def __init__(self, N: int, tau: float, baseline: float, SNpci_1_SNpco_1_W, SNpci_2_SNpco_2_W, rng, noise: float, threshold: float):
+    def __init__(self, N: int, tau: float, baseline_i: float, baseline_o: float, SNpci_1_SNpco_1_W, SNpci_2_SNpco_2_W, rng, noise: float, threshold: float):
         
-        self.SNpci_1 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
-        self.SNpci_2 = Leaky_units_inh(N, tau, baseline, rng, noise, threshold)
-        self.SNpco_1 = Leaky_units_exc(N, tau, baseline*0, rng, noise, threshold)
-        self.SNpco_2 = Leaky_units_exc(N, tau, baseline*0, rng, noise, threshold)
+        self.SNpci_1 = Leaky_units_inh(N, tau, baseline_i, rng, noise, threshold)
+        self.SNpci_2 = Leaky_units_inh(N, tau, baseline_i, rng, noise, threshold)
+        self.SNpco_1 = Leaky_units_exc(N, tau, baseline_o, rng, noise, threshold)
+        self.SNpco_2 = Leaky_units_exc(N, tau, baseline_o, rng, noise, threshold)
         self.output_1 = np.zeros(N)
         self.output_2 = np.zeros(N)
         self.output_SNpci_1_pre = np.zeros(N)

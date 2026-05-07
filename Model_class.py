@@ -67,7 +67,8 @@ class Model:
         self.SNpc = SNpc_Layer(
             self.parameters.N["SNpc"],
             self.parameters.tau["SNpc"],
-            self.parameters.baseline["SNpc"],
+            self.parameters.baseline["SNpci"],
+            self.parameters.baseline["SNpco"],
             self.parameters.SNpc_W["SNpci_1_SNpco_1_W"],
             self.parameters.SNpc_W["SNpci_2_SNpco_2_W"],
             rng,
