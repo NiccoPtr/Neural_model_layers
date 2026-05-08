@@ -224,17 +224,6 @@ if __name__ == "__main__":
     seed = args.seed
 
     parameters = Parameters()
-    parameters.Matrices_scalars['Sat_BLA_IC'] = 20.0
-    parameters.tau['BLA_IC'][0] = 2
-    parameters.tau['BLA_IC'][1] = 10
-    parameters.BLA_Learn["eta_b"] = 0.005
-    parameters.BLA_Learn['alpha_t'] = 50
-    parameters.BLA_Learn['tau_t'] = 20
-    parameters.BLA_Learn["theta_DA"] = 0.5
-    parameters.Str_Learn['eta_NAc'] = 0.05
-    parameters.Str_Learn["theta_inp_NAc"] = 0.8
-    parameters.Str_Learn['theta_DA_NAc'] = 0.5
-    parameters.Str_Learn["theta_NAc"] = 0.12
 
     if args.noise_PL:
         parameters.noise["PL"] = args.noise_PL

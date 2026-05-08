@@ -24,7 +24,8 @@ class PPN_SNpc():
         self.SNpc = SNpc_Layer(
             parameters.N["SNpc"],
             parameters.tau["SNpc"],
-            parameters.baseline["SNpc"],
+            parameters.baseline["SNpci"],
+            parameters.baseline["SNpco"],
             parameters.SNpc_W["SNpci_1_SNpco_1_W"],
             parameters.SNpc_W["SNpci_2_SNpco_2_W"],
             rng,

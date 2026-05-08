@@ -103,7 +103,7 @@ def parse_args():
     parser.add_argument(
         "--NAc",
         type=int,
-        default=(0.0, 0.0),
+        default=(0.0, 0.7),
         help="NAc input",
     )
     parser.add_argument(

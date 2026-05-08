@@ -34,7 +34,6 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=0,
         help="Input simulation seed for noise",
     )
 
@@ -45,8 +44,8 @@ if __name__ == "__main__":
     args = parse_args()
     parameters = Parameters()
     parameters.seed = args.seed
-    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(parameters.seed)}/params.json").exists():
-        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{int(args.id)}/sim_seed{int(parameters.seed)}/params.json", mode="json")
+    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
+        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
@@ -59,8 +58,7 @@ if __name__ == "__main__":
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
-    idx = args.index
-    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(parameters.seed)}/Model_{int(parameters.seed)}.joblib')
+    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(args.seed)}/Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     results = []
 
@@ -116,7 +114,7 @@ if __name__ == "__main__":
             elif t == 50:
                 state = np.asanyarray(parameters.scheduling["states"][phase - 1])
 
-            model.step(state)
+            model.step(state, learning=False)
             action = model.MC.output.copy()
 
             MC_output.append(action.copy())

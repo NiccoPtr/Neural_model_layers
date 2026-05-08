@@ -115,15 +115,15 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=4,
-        help="Seed for random number generation",
+        default=20,
+        help="Range of seeds for random number generation",
     )
     parser.add_argument(
         "-i",
         "--inp_BLA",
         type=float,
         nargs=2,
-        default=(0.0, 0.9),
+        default=(0.0, 0.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -131,7 +131,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=2,
-        default=(1.0, 1.0),
+        default=(0.0, 0.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -178,79 +178,87 @@ if __name__ == "__main__":
     parameters = Parameters()
     if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
         parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
-    parameters.seed = args.seed
-    parameters.Matrices_scalars['PL_PFCd_PPC'] *= args.W_C
-    parameters.Matrices_scalars['PFCd_PPC_PL'] *= args.W_C
-    parameters.Matrices_scalars['PFCd_PPC_MC'] *= args.W_C
-    parameters.Matrices_scalars['MC_PFCd_PPC'] *= args.W_C
-
-    rng = np.random.RandomState(parameters.seed)
-    C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
-    C_Model.Ws["inp_BG"][1, 1] = 0.2
-    C_Model.Ws["inp_BLA_BG"][1, 1] = 0.8
-
-    SNpr_output = []
-    DM_output = []
-    PL_output = []
-    GPi_SNpr_output = []
-    P_output = []
-    PFCd_PPC_output = []
-    GPi_output = []
-    MGV_output = []
-    MC_output = []
-    _inp_BLA = []
-    _inp = []
-    actions = []
-
-    C_Model.reset_activity()
-
-    for t in range(timesteps):
-    
-        C_Model.step(inp_BLA, inp)
         
-        action = C_Model.MC.output.copy()
-        if np.any(action >= C_Model.MC.threshold):
-            winner = np.argmax(action) + 1
-        else:
-            winner = np.array(0)
-            
-        SNpr_output.append(C_Model.BG_v.SNpr.output.copy()) 
-        DM_output.append(C_Model.DM.output.copy())
-        PL_output.append(C_Model.PL.output.copy())
-        GPi_SNpr_output.append(C_Model.BG_dm.GPi_SNpr.output.copy())
-        P_output.append(C_Model.P.output.copy())
-        PFCd_PPC_output.append(C_Model.PFCd_PPC.output.copy())
-        GPi_output.append(C_Model.BG_dl.GPi.output.copy())
-        MGV_output.append(C_Model.MGV.output.copy())
-        MC_output.append(C_Model.MC.output.copy())
-        _inp_BLA.append(inp_BLA.copy())
-        _inp.append(inp.copy())
-        actions.append(winner.copy())
-
-    result = {
-        "Seed": np.ones(timesteps) * parameters.seed,
-        "Inp_BLA_timeline": _inp_BLA.copy,
-        "Inp_timeline": _inp.copy,
-        "SNpr_output": SNpr_output,
-        "DM_output": DM_output,
-        "PL_output": PL_output,
-        "GPi_SNpr_output": GPi_SNpr_output,
-        "P_output": P_output,
-        "PFCd_PPC_output": PFCd_PPC_output,
-        "GPi_output": GPi_output,
-        "MGV_output": MGV_output,
-        "MC_output": MC_output,
-        'Action_selection': actions
-    }
+    for seed in range(args.seed):
+        parameters.seed = seed
+        parameters.Matrices_scalars['PL_PFCd_PPC'] *= args.W_C
+        parameters.Matrices_scalars['PFCd_PPC_PL'] *= args.W_C
+        parameters.Matrices_scalars['PFCd_PPC_MC'] *= args.W_C
+        parameters.Matrices_scalars['MC_PFCd_PPC'] *= args.W_C
+        parameters.baseline['GPi'] = 0.33
+        parameters.baseline['GPi_SNpr'] = 0.33
+        parameters.baseline['SNpr'] = 0.33
     
-    if args.mode == "plot":
-        print(f"""
-              Seed: {args.seed}
-              Input_BLA: {args.inp_BLA}
-              Input: {args.inp}
-              Matrices Cortex: {args.W_C}
-              Cortex Noise: {parameters.noise['MC']}
-              Thalamus Baseline: {parameters.baseline['MGV']}
-              """)
-        plotting(result)
-        plt.show()
+        rng = np.random.RandomState(parameters.seed)
+        C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
+        C_Model.Ws["inp_BG"][1, 1] = 0.2
+        C_Model.Ws["inp_BLA_BG"][1, 1] = 0.8
+    
+        SNpr_output = []
+        DM_output = []
+        PL_output = []
+        GPi_SNpr_output = []
+        P_output = []
+        PFCd_PPC_output = []
+        GPi_output = []
+        MGV_output = []
+        MC_output = []
+        _inp_BLA = []
+        _inp = []
+        actions = []
+    
+        C_Model.reset_activity()
+    
+        for t in range(timesteps):
+            
+            if t == 50:
+                inp_BLA[1] = 0.8
+        
+            C_Model.step(inp_BLA, inp)
+            
+            action = C_Model.MC.output.copy()
+            if np.any(action >= C_Model.MC.threshold):
+                winner = np.argmax(action) + 1
+            else:
+                winner = np.array(0)
+                
+            SNpr_output.append(C_Model.BG_v.SNpr.output.copy()) 
+            DM_output.append(C_Model.DM.output.copy())
+            PL_output.append(C_Model.PL.output.copy())
+            GPi_SNpr_output.append(C_Model.BG_dm.GPi_SNpr.output.copy())
+            P_output.append(C_Model.P.output.copy())
+            PFCd_PPC_output.append(C_Model.PFCd_PPC.output.copy())
+            GPi_output.append(C_Model.BG_dl.GPi.output.copy())
+            MGV_output.append(C_Model.MGV.output.copy())
+            MC_output.append(C_Model.MC.output.copy())
+            _inp_BLA.append(inp_BLA.copy())
+            _inp.append(inp.copy())
+            actions.append(winner.copy())
+    
+        result = {
+            "Seed": np.ones(timesteps) * parameters.seed,
+            "Inp_BLA_timeline": _inp_BLA.copy,
+            "Inp_timeline": _inp.copy,
+            "SNpr_output": SNpr_output,
+            "DM_output": DM_output,
+            "PL_output": PL_output,
+            "GPi_SNpr_output": GPi_SNpr_output,
+            "P_output": P_output,
+            "PFCd_PPC_output": PFCd_PPC_output,
+            "GPi_output": GPi_output,
+            "MGV_output": MGV_output,
+            "MC_output": MC_output,
+            'Action_selection': actions
+        }
+        
+        if args.mode == "plot":
+            print(f"""
+                  Seed: {seed}
+                  Input_BLA: {args.inp_BLA}
+                  Input: {args.inp}
+                  Matrices Cortex: {args.W_C}
+                  Cortex Noise: {parameters.noise['MC']}
+                  Thalamus Baseline: {parameters.baseline['MGV']}
+                  """)
+            plotting(result)
+            plt.show()
