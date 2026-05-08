@@ -232,8 +232,8 @@ if __name__ == '__main__':
         for res in results_single_ts:
             f.write(f"Simulation Seed: {res['Seed']}\n")
             f.write(f"Average action selected: {res['Results_Neut_Cond']:.4f}\n")
-            f.write(f"Condition 1 succes rate: {res['Results_Cond1']:.4f}\n")
-            f.write(f"Condition 2 succes rate: {res['Results_Cond2']:.4f}\n\n")
+            f.write(f"Condition 1 success rate: {res['Results_Cond1']:.4f}\n")
+            f.write(f"Condition 2 success rate: {res['Results_Cond2']:.4f}\n\n")
         
         f.write("Unsuccessful simulations seeds:\n")
         f.write(f"{failed_seeds}\n\n")
