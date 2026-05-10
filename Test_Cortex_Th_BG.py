@@ -115,7 +115,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=20,
+        default=1,
         help="Range of seeds for random number generation",
     )
     parser.add_argument(
@@ -149,7 +149,7 @@ def parse_args():
     parser.add_argument(
         "--W_BLA",
         type=float,
-        default=0.8,
+        default=1.0,
         help='Scalar Matrix Input to Basal Ganglia'
         )
     parser.add_argument(
@@ -185,14 +185,9 @@ if __name__ == "__main__":
         parameters.Matrices_scalars['PFCd_PPC_PL'] *= args.W_C
         parameters.Matrices_scalars['PFCd_PPC_MC'] *= args.W_C
         parameters.Matrices_scalars['MC_PFCd_PPC'] *= args.W_C
-        parameters.baseline['GPi'] = 0.33
-        parameters.baseline['GPi_SNpr'] = 0.33
-        parameters.baseline['SNpr'] = 0.33
     
         rng = np.random.RandomState(parameters.seed)
         C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
-        C_Model.Ws["inp_BG"][1, 1] = 0.2
-        C_Model.Ws["inp_BLA_BG"][1, 1] = 0.8
     
         SNpr_output = []
         DM_output = []
@@ -212,8 +207,11 @@ if __name__ == "__main__":
         for t in range(timesteps):
             
             if t == 50:
-                inp_BLA[1] = 0.8
-        
+                inp_BLA[0] = 0.8
+                
+            elif t == 150:
+                inp_BLA[0] = 0.0
+                
             C_Model.step(inp_BLA, inp)
             
             action = C_Model.MC.output.copy()
@@ -253,7 +251,7 @@ if __name__ == "__main__":
         
         if args.mode == "plot":
             print(f"""
-                  Seed: {seed}
+                  Seed: {args.seed}
                   Input_BLA: {args.inp_BLA}
                   Input: {args.inp}
                   Matrices Cortex: {args.W_C}

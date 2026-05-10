@@ -16,14 +16,14 @@ def parse_args():
         "-s",
         "--seeds",
         type=int,
-        default=50,
+        default=40,
         help="Range defining seeds to verify; (i.e 20)",
     )
     parser.add_argument(
         "-i",
         "--id",
         type=int,
-        default=5,
+        default=6,
         help="Verification ID Number",
     )
     
@@ -42,14 +42,13 @@ if __name__ == '__main__':
         ver_single_seed = {}
         
         print('Starting data extraction')
-        for data in range(1, int(((df.iloc[-1]['Trial'] * 0.33))) + 1):
+        for data in range(1, int(((df.iloc[-1]['Trial'] * 0.5))) + 1):
             verification = {}
             verification["Seed"] = seed
             verification["Trial"] = data
             
             lim_n = data
-            lim_1 = data + 33.0
-            lim_2 = data + 66.0
+            lim_1 = data + int(((df.iloc[-1]['Trial'] * 0.5))) + 1
             
             cond_n = df[
                 (df["Trial"] == lim_n)
@@ -69,49 +68,24 @@ if __name__ == '__main__':
             inp_cond1 = inp_cond1[-1]
             winner_1 = np.argmax(MC_cond1[-1])
             
-            cond_2 = df[
-                (df["Trial"] == lim_2)
-                ].sort_values("Timestep").copy()
-            cond_2 = cond_2[cond_2['Input_0'] == 1.0]
-            MC_cond2 = cond_2.filter(like="MC_Unit").to_numpy()
-            inp_cond2 = cond_2.filter(like="Input").to_numpy()
-            inp_cond2 = inp_cond2[-1]
-            winner_2 = np.argmax(MC_cond2[-1])
-            
             verification["Neutral_condition"] = winner_n
             ver_single_seed[f"Neutral_condition_t{data}"] = winner_n
             
             if winner_1 == 0 and inp_cond1[-1] == 1.0:
                 verification["Condition_1"] = 1.0
-                ver_single_seed[f"Condition_1_t{int(data) + 33}"] = 1.0
+                ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 1.0
             
             elif winner_1 == 1 and inp_cond1[-2] == 1.0:
                 verification["Condition_1"] = 1.0
-                ver_single_seed[f"Condition_1_t{int(data) + 33}"] = 1.0
+                ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 1.0
                 
             elif winner_1 == 0 and inp_cond1[-2] == 1.0:
                 verification["Condition_1"] = 0.0
-                ver_single_seed[f"Condition_1_t{int(data) + 33}"] = 0.0
+                ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 0.0
                 
             elif winner_1 == 1 and inp_cond1[-1] == 1.0:
                 verification["Condition_1"] = 0.0
-                ver_single_seed[f"Condition_1_t{int(data) + 33}"] = 0.0
-            
-            if winner_2 == 0 and inp_cond2[-1] == 1.0:
-                verification["Condition_2"] = 1.0
-                ver_single_seed[f"Condition_2_t{int(data) + 66}"] = 1.0
-            
-            elif winner_2 == 1 and inp_cond2[-2] == 1.0:
-                verification["Condition_2"] = 1.0
-                ver_single_seed[f"Condition_2_t{int(data) + 66}"] = 1.0
-                
-            elif winner_2 == 0 and inp_cond2[-2] == 1.0:
-                verification["Condition_2"] = 0.0
-                ver_single_seed[f"Condition_2_t{int(data) + 66}"] = 0.0
-                
-            elif winner_2 == 1 and inp_cond2[-1] == 1.0:
-                verification["Condition_2"] = 0.0
-                ver_single_seed[f"Condition_2_t{int(data) + 66}"] = 0.0
+                ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 0.0
                 
             fin_results.append(verification.copy())
         
@@ -123,16 +97,13 @@ if __name__ == '__main__':
     print('Strating conditions sums')
     sum_n = 0.0
     sum_cond1 = 0.0 
-    sum_cond2 = 0.0
     
     for ver in fin_results:
         sum_n += ver["Neutral_condition"]
         sum_cond1 += ver["Condition_1"]
-        sum_cond2 += ver["Condition_2"]
         
     res_condn = sum_n / len(fin_results)
     res_cond1 = sum_cond1 / len(fin_results)
-    res_cond2 = sum_cond2 / len(fin_results)
     
     print('Sums termined successfully')
     
@@ -142,18 +113,15 @@ if __name__ == '__main__':
     for ver in single_trials:
         sum_n_t = 0.0
         sum_cond1_t = 0.0
-        sum_cond2_t = 0.0
-        for data in range(1, int(((df.iloc[-1]['Trial'] * 0.33))) + 1):
+        for data in range(1, int(((df.iloc[-1]['Trial'] * 0.5))) + 1):
             
             sum_n_t += ver[f"Neutral_condition_t{data}"]
-            sum_cond1_t += ver[f"Condition_1_t{int(data) + 33}"]
-            sum_cond2_t += ver[f"Condition_2_t{int(data) + 66}"]
+            sum_cond1_t += ver[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"]
             
         result_t = {}
         result_t['Seed'] = ver['Seed']
-        result_t["Results_Neut_Cond"] = sum_n_t / int(((df.iloc[-1]['Trial'] * 0.33)))
-        result_t["Results_Cond1"] = sum_cond1_t / int(((df.iloc[-1]['Trial'] * 0.33)))
-        result_t["Results_Cond2"] = sum_cond2_t / int(((df.iloc[-1]['Trial'] * 0.33)))
+        result_t["Results_Neut_Cond"] = sum_n_t / int(((df.iloc[-1]['Trial'] * 0.5)))
+        result_t["Results_Cond1"] = sum_cond1_t / int(((df.iloc[-1]['Trial'] * 0.5)))
         
         results_single_ts.append(result_t.copy())
         
@@ -162,7 +130,7 @@ if __name__ == '__main__':
     print('Isolating unsuccessful testings seeds')
     failed_seeds = []
     for ver in fin_results:
-        if ver["Condition_1"] == 0.0 or ver["Condition_2"] == 0.0:
+        if ver["Condition_1"] == 0.0:
             if ver['Seed'] not in failed_seeds:
                 failed_seeds.append(ver['Seed'])
             
@@ -172,23 +140,10 @@ if __name__ == '__main__':
     failed_trials = []
     for ver in fin_results:
         if ver['Seed'] in failed_seeds:
-            if ver['Condition_1'] == 0.0 and ver['Condition_2'] == 0.0:
-                failed_trials.append(
-                    ('Seed_' + str(ver['Seed']),
-                     'Trial_' + str(ver['Trial']) + ' and Trial_' + str(ver['Trial']+ 25.0))
-                    )
-                                      
-            
-            elif ver['Condition_1'] == 0.0:
+            if ver['Condition_1'] == 0.0:
                 failed_trials.append(
                     ('Seed_' + str(ver['Seed']),
                      'Trial_' + str(ver['Trial']))
-                    )
-                
-            elif ver['Condition_2'] == 0.0:
-                failed_trials.append(
-                    ('Seed_' + str(ver['Seed']), 
-                     'Trial_' + str(ver['Trial'] + 25.0))
                     )
                 
     print('Unsuccessful seeds trials saving termined successfully')
@@ -197,18 +152,14 @@ if __name__ == '__main__':
     
     tot_n = []
     tot_1 = []
-    tot_2 = []
     for res in results_single_ts:
         tot_n.append(res["Results_Neut_Cond"])
         tot_1.append(res["Results_Cond1"])
-        tot_2.append(res["Results_Cond2"])
     
     mean_1 = np.mean(tot_1)
-    mean_2 = np.mean(tot_2)
     
     std_n = np.std(tot_n)
     std_1 = np.std(tot_1)
-    std_2 = np.std(tot_2)
     
     print('Creating .txt results file')
     output_path = f"verification/verification_results_{str(args.id)}.txt"
@@ -217,27 +168,22 @@ if __name__ == '__main__':
         f.write("Verification Test results\n")
         f.write(f"Seeds from 1 to {args.seeds}\n\n")
         
-        f.write("Controlling for MC final decision given Satiation conditions at 2 given trials (1 per condition):\n")
-        f.write("Neutral_Condition = No Satiation")
-        f.write("Condition_1 = Satiation_1\n")
-        f.write("Condition_2 = Satiation_2\n\n")
+        f.write("Controlling for MC final decision given Satiation:\n")
+        f.write("Neutral_Condition = No Satiation\n")
+        f.write("Condition_1 = Satiation_2\n\n")
         
         f.write(f"Neutral Condition average actions selected and Standard Deviation: {res_condn:.4f}, {std_n:.4f}\n")
         f.write(f"Condition 1 total success rate: {res_cond1:.4f}\n")
-        f.write(f"Condition 2 total success rate: {res_cond2:.4f}\n")
-        f.write(f"Condition 1 Mean & Standard Deviation: {mean_1:.4f}, {std_1:.4f}\n")
-        f.write(f"Condition 2 Mean & Standard Deviation: {mean_2:.4f}, {std_2:.4f}\n\n")
+        f.write(f"Condition 1 Mean & Standard Deviation: {mean_1:.4f}, {std_1:.4f}\n\n")
         
         f.write("Succes rate values per single seed\n\n")
         for res in results_single_ts:
             f.write(f"Simulation Seed: {res['Seed']}\n")
-            f.write(f"Average action selected: {res['Results_Neut_Cond']:.4f}\n")
-            f.write(f"Condition 1 success rate: {res['Results_Cond1']:.4f}\n")
-            f.write(f"Condition 2 success rate: {res['Results_Cond2']:.4f}\n\n")
+            f.write(f"Neutral condition average action selected: {res['Results_Neut_Cond']:.4f}\n")
+            f.write(f"Condition 1 success rate: {res['Results_Cond1']:.4f}\n\n")
         
         f.write("Unsuccessful simulations seeds:\n")
         f.write(f"{failed_seeds}\n\n")
-        
         
         f.write("Unsuccessful simulations trials per unsuccessful seed:\n")
         for data in range(len(failed_trials)):
