@@ -143,7 +143,7 @@ if __name__ == '__main__':
             if ver['Condition_1'] == 0.0:
                 failed_trials.append(
                     ('Seed_' + str(ver['Seed']),
-                     'Trial_' + str(ver['Trial']))
+                     'Trial_' + str(int(ver['Trial']) + int((df.iloc[-1]['Trial'] * 0.5)) + 1))
                     )
                 
     print('Unsuccessful seeds trials saving termined successfully')
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         f.write(f"Condition 1 total success rate: {res_cond1:.4f}\n")
         f.write(f"Condition 1 Mean & Standard Deviation: {mean_1:.4f}, {std_1:.4f}\n\n")
         
-        f.write("Succes rate values per single seed\n\n")
+        f.write("Success rate values per single seed\n\n")
         for res in results_single_ts:
             f.write(f"Simulation Seed: {res['Seed']}\n")
             f.write(f"Neutral condition average action selected: {res['Results_Neut_Cond']:.4f}\n")

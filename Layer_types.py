@@ -9,7 +9,7 @@ import numpy as np
 
 class Leaky_units_exc:
 
-    def __init__(self, N: int, tau: float, baseline: float, rng, noise: float, threshold: float):
+    def __init__(self, N: int, tau: float, baseline: float, rng, noise: float, threshold: float, lesion=False):
         """Initializes the neural unit.
 
         Args:
@@ -27,6 +27,7 @@ class Leaky_units_exc:
         self.threshold = threshold
         self.activity = self.baseline.copy()
         self.output = np.zeros(N)
+        self.lesion = lesion
 
     def update_weights(self, W: np.array):
         """Updates the weight matrix.
@@ -70,6 +71,10 @@ class Leaky_units_exc:
         
         self.output = np.maximum(0, np.tanh(self.activity.copy()))
         
+        if self.lesion:
+            self.activity *= 0.0
+            self.output *= 0.0
+        
         if np.any(self.output > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
 
@@ -96,7 +101,7 @@ class Leaky_units_inh(Leaky_units_exc):
 
 class Leaky_onset_units_exc:
     
-    def __init__(self, N, tau_uo: float, tau_ui: float, baseline: float, rng, noise: float):
+    def __init__(self, N, tau_uo: float, tau_ui: float, baseline: float, rng, noise: float, lesion=False):
         """
         Initialize values for both uo and ui components
         
@@ -116,6 +121,7 @@ class Leaky_onset_units_exc:
         self.activity_uo = self.baseline.copy()
         self.activity_ui = self.baseline.copy()
         self.output = np.zeros(N)
+        self.lesion = lesion
         
     def update_weights(self, W: np.array):
         """ 
@@ -170,10 +176,15 @@ class Leaky_onset_units_exc:
         
         act = np.tanh(self.activity_uo)
     
-        self.output = np.maximum(0, act)     
+        self.output = np.maximum(0, act)   
+        
+        if self.lesion:
+            self.activity_ui *= 0.0
+            self.activity_uo *= 0.0
+            self.output *= 0.0
         
         if np.any(self.output > 1.0):
-            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
+            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity_uo}")
 
     
 class Leaky_onset_units_inh(Leaky_onset_units_exc):
@@ -195,7 +206,7 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
 
 class BG_v_Layer:
     
-    def __init__(self, N, tau: float, baseline_NAc: float, baseline_STNv: float, baseline_SNpr: float, NAc_SNpr_W, STNv_SNpr_W, rng, noise: float, threshold: float):
+    def __init__(self, N, tau: float, baseline_NAc: float, baseline_STNv: float, baseline_SNpr: float, NAc_SNpr_W, STNv_SNpr_W, rng, noise: float, threshold: float, lesion=False):
         """
         Initialize different layers of neurons of size "N"
            
@@ -207,7 +218,7 @@ class BG_v_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise, threshold)
+        self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise, threshold, lesion)
         self.STNv = Leaky_units_exc(N, tau, baseline_STNv, rng, noise, threshold)
         self.SNpr = Leaky_units_inh(N, tau, baseline_SNpr, rng, noise, threshold)
         self.output_BG_v = np.zeros(N)
@@ -259,11 +270,10 @@ class BG_v_Layer:
             
         self.output_NAc_pre = output_NAc.copy()
         self.output_STNv_pre = output_STNv.copy()
-         
 
 class BG_dm_Layer:
     
-    def __init__(self, N, tau: float, baseline_DMS: float, baseline_STNdm: float, baseline_GPi_SNpr: float, DMS_GPiSNpr_W, STNdm_GPiSNpr_W, rng, noise: float, threshold: float):
+    def __init__(self, N, tau: float, baseline_DMS: float, baseline_STNdm: float, baseline_GPi_SNpr: float, DMS_GPiSNpr_W, STNdm_GPiSNpr_W, rng, noise: float, threshold: float, lesion=False):
         """
         Initialize different layers of neurons of size "N"
            
@@ -275,7 +285,7 @@ class BG_dm_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise, threshold)
+        self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise, threshold, lesion)
         self.STNdm = Leaky_units_exc(N, tau, baseline_STNdm, rng, noise, threshold)
         self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise, threshold)
         self.output_BG_dm = np.zeros(N)
@@ -399,7 +409,7 @@ class BG_dl_Layer:
 
 class BLA_IC_Layer(Leaky_onset_units_exc):
     
-    def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, theta_da, max_W):
+    def __init__(self, N, tau_uo, tau_ui, baseline, rng, noise, eta_b, tau_t, alpha_t, theta_da, max_W, lesion=False):
         
         super(BLA_IC_Layer, self).__init__(N, tau_uo, tau_ui, baseline, rng, noise)
         
@@ -410,6 +420,7 @@ class BLA_IC_Layer(Leaky_onset_units_exc):
         self.eta_b = eta_b
         self.max_W = max_W
         self.theta_da = theta_da
+        self.lesion = lesion
 
     def learn(self, da):
 
