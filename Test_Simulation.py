@@ -36,6 +36,12 @@ def parse_args():
         type=int,
         help="Input simulation seed for noise",
     )
+    parser.add_argument(
+        "-l",
+        "--lesion",
+        type=str,
+        help="Report area to lesion (BLA, NAc, DMS, PL)",
+    )
 
     return parser.parse_args()
 
@@ -60,6 +66,19 @@ if __name__ == "__main__":
 
     model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(args.seed)}/Model_{int(args.seed)}.joblib')
     model.parameters = parameters
+    
+    if args.lesion == "BLA":
+        model.BLA_IC.lesion = True
+        
+    elif args.lesion == "NAc":
+        model.BG_v.NAc.lesion = True
+        
+    elif args.lesion == "DMS":
+        model.BG_dm.DMS.lesion = True
+        
+    elif args.lesion == "PL":
+        model.PL.lesion = True
+    
     results = []
 
     for trial in range(parameters.scheduling["trials"]):
