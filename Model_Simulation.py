@@ -36,6 +36,7 @@ def parse_args():
         "-l",
         "--lesion",
         type=str,
+        default="None",
         help="Report area to lesion (BLA, NAc, DMS, PL)",
     )
     
