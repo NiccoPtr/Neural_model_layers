@@ -22,7 +22,6 @@ def parse_args():
     parser.add_argument(
         "-i",
         "--id",
-        type=int,
         help="Verification ID Number",
     )
     
@@ -35,7 +34,7 @@ if __name__ == '__main__':
     
     for seed in range(1, args.seeds + 1):
         
-        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{args.id}/test_seed{seed}/Test_Simulation.csv")
+        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
         result = {}
         act_D = []
         act_ND = []

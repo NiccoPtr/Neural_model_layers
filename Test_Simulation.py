@@ -21,7 +21,6 @@ def parse_args():
     parser.add_argument(
         "-i",
         "--id",
-        type=int,
         help="ID simulation",
     )
     parser.add_argument(
@@ -65,7 +64,7 @@ if __name__ == "__main__":
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
-    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{args.id}/sim_seed{int(args.seed)}/Model_{int(args.seed)}.joblib')
+    model = joblib.load(f'C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{str(args.id)}/sim_seed{int(args.seed)}/Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     
     if args.lesion == "BLA":
