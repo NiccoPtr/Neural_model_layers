@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument(
         "-i",
         "--id",
-        type=int,
+        type=str,
         default=6,
         help="Verification ID Number",
     )
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     for seed in range(1, args.seeds + 1):
         
         print(f'Reading file with seed {seed}')
-        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{args.id}/test_seed{seed}/Test_Simulation.csv")
+        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
         ver_single_seed = {}
         
         print('Starting data extraction')

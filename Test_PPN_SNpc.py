@@ -83,7 +83,7 @@ def parse_args():
         "--food",
         type=float,
         nargs=2,
-        default=[1.0, 1.0],
+        default=(1.0, 1.0),
         help="Input values (two floats)",
     )
     parser.add_argument(
@@ -102,13 +102,15 @@ def parse_args():
     )
     parser.add_argument(
         "--NAc",
-        type=int,
-        default=(0.0, 0.7),
+        type=float,
+        nargs=2,
+        default=(0.0, 0.0),
         help="NAc input",
     )
     parser.add_argument(
         "--DMS",
-        type=int,
+        type=float,
+        nargs=2,
         default=(0.0, 0.0),
         help="DMS input",
     )
@@ -139,10 +141,15 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        # if t == timesteps//2:
-        #     PPN_SNpc_model.reset_activity()
+        if t == timesteps * 0.10 or t <= timesteps * 0.15:
+            NAc_inp = np.array(args.NAc) * -1
+            DMS_inp = np.array(args.DMS) * -1
+            
+        else:
+            NAc_inp = np.array([0.0, 0.0])
+            DMS_inp = np.array([0.0, 0.0])
 
-        PPN_SNpc_model.step(inp, NAc_inp = np.array(args.NAc) * -1, DMS_inp = np.array(args.DMS) * -1)
+        PPN_SNpc_model.step(inp, NAc_inp, DMS_inp)
          
         PPN_output.append(PPN_SNpc_model.PPN.output.copy())
         SNpci_1.append(PPN_SNpc_model.SNpc.output_SNpci_1_pre.copy())
@@ -166,5 +173,7 @@ if __name__ == "__main__":
         print(f"""
               Seed: {args.seed}
               Input: {args.food}
+              NAc: {args.NAc}
+              DMS: {args.DMS}
               """)
-        # input("Press Enter to exit")
+        input("Press Enter to exit")

@@ -24,31 +24,36 @@ def plotting(res):
 
     # Isolating single layers
     
+    NAc = np.array(res["NAc_output"]) * -1
     SNpr = np.array(res["SNpr_output"]) * -1
     DM = np.array(res["DM_output"])
     PL = np.array(res["PL_output"])
+    DMS = np.array(res["DMS_output"]) * -1
     GPi_SNpr = np.array(res["GPi_SNpr_output"]) * -1
     P = np.array(res["P_output"])
     PFCd_PPC = np.array(res["PFCd_PPC_output"])
+    DLS = np.array(res["DLS_output"])* -1
     GPi = np.array(res["GPi_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
-    actions = np.array(res['Action_selection'])
 
     # Plotting set up
     plots = [
+        ("NAc", [(NAc[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("SNpr", [(SNpr[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("DMS", [(DMS[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("GPi_SNpr", [(GPi_SNpr[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("P", [(P[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("PFCd_PPC", [(PFCd_PPC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("DLS", [(DLS[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("GPi", [(GPi[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
     ]
 
-    n_rows = len(plots) + 1
+    n_rows = len(plots) 
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -77,26 +82,6 @@ def plotting(res):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
-    #Action selection
-    title_ax = fig.add_subplot(gs[-1, 0])
-    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
-
-    title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
-    title_ax.axis("off")
-
-    im = ax.imshow(
-        actions.reshape(-1, 1).T,
-        interpolation="none",
-        aspect="auto",
-        vmin=0,
-        vmax=2
-    )
-    
-    ax.set_yticks([])  
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
     # Shared x-axis
     ax.set_xlabel("Timestep")
@@ -166,6 +151,14 @@ def parse_args():
         default="plot",
         help="Output mode ('plot')",
     )
+    parser.add_argument(
+        "-l",
+        "--lesion",
+        type=float,
+        nargs=3,
+        default=(0.0, 0.0, 0.0),
+        help="Lesioned areas if 1.0, else 0.0 (PL_0, PFCd_PPC_1, MC_2)",
+    )
     
     return parser.parse_args()
 
@@ -179,6 +172,9 @@ if __name__ == "__main__":
     if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
         parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
         
+    else:
+        raise ValueError('No prm_file imported')
+        
     for seed in range(args.seed):
         parameters.seed = seed
         parameters.Matrices_scalars['PL_PFCd_PPC'] *= args.W_C
@@ -188,13 +184,25 @@ if __name__ == "__main__":
     
         rng = np.random.RandomState(parameters.seed)
         C_Model = Cortex(parameters, rng, np.array(args.W_BLA), np.array(args.W_inp))
-    
+        
+        if args.lesion[0] == 1.0:
+            C_Model.PL.lesion = True
+            
+        elif args.lesion[1] == 1.0:
+            C_Model.PFCd_PPC.lesion = True
+            
+        elif args.lesion[2] == 1.0:
+            C_Model.MC.lesion = True
+        
+        NAc_output = []
         SNpr_output = []
         DM_output = []
         PL_output = []
+        DMS_output = []
         GPi_SNpr_output = []
         P_output = []
         PFCd_PPC_output = []
+        DLS_output = []
         GPi_output = []
         MGV_output = []
         MC_output = []
@@ -207,10 +215,12 @@ if __name__ == "__main__":
         for t in range(timesteps):
             
             if t == 50:
-                inp_BLA[0] = 0.8
+                inp_BLA[0] = args.inp_BLA[0]
+                inp_BLA[1] = args.inp_BLA[1]
                 
             elif t == 150:
                 inp_BLA[0] = 0.0
+                inp_BLA[1] = 0.0
                 
             C_Model.step(inp_BLA, inp)
             
@@ -222,10 +232,13 @@ if __name__ == "__main__":
                 
             SNpr_output.append(C_Model.BG_v.SNpr.output.copy()) 
             DM_output.append(C_Model.DM.output.copy())
+            NAc_output.append(C_Model.BG_v.NAc.output.copy())
             PL_output.append(C_Model.PL.output.copy())
+            DMS_output.append(C_Model.BG_dm.DMS.output.copy())
             GPi_SNpr_output.append(C_Model.BG_dm.GPi_SNpr.output.copy())
             P_output.append(C_Model.P.output.copy())
             PFCd_PPC_output.append(C_Model.PFCd_PPC.output.copy())
+            DLS_output.append(C_Model.BG_dl.DLS.output.copy())
             GPi_output.append(C_Model.BG_dl.GPi.output.copy())
             MGV_output.append(C_Model.MGV.output.copy())
             MC_output.append(C_Model.MC.output.copy())
@@ -237,16 +250,18 @@ if __name__ == "__main__":
             "Seed": np.ones(timesteps) * parameters.seed,
             "Inp_BLA_timeline": _inp_BLA.copy,
             "Inp_timeline": _inp.copy,
+            "NAc_output": NAc_output,
             "SNpr_output": SNpr_output,
             "DM_output": DM_output,
             "PL_output": PL_output,
+            "DMS_output": DMS_output,
             "GPi_SNpr_output": GPi_SNpr_output,
             "P_output": P_output,
             "PFCd_PPC_output": PFCd_PPC_output,
+            "DLS_output": DLS_output,
             "GPi_output": GPi_output,
             "MGV_output": MGV_output,
             "MC_output": MC_output,
-            'Action_selection': actions
         }
         
         if args.mode == "plot":
@@ -255,8 +270,9 @@ if __name__ == "__main__":
                   Input_BLA: {args.inp_BLA}
                   Input: {args.inp}
                   Matrices Cortex: {args.W_C}
-                  Cortex Noise: {parameters.noise['MC']}
-                  Thalamus Baseline: {parameters.baseline['MGV']}
+                  MC-PFCd_PPC Noise: {parameters.noise['MC'], parameters.noise['PFCd_PPC']}
+                  PL Noise: {parameters.noise['PL']}
+                  Thalamus Baseline: {parameters.baseline['MGV'], parameters.baseline['P'], parameters.baseline['DM']}
                   """)
             plotting(result)
             plt.show()

@@ -12,6 +12,8 @@ class Cortex():
     
     def __init__(self, parameters, rng, scalar_inp_BLA, scalar_inp):
         
+        self.parameters = parameters
+        
         self.BG_dl = BG_dl_Layer(
             parameters.N["BG_dl"],
             parameters.tau["BG_dl"],
@@ -165,18 +167,34 @@ class Cortex():
         
     def step(self, inp_BLA, inp):
         
+        VTA_baseline = self.parameters.baseline["VTA"]
+        SNpco_1_baseline = self.parameters.baseline["SNpco"]
+        SNpco_2_baseline = self.parameters.baseline["SNpco"]
+        
         #Basal Ganglia
         self.BG_v.step(
+            (
+                self.parameters.DA_values["Y_NAc"]
+                + (self.parameters.DA_values["delta_NAc"] * VTA_baseline)
+            ) * 
             np.dot(self.Ws['inp_BLA_BG'], inp_BLA),
             np.dot(self.Ws['PL_NAc'], self.PL_output_pre),
             np.dot(self.Ws['PL_STNv'], self.PL_output_pre)
             )
         self.BG_dm.step(
+            (
+                self.parameters.DA_values["Y_DMS"]
+                + (self.parameters.DA_values["delta_DMS"] * SNpco_1_baseline)
+            ) *
             np.dot(self.Ws['inp_BG'], inp),
             np.dot(self.Ws['PFCd_PPC_DMS'], self.PFCd_PPC_output_pre),
             np.dot(self.Ws['PFCd_PPC_STNdm'], self.PFCd_PPC_output_pre)
             )
         self.BG_dl.step(
+            (
+                self.parameters.DA_values["Y_DLS"]
+                + (self.parameters.DA_values["delta_DLS"] * SNpco_2_baseline)
+            ) *
             np.dot(self.Ws['inp_BG'], inp),
             np.dot(self.Ws['MC_DLS'], self.MC_output_pre),
             np.dot(self.Ws['MC_STNdl'], self.MC_output_pre)

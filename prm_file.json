@@ -62,7 +62,7 @@
         "VTA": 0.2,
         "BLA_IC": 0.0,
         "SNpci": 2.0,
-        "SNpco": 0.2,
+        "SNpco": 1.0,
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.33,
@@ -150,8 +150,8 @@
         "Y_DLS": 0.2,
         "Y_DMS": 0.2,
         "Y_NAc": 1.0,
-        "delta_DLS": 4.0,
-        "delta_DMS": 6.5,
+        "delta_DLS": 10.0,
+        "delta_DMS": 10.0,
         "delta_NAc": 2.5
     },
     "BLA_Learn": {
@@ -162,8 +162,8 @@
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS": 0.02,
-        "eta_DMS": 0.02,
+        "eta_DLS": 0.01,
+        "eta_DMS": 0.01,
         "eta_NAc": 0.09,
         "theta_DA_DLS": 0.4,
         "theta_DA_DMS": 0.4,
