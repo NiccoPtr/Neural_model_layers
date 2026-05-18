@@ -68,7 +68,12 @@ if __name__ == "__main__":
     
     n_rows = 4
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
-    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
+    gs = GridSpec(n_rows,
+                  2,
+                  width_ratios=[1, 6],
+                  height_ratios=[3.2, 1, 1, 1],
+                  hspace=0.25
+                  )
     
     shared_ax = None
     
@@ -76,7 +81,7 @@ if __name__ == "__main__":
     title_ax = fig.add_subplot(gs[0, 0])
     ax = fig.add_subplot(gs[0, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights BLA_IC", ha="center", va="center", fontsize=12)
+    title_ax.text(0.3, 0.5, "Weights BLA_IC", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -96,12 +101,14 @@ if __name__ == "__main__":
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
     
+    ax.tick_params(labelbottom=False)
+    
     #-----------------------------------------------
     
     title_ax = fig.add_subplot(gs[1, 0])
     ax = fig.add_subplot(gs[1, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights BLA_IC_NAc", ha="center", va="center", fontsize=12)
+    title_ax.text(0.3, 0.5, "Weights BLA_IC_NAc", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -121,12 +128,14 @@ if __name__ == "__main__":
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
     
+    ax.tick_params(labelbottom=False)
+    
     #-----------------------------------------------
     
     title_ax = fig.add_subplot(gs[2, 0])
     ax = fig.add_subplot(gs[2, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights Mani_DLS", ha="center", va="center", fontsize=12)
+    title_ax.text(0.3, 0.5, "Weights Mani_DLS", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -146,12 +155,14 @@ if __name__ == "__main__":
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
     
+    ax.tick_params(labelbottom=False)
+    
     #-----------------------------------------------
     
     title_ax = fig.add_subplot(gs[3, 0])
     ax = fig.add_subplot(gs[3, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights Mani_DMS", ha="center", va="center", fontsize=12)
+    title_ax.text(0.3, 0.5, "Weights Mani_DMS", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(

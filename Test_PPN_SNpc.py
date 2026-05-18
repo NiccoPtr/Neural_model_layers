@@ -17,9 +17,6 @@ from pathlib import Path
 from PPN_SNpc_simulation import PPN_SNpc
 from params import Parameters
 
-plt.ion()
-
-
 def plotting(res):
 
     plt.close("all")
@@ -141,7 +138,7 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        if t == timesteps * 0.10 or t <= timesteps * 0.15:
+        if t == timesteps * 0.10 or t <= timesteps * 0.12:
             NAc_inp = np.array(args.NAc) * -1
             DMS_inp = np.array(args.DMS) * -1
             
@@ -169,11 +166,11 @@ if __name__ == "__main__":
     }
     
     if args.mode == "plot":
-        plotting(result)
         print(f"""
               Seed: {args.seed}
               Input: {args.food}
               NAc: {args.NAc}
               DMS: {args.DMS}
               """)
-        input("Press Enter to exit")
+        plotting(result)
+        plt.show()

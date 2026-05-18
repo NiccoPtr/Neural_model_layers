@@ -69,7 +69,12 @@ if __name__ == "__main__":
     
     n_rows = len(plots) + 1
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
-    gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
+    gs = GridSpec(n_rows,
+                  2,
+                  width_ratios=[0.3, 8],
+                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                  hspace=0.25
+                  )
     
     shared_ax = None
     
@@ -82,7 +87,7 @@ if __name__ == "__main__":
             shared_ax = ax
 
         # Left column: titles only
-        title_ax.text(0.5, 0.5, title, ha="center", va="center", fontsize=12)
+        title_ax.text(0.2, 0.5, title, ha="center", va="center", fontsize=15)
         title_ax.axis("off")
 
         # Right column: actual plot
@@ -90,7 +95,10 @@ if __name__ == "__main__":
             ax.plot(df_new["Timestep"], y, label=label)
 
         ax.set_ylim(*ylim)
-        ax.legend(loc="upper right", fontsize=5)
+        if i == 0:
+            ax.legend(loc="upper right", fontsize=8, frameon=False, bbox_to_anchor=(1.0, 1.5))
+        else:
+            ax.legend(loc="upper right", fontsize=8, frameon=False, bbox_to_anchor=(1.0, 1.15))
 
         # Clean spines
         ax.spines["top"].set_visible(False)
@@ -102,7 +110,7 @@ if __name__ == "__main__":
     title_ax = fig.add_subplot(gs[-1, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
     
-    title_ax.text(0.5, 0.5, "State", ha="center", va="center", fontsize=12)
+    title_ax.text(0.2, 0.5, "State", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
     
     im = ax.imshow(
@@ -119,7 +127,8 @@ if __name__ == "__main__":
                                  'Food_1',
                                  'Food_2',
                                  'Sat_1',
-                                 'Sat_2']
+                                 'Sat_2'],
+                  fontsize=10
                   )
     
     ax.spines["top"].set_visible(False)

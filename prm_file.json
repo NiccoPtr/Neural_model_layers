@@ -45,7 +45,8 @@
             2,
             10
         ],
-        "SNpc": 6,
+        "SNpc_i": 6,
+        "SNpc_o": 6,
         "PPN": [
             2,
             10
@@ -62,7 +63,7 @@
         "VTA": 0.2,
         "BLA_IC": 0.0,
         "SNpci": 2.0,
-        "SNpco": 1.0,
+        "SNpco": 0.7,
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.33,
@@ -92,8 +93,8 @@
         "STNv_SNpr_W": 1.6
     },
     "SNpc_W": {
-        "SNpci_1_SNpco_1_W": 30.0,
-        "SNpci_2_SNpco_2_W": 30.0
+        "SNpci_1_SNpco_1_W": 20.0,
+        "SNpci_2_SNpco_2_W": 20.0
     },
     "seed": 0,
     "noise": {
@@ -135,12 +136,12 @@
         "PL_DM": 2.4,
         "PL_NAc": 0.8,
         "PL_STNv": 1.2,
-        "PL_PFCd_PPC": 0.5,
+        "PL_PFCd_PPC": 0.3,
         "PFCd_PPC_P": 2.0,
         "PFCd_PPC_DMS": 0.8,
         "PFCd_PPC_STNdm": 1.2,
         "PFCd_PPC_PL": 0.2,
-        "PFCd_PPC_MC": 0.5,
+        "PFCd_PPC_MC": 0.3,
         "MC_MGV": 2.0,
         "MC_DLS": 0.8,
         "MC_STNdl": 1.2,
@@ -162,8 +163,8 @@
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS": 0.01,
-        "eta_DMS": 0.01,
+        "eta_DLS": 0.009,
+        "eta_DMS": 0.009,
         "eta_NAc": 0.09,
         "theta_DA_DLS": 0.4,
         "theta_DA_DMS": 0.4,
