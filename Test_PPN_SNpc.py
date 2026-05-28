@@ -120,8 +120,12 @@ if __name__ == "__main__":
     timesteps = args.timesteps
 
     parameters = Parameters()
-    if Path("prm_file.json").exists():
-        parameters.load("prm_file.json", mode="json")
+    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
+        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
+
+    else:
+        raise ValueError('Parameters file not found')
+    
     parameters.seed = args.seed
 
     rng = np.random.RandomState(parameters.seed)
@@ -136,15 +140,10 @@ if __name__ == "__main__":
 
     PPN_SNpc_model.reset_activity()
 
+    DMS_inp = np.array(args.DMS) * -1
+    NAc_inp = np.array(args.NAc) * -1
+
     for t in range(timesteps):
-        
-        if t == timesteps * 0.10 or t <= timesteps * 0.12:
-            NAc_inp = np.array(args.NAc) * -1
-            DMS_inp = np.array(args.DMS) * -1
-            
-        else:
-            NAc_inp = np.array([0.0, 0.0])
-            DMS_inp = np.array([0.0, 0.0])
 
         PPN_SNpc_model.step(inp, NAc_inp, DMS_inp)
          

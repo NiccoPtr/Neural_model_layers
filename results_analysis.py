@@ -21,7 +21,14 @@ def parse_args():
         "--seeds",
         type=int,
         default=40,
-        help="Range defining seeds to verify; (i.e 20)",
+        help="Range defining amount of seeds to verify; (i.e 20)",
+    )
+    parser.add_argument(
+        "-m",
+        "--seeds_max",
+        type=int,
+        default=40,
+        help="Final seed in the simulation, end of the loop",
     )
     parser.add_argument(
         "-i",
@@ -51,7 +58,7 @@ if __name__ == '__main__':
     args = parse_args()
     fin_results = []
     
-    for seed in range(1, args.seeds + 1):
+    for seed in range(((args.seeds_max + 1) - args.seeds), args.seeds_max + 1):
         
         df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
         result = {}
@@ -253,6 +260,4 @@ if __name__ == '__main__':
         
         plot_path = os.path.join(save_dir, f"analysis_ID_{args.id}_barplot.png")
         plt.savefig(plot_path, dpi=300, bbox_inches="tight")
-    
-    # plt.show()
                         

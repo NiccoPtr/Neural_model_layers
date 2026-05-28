@@ -100,7 +100,7 @@ def parse_args():
         "-s",
         "--seed",
         type=int,
-        default=1,
+        default=4,
         help="Range of seeds for random number generation",
     )
     parser.add_argument(
@@ -157,7 +157,7 @@ def parse_args():
         type=float,
         nargs=3,
         default=(0.0, 0.0, 0.0),
-        help="Lesioned areas if 1.0, else 0.0 (PL_0, PFCd_PPC_1, MC_2)",
+        help="Lesioned areas if 1.0, else 0.0 (PL_0, DMS_1, NAc_2)",
     )
     
     return parser.parse_args()
@@ -189,10 +189,10 @@ if __name__ == "__main__":
             C_Model.PL.lesion = True
             
         elif args.lesion[1] == 1.0:
-            C_Model.PFCd_PPC.lesion = True
+            C_Model.BG_dm.DMS.lesion = True
             
         elif args.lesion[2] == 1.0:
-            C_Model.MC.lesion = True
+            C_Model.BG_v.NAc.lesion = True
         
         NAc_output = []
         SNpr_output = []
@@ -266,13 +266,14 @@ if __name__ == "__main__":
         
         if args.mode == "plot":
             print(f"""
-                  Seed: {args.seed}
+                  Seed: {seed + 1}
                   Input_BLA: {args.inp_BLA}
                   Input: {args.inp}
                   Matrices Cortex: {args.W_C}
                   MC-PFCd_PPC Noise: {parameters.noise['MC'], parameters.noise['PFCd_PPC']}
                   PL Noise: {parameters.noise['PL']}
                   Thalamus Baseline: {parameters.baseline['MGV'], parameters.baseline['P'], parameters.baseline['DM']}
+                  Lesioned areas: PL_{args.lesion[0]}, DMS_{args.lesion[1]}, NAc_{args.lesion[2]}
                   """)
             plotting(result)
             plt.show()

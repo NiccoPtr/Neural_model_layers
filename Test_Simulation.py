@@ -49,13 +49,13 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    parameters.seed = args.seed
     if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
         parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
         
+    parameters.seed = args.seed
     scheduling = Scheduling()
     if args.scheduling is not None:
         scheduling.load(args.scheduling, mode="json")
@@ -83,7 +83,6 @@ if __name__ == "__main__":
 
     for trial in range(parameters.scheduling["trials"]):
 
-        print(f"Running trial {trial + 1}")
         model.reset_activity()
         model.update_output_pre()
         MC_output = []
@@ -173,9 +172,7 @@ if __name__ == "__main__":
             "W_Mani_DLS": W_Mani_DLS,
             "W_Mani_DMS": W_Mani_DMS,
         }
-
-        print(f"End trial {trial + 1}")
-
+        
         results.append(result)
 
     print(

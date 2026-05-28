@@ -20,6 +20,13 @@ def parse_args():
         help="Range defining seeds to verify; (i.e 20)",
     )
     parser.add_argument(
+        "-m",
+        "--seeds_max",
+        type=int,
+        default=40,
+        help="Final seed in the simulation, end of the loop",
+    )
+    parser.add_argument(
         "-i",
         "--id",
         type=str,
@@ -35,7 +42,7 @@ if __name__ == '__main__':
     single_trials = []
     
     print('Starting verification')
-    for seed in range(1, args.seeds + 1):
+    for seed in range(((args.seeds_max + 1) - args.seeds), args.seeds_max + 1):
         
         print(f'Reading file with seed {seed}')
         df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")

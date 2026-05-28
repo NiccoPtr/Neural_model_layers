@@ -7,6 +7,7 @@ Created on Fri Feb  6 11:13:28 2026
 
 import argparse
 import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,9 +15,6 @@ import pandas as pd
 
 from BLA_IC_simulation import BLA_IC_sm
 from params import Parameters
-
-plt.ion()
-
 
 def plotting(result):
 
@@ -102,7 +100,7 @@ def parse_args():
         "-t",
         "--timesteps",
         type=int,
-        default=500,
+        default=1000,
         help="Number of timesteps",
     )
     parser.add_argument(
@@ -123,14 +121,14 @@ def parse_args():
         "-da",
         "--dopamine",
         type=float,
-        default=2.0,
+        default=0.7,
         help="Insert Dopaminergic modulation for BLA_IC learning",
     )
     parser.add_argument(
         "-de",
         "--delta",
         type=float,
-        default=160.0,
+        default=150.0,
         help="Insert delta for manipulanda input onset",
     )
 
@@ -148,12 +146,12 @@ if __name__ == "__main__":
     inp = np.array(args.inp)
 
     parameters = Parameters()
-    parameters.noise["BLA_IC"] = args.noise
-    parameters.tau['BLA_IC'][0] = 10
-    parameters.tau['BLA_IC'][1] = 10
-    parameters.BLA_Learn['eta_b'] = 0.05
-    parameters.BLA_Learn['tau_t'] = 500
-    parameters.BLA_Learn['theta_DA'] = 0.5
+    if Path("prm_file.json").exists():
+        parameters.load("prm_file.json", mode="json")
+
+    else:
+        raise FileNotFoundError("Parameter file 'prm_file.json' not found.")
+    
     rng = np.random.RandomState(parameters.seed)
 
     bla = BLA_IC_sm(parameters, rng)
@@ -189,7 +187,7 @@ if __name__ == "__main__":
 
     if args.mode == "plot":
         plotting(result)
-        input("Press Enter to exit")
+        plt.show()
 
     elif args.mode == "stream":
         inp_end = inp.copy()

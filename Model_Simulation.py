@@ -80,7 +80,6 @@ if __name__ == "__main__":
 
     for trial in range(parameters.scheduling["trials"]):
 
-        print(f"Running trial {trial + 1}")
         model.reset_activity()
         model.update_output_pre()
         MC_output = []
@@ -181,8 +180,6 @@ if __name__ == "__main__":
             "W_Mani_DLS": W_Mani_DLS,
             "W_Mani_DMS": W_Mani_DMS,
         }
-
-        print(f"End trial {trial + 1}")
 
         results.append(result)
 
