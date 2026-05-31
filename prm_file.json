@@ -111,7 +111,7 @@
         "P": 0.0,
         "DM": 0.0,
         "PL": 0.4,
-        "PFCd_PPC": 0.3
+        "PFCd_PPC": 0.4
     },
     "Matrices_scalars": {
         "Mani_DLS": 0.0,
@@ -137,7 +137,7 @@
         "PL_NAc": 1.0,
         "PL_STNv": 1.4,
         "PL_PFCd_PPC": 0.3,
-        "PFCd_PPC_P": 2.0,
+        "PFCd_PPC_P": 2.4,
         "PFCd_PPC_DMS": 1.0,
         "PFCd_PPC_STNdm": 1.4,
         "PFCd_PPC_PL": 0.2,
@@ -156,20 +156,20 @@
         "delta_NAc": 2.5
     },
     "BLA_Learn": {
-        "eta_b": 0.1,
+        "eta_b": 0.2,
         "alpha_t": 50.0,
         "tau_t": 80,
         "theta_DA": 0.5,
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS": 0.08,
-        "eta_DMS": 0.08,
+        "eta_DLS": 0.04,
+        "eta_DMS": 0.04,
         "eta_NAc": 0.1,
-        "theta_DA_DLS": 0.6,
-        "theta_DA_DMS": 0.6,
+        "theta_DA_DLS": 0.65,
+        "theta_DA_DMS": 0.65,
         "theta_DA_NAc": 0.4,
-        "theta_DLS": 0.7,
+        "theta_DLS": 0.6,
         "theta_DMS": 0.6,
         "theta_NAc": 0.6,
         "theta_inp_DLS": 0.5,
