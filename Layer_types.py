@@ -498,4 +498,69 @@ class SNpc_Layer:
             
         self.output_SNpci_1_pre = output_i_1.copy()
         self.output_SNpci_2_pre = output_i_2.copy()
-            
+
+class BG_dl_v2:
+
+    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, baseline_GPe: float, DLS_1_GPi_W, DLS_2_GPe_W, STNdl_GPi_W, STNdl_GPe_W, GPe_STNdl_W, GPe_GPi_W, rng, noise: float, threshold: float):
+        
+        self.DLS_1 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
+        self.DLS_2 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
+        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
+        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
+        self.GPe = Leaky_units_exc(N, tau, baseline_GPe, rng, noise, threshold)
+
+        self.output_BG_dl = np.zeros(N)
+        self.output_GPe_pre = np.zeros(N)
+        self.output_DLS_1_pre = np.zeros(N)
+        self.output_DLS_2_pre = np.zeros(N)
+        self.output_STNdl_pre = np.zeros(N)
+        self.DLS_1_GPi_W = DLS_1_GPi_W
+        self.DLS_2_GPe_W = DLS_2_GPe_W
+        self.STNdl_GPi_W = STNdl_GPi_W
+        self.STNdl_GPe_W = STNdl_GPe_W
+        self.GPe_STNdl_W = GPe_STNdl_W
+        self.GPe_GPi_W = GPe_GPi_W
+        self.BG_dl_Ws = {
+            "DLS_1_GPi" : np.eye(N).astype(float) * self.DLS_1_GPi_W,
+            "DLS_2_GPe" : np.eye(N).astype(float) * self.DLS_2_GPe_W,
+            "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W,
+            "STNdl_GPe" : np.ones((N, N)).astype(float) * self.STNdl_GPe_W,
+            "GPe_STNdl" : np.eye(N).astype(float) * self.GPe_STNdl_W,
+            "GPe_GPi" : np.eye(N).astype(float) * self.GPe_GPi_W
+            }
+
+    def reset_activity(self):
+
+        self.output_BG_dl *= 0.0
+        self.output_GPe_pre *= 0.0
+        self.output_DLS_1_pre *= 0.0
+        self.output_DLS_2_pre *= 0.0
+        self.output_STNdl_pre *= 0.0
+
+        self.DLS_1.reset_activity()
+        self.DLS_2.reset_activity()
+        self.STNdl.reset_activity()
+        self.GPi.reset_activity()
+        self.GPe.reset_activity()
+
+    def step(self, inp, inp_cortex_DLS, inp_cortex_STNdl):
+
+        self.DLS_1.step(inp + inp_cortex_DLS)
+        self.DLS_2.step(inp + inp_cortex_DLS)
+        self.STNdl.step(inp_cortex_STNdl
+                        + np.dot(self.BG_dl_Ws['GPe_STNdl'], self.output_GPe_pre)
+                        )
+        self.GPe.step(np.dot(self.BG_dl_Ws['DLS_2_GPe'], self.output_DLS_2_pre)
+                       + np.dot(self.BG_dl_Ws['STNdl_GPe'], self.output_STNdl_pre)
+                       )
+        self.GPi.step(np.dot(self.BG_dl_Ws['DLS_1_GPi'], self.output_DLS_1_pre)
+                       + np.dot(self.BG_dl_Ws['STNdl_GPi'], self.output_STNdl_pre)
+                       + np.dot(self.BG_dl_Ws['GPe_GPi'], self.output_GPe_pre)
+                       )
+
+        self.output_BG_dl = self.GPi.output.copy()
+        self.output_GPe_pre = self.GPe.output.copy()
+        self.output_STNdl_pre = self.STNdl.output.copy()
+        self.output_DLS_1_pre = self.DLS_1.output.copy()
+        self.output_DLS_2_pre = self.DLS_2.output.copy()
+        
