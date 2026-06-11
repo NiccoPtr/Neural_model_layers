@@ -67,6 +67,7 @@
         "DLS": 0.0,
         "STNdl": 0.0,
         "GPi": 0.33,
+        "GPe": 0.0,
         "DMS": 0.0,
         "STNdm": 0.0,
         "GPi_SNpr": 0.33,
@@ -81,8 +82,12 @@
         "PL": 0.0
     },
     "BG_dl_W": {
-        "DLS_GPi_W": 1.8,
-        "STNdl_GPi_W": 1.6
+        "DLS_1_GPi_W": 1.8,
+        "DLS_2_GPe_W": 1.8,
+        "STNdl_GPi_W": 1.6,
+        "STNdl_GPe_W": 1.6,
+        "GPe_STNdl_W": 1.6,
+        "GPe_GPi_W": 1.6
     },
     "BG_dm_W": {
         "DMS_GPiSNpr_W": 1.8,

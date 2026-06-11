@@ -501,13 +501,28 @@ class SNpc_Layer:
 
 class BG_dl_v2:
 
-    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, baseline_GPe: float, DLS_1_GPi_W, DLS_2_GPe_W, STNdl_GPi_W, STNdl_GPe_W, GPe_STNdl_W, GPe_GPi_W, rng, noise: float, threshold: float):
-        
+    def __init__(self,
+                  N,
+                    tau: float,
+                      baseline_DLS: float,
+                        baseline_STNdl: float,
+                          baseline_GPi: float,
+                            baseline_GPe: float,
+                              DLS_1_GPi_W,
+                                DLS_2_GPe_W,
+                                  STNdl_GPi_W,
+                                    STNdl_GPe_W,
+                                      GPe_STNdl_W,
+                                        GPe_GPi_W,
+                                          rng,
+                                            noise: float,
+                                              threshold: float):
+    
         self.DLS_1 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
         self.DLS_2 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
         self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
         self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
-        self.GPe = Leaky_units_exc(N, tau, baseline_GPe, rng, noise, threshold)
+        self.GPe = Leaky_units_inh(N, tau, baseline_GPe, rng, noise, threshold)
 
         self.output_BG_dl = np.zeros(N)
         self.output_GPe_pre = np.zeros(N)
@@ -543,10 +558,10 @@ class BG_dl_v2:
         self.GPi.reset_activity()
         self.GPe.reset_activity()
 
-    def step(self, inp, inp_cortex_DLS, inp_cortex_STNdl):
+    def step(self, inp_DLS_1, inp_DLS_2, inp_cortex_DLS, inp_cortex_STNdl):
 
-        self.DLS_1.step(inp + inp_cortex_DLS)
-        self.DLS_2.step(inp + inp_cortex_DLS)
+        self.DLS_1.step(inp_DLS_1 + inp_cortex_DLS)
+        self.DLS_2.step(inp_DLS_2 + inp_cortex_DLS)
         self.STNdl.step(inp_cortex_STNdl
                         + np.dot(self.BG_dl_Ws['GPe_STNdl'], self.output_GPe_pre)
                         )
