@@ -1,0 +1,14 @@
+Report Model's issues
+
+Implementation of DA modulation of the total Input incoming in the Striatum (DLS, DMS, NAc)
+
+- Incongruencies between winning channels of different cortical components causes the unleash of incongruent SNpco channels (DA release)
+- This leads to saturation of both Striatal channels receiving the DA modulation:
+
+	- One channel with lock-in thanks to noise
+
+	- The other channel will reach lock-in despite its lower activity thanks to the incongruent DA modulation coming from the SNpco unit
+
+-The problem can be avoided by decreasing the sensitivity to the DA component for the input in the Striatum (delta_values)
+
+	- However, this will lead to non-sufficient DA activity to permit a modulation in Devaluation testing
