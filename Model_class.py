@@ -337,6 +337,7 @@ class Model:
     ):
 
         DA_term = np.maximum(0, DA - theta_DA_str)[:, None]
+        
         delta_W_inp_str = (
             eta_str
             * DA_term
@@ -496,7 +497,11 @@ class Model:
                 + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
             )
             * np.dot(self.Ws["Mani_DMS"], _input_),
-            np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
+            (
+                self.parameters.DA_values["Y_DMS"]
+                + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
+            )
+            * np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
             np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
         )
 
@@ -506,7 +511,11 @@ class Model:
                 + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
             )
             * np.dot(self.Ws["Mani_DLS"], _input_),
-            np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+            (
+                self.parameters.DA_values["Y_DLS"]
+                + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
+            )
+            * np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
         )
 
@@ -525,7 +534,11 @@ class Model:
                 + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
             )
             * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
-            np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
+            (
+                self.parameters.DA_values["Y_NAc"]
+                + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
+            )
+            * np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
             np.dot(self.Ws["PL_STNv"], self.PL_output_pre),
         )
 

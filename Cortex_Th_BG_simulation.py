@@ -165,37 +165,45 @@ class Cortex():
         self.DM_output_pre = self.DM.output.copy()
         self.PL_output_pre = self.PL.output.copy()
         
-    def step(self, inp_BLA, inp):
-        
-        VTA_baseline = self.parameters.baseline["VTA"]
-        SNpco_1_baseline = self.parameters.baseline["SNpco"]
-        SNpco_2_baseline = self.parameters.baseline["SNpco"]
+    def step(self, inp_BLA, inp, da_VTA, da_SNpco):
         
         #Basal Ganglia
         self.BG_v.step(
             (
                 self.parameters.DA_values["Y_NAc"]
-                + (self.parameters.DA_values["delta_NAc"] * VTA_baseline)
+                + (self.parameters.DA_values["delta_NAc"] * da_VTA)
             ) * 
             np.dot(self.Ws['inp_BLA_BG'], inp_BLA),
+            (
+                self.parameters.DA_values["Y_NAc"]
+                + (self.parameters.DA_values["delta_NAc"] * da_VTA)
+            ) * 
             np.dot(self.Ws['PL_NAc'], self.PL_output_pre),
             np.dot(self.Ws['PL_STNv'], self.PL_output_pre)
             )
         self.BG_dm.step(
             (
                 self.parameters.DA_values["Y_DMS"]
-                + (self.parameters.DA_values["delta_DMS"] * SNpco_1_baseline)
+                + (self.parameters.DA_values["delta_DMS"] * da_SNpco)
             ) *
             np.dot(self.Ws['inp_BG'], inp),
+            (
+                self.parameters.DA_values["Y_DMS"]
+                + (self.parameters.DA_values["delta_DMS"] * da_SNpco)
+            ) *
             np.dot(self.Ws['PFCd_PPC_DMS'], self.PFCd_PPC_output_pre),
             np.dot(self.Ws['PFCd_PPC_STNdm'], self.PFCd_PPC_output_pre)
             )
         self.BG_dl.step(
             (
                 self.parameters.DA_values["Y_DLS"]
-                + (self.parameters.DA_values["delta_DLS"] * SNpco_2_baseline)
+                + (self.parameters.DA_values["delta_DLS"] * da_SNpco)
             ) *
             np.dot(self.Ws['inp_BG'], inp),
+            (
+                self.parameters.DA_values["Y_DLS"]
+                + (self.parameters.DA_values["delta_DLS"] * da_SNpco)
+            ) *
             np.dot(self.Ws['MC_DLS'], self.MC_output_pre),
             np.dot(self.Ws['MC_STNdl'], self.MC_output_pre)
             )

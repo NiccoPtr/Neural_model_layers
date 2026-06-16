@@ -124,7 +124,7 @@ if __name__ == "__main__":
         BLA_IC = model.BLA_IC
 
         for t in range(timesteps):
-            
+
             if t < 50:
                 state[0:2] = 0.0
                 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
                 elif state[1] == 1.0 and winner == 1:
                     state[2:4] = 0.0
-                    state[2 + winner] = 1.0
+                    state[2 + winner] = 1.0                
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,

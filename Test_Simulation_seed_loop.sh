@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
+id=16
+
 scheduling=$(cat << EOF 
 {
-    "trials": 100,
+    "trials": 80,
     "timesteps": 1000,
     "states": [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-		[1.0, 1.0, 0.0, 0.0, 1.0, 0.0],
 		[1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 		],
-    "phases": [0.5, 0.75, 1.0]
+    "phases": [0.5, 1.0]
 }   
+
 EOF
 )
 
@@ -19,14 +21,14 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-for seed in $(seq 1 1 9); do
-    SIM=test_seed${seed}
+for seed in $(seq 1 1 1); do
+    SIM="test_seed${seed}"
     mkdir -p $SIM
     cd $SIM
 
     echo "$scheduling" > scheduling.json
     echo "Running simulation with seed= $seed"
-    python ${SRC}/Test_Simulation.py -m save -d scheduling.json -s $seed
+    python ${SRC}/Test_Simulation.py -d scheduling.json -s $seed -l None -i $id
 
     cd $CURR_DIR  
 done

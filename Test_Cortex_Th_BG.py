@@ -104,14 +104,6 @@ def parse_args():
         help="Range of seeds for random number generation",
     )
     parser.add_argument(
-        "-i",
-        "--inp_BLA",
-        type=float,
-        nargs=2,
-        default=(0.0, 0.0),
-        help="Input values (two floats)",
-    )
-    parser.add_argument(
         "-e",
         "--inp",
         type=float,
@@ -122,7 +114,7 @@ def parse_args():
     parser.add_argument(
         "--W_inp",
         type=float,
-        default=0.2,
+        default=1.0,
         help='Scalar Matrix Input to Basal Ganglia'
         )
     parser.add_argument(
@@ -136,6 +128,18 @@ def parse_args():
         type=float,
         default=1.0,
         help='Scalar Matrix Input to Basal Ganglia'
+        )
+    parser.add_argument(
+        "--da_SNpco",
+        type=float,
+        default=0.0,
+        help='SNpco baseline activity for dopaminergic modulation'
+        )
+    parser.add_argument(
+        "--da_VTA",
+        type=float,
+        default=0.0,
+        help='VTA baseline activity for dopaminergic modulation'
         )
     parser.add_argument(
         "-t",
@@ -164,8 +168,10 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    inp_BLA = np.array(args.inp_BLA)
+    inp_BLA = np.zeros(2)
     inp = np.array(args.inp)
+    da_VTA = np.array(args.da_VTA)
+    da_SNpco = np.zeros(2)
     timesteps = args.timesteps
 
     parameters = Parameters()
@@ -211,24 +217,50 @@ if __name__ == "__main__":
         actions = []
     
         C_Model.reset_activity()
+        winner = False
     
         for t in range(timesteps):
             
-            if t == 50:
-                inp_BLA[0] = args.inp_BLA[0]
-                inp_BLA[1] = args.inp_BLA[1]
-                
-            elif t == 150:
-                inp_BLA[0] = 0.0
-                inp_BLA[1] = 0.0
-                
-            C_Model.step(inp_BLA, inp)
+            if winner:
+                if args.inp[arg - 1] == 1.0:
+                    if 50 <= t <= 150:
+                        inp_BLA[arg - 1] = 1.0
+                        da_VTA = 1.0
+                        da_SNpco[arg - 1] = 1.0                 
+
+                    elif t > 150:
+                        inp_BLA *= 0.0
+                        da_VTA = np.array(args.da_VTA)
+                        da_SNpco[arg - 1] = 1.0
+
+                    else:
+                        inp_BLA *= 0.0
+                        da_VTA = np.array(args.da_VTA)
+                        da_SNpco[arg - 1] = args.da_SNpco
+
+                else:
+                    inp_BLA *= 0.0
+                    da_SNpco[arg - 1] = args.da_SNpco
+                    da_VTA = np.array(args.da_VTA)
+
+            C_Model.step(inp_BLA, inp, da_VTA, da_SNpco)
             
             action = C_Model.MC.output.copy()
-            if np.any(action >= C_Model.MC.threshold):
-                winner = np.argmax(action) + 1
+            if np.any(action >= C_Model.MC.threshold) and t <= timesteps*0.2:
+                winner = True
+                arg = np.argmax(action) + 1
+
+            elif np.any(action >= C_Model.MC.threshold) and t > timesteps*0.2:
+                winner = False
+                arg = np.argmax(action) + 1
+                da_SNpco[arg - 1] = args.da_SNpco
+                da_VTA = np.array(args.da_VTA)
+
             else:
-                winner = np.array(0)
+                winner = False
+                da_SNpco *= 0.0
+                da_VTA = np.array(args.da_VTA)
+                inp_BLA *= 0.0
                 
             SNpr_output.append(C_Model.BG_v.SNpr.output.copy()) 
             DM_output.append(C_Model.DM.output.copy())
@@ -244,7 +276,6 @@ if __name__ == "__main__":
             MC_output.append(C_Model.MC.output.copy())
             _inp_BLA.append(inp_BLA.copy())
             _inp.append(inp.copy())
-            actions.append(winner.copy())
     
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
@@ -267,12 +298,11 @@ if __name__ == "__main__":
         if args.mode == "plot":
             print(f"""
                   Seed: {seed + 1}
-                  Input_BLA: {args.inp_BLA}
                   Input: {args.inp}
                   Matrices Cortex: {args.W_C}
                   MC-PFCd_PPC Noise: {parameters.noise['MC'], parameters.noise['PFCd_PPC']}
                   PL Noise: {parameters.noise['PL']}
-                  Thalamus Baseline: {parameters.baseline['MGV'], parameters.baseline['P'], parameters.baseline['DM']}
+                  Thalamus Baselines: {parameters.baseline['MGV'], parameters.baseline['P'], parameters.baseline['DM']}
                   Lesioned areas: PL_{args.lesion[0]}, DMS_{args.lesion[1]}, NAc_{args.lesion[2]}
                   """)
             plotting(result)

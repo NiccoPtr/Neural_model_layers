@@ -85,14 +85,14 @@ def parse_args():
     parser.add_argument(
         "-mani",
         "--manipulanda",
-        type=float,
+        type=int,
         default=0,
         help="Insert 0 for manipulanda lever, 1 for manipulanda chain",
     )
     parser.add_argument(
         "-f",
         "--food",
-        type=float,
+        type=int,
         default=2,
         help="Insert 2 for food_1, 3 for food_2",
     )
@@ -127,8 +127,8 @@ def parse_args():
     parser.add_argument(
         "-de",
         "--delta",
-        type=float,
-        default=150.0,
+        type=int,
+        default=50,
         help="Insert delta for manipulanda input onset",
     )
 
