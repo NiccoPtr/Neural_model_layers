@@ -65,9 +65,9 @@
         "SNpci": 2.0,
         "SNpco": 0.7,
         "DLS": 0.0,
-        "STNdl": 0.0,
+        "STNdl": 0.2,
         "GPi": 0.33,
-        "GPe": 0.0,
+        "GPe": 0.33,
         "DMS": 0.0,
         "STNdm": 0.0,
         "GPi_SNpr": 0.33,
@@ -81,13 +81,17 @@
         "DM": 0.2,
         "PL": 0.0
     },
+    "BG_v2": {
+        "DLS_1_GPi_W": 3.0,
+        "DLS_2_GPe_W": 2.5,
+        "STNdl_GPi_W": 3.0,
+        "STNdl_GPe_W": 2.0,
+        "GPe_STNdl_W": 1.5,
+        "GPe_GPi_W": 1.0
+    },
     "BG_dl_W": {
-        "DLS_1_GPi_W": 1.8,
-        "DLS_2_GPe_W": 1.8,
-        "STNdl_GPi_W": 1.6,
-        "STNdl_GPe_W": 1.6,
-        "GPe_STNdl_W": 1.6,
-        "GPe_GPi_W": 1.6
+        "DMS_GPiSNpr_W": 1.8,
+        "STNdm_GPiSNpr_W": 1.6
     },
     "BG_dm_W": {
         "DMS_GPiSNpr_W": 1.8,
@@ -150,12 +154,18 @@
         "MC_MGV": 2.4,
         "MC_DLS": 1.0,
         "MC_STNdl": 1.4,
-        "MC_PFCd_PPC": 0.3
+        "MC_PFCd_PPC": 0.3,
+        "MC_DLS_1": 0.6,
+        "MC_DLS_2": 0.6
     },
     "DA_values": {
+        "Y_DLS_1": 0.1,
+        "Y_DLS_2": 0.2,
         "Y_DLS": 0.2,
         "Y_DMS": 0.2,
         "Y_NAc": 1.0,
+        "delta_DLS_1": 0.5,
+        "delta_DLS_2": 5.0,
         "delta_DLS": 5.0,
         "delta_DMS": 5.0,
         "delta_NAc": 2.5

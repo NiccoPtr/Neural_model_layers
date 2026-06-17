@@ -499,7 +499,7 @@ class SNpc_Layer:
         self.output_SNpci_1_pre = output_i_1.copy()
         self.output_SNpci_2_pre = output_i_2.copy()
 
-class BG_dl_v2:
+class BG_v2:
 
     def __init__(self,
                   N,
@@ -558,10 +558,10 @@ class BG_dl_v2:
         self.GPi.reset_activity()
         self.GPe.reset_activity()
 
-    def step(self, inp_DLS_1, inp_DLS_2, inp_cortex_DLS, inp_cortex_STNdl):
+    def step(self, inp_DLS_1, inp_DLS_2, inp_cortex_DLS_1, inp_cortex_DLS_2, inp_cortex_STNdl):
 
-        self.DLS_1.step(inp_DLS_1 + inp_cortex_DLS)
-        self.DLS_2.step(inp_DLS_2 + inp_cortex_DLS)
+        self.DLS_1.step(inp_DLS_1 + inp_cortex_DLS_1)
+        self.DLS_2.step(inp_DLS_2 + inp_cortex_DLS_2)
         self.STNdl.step(inp_cortex_STNdl
                         + np.dot(self.BG_dl_Ws['GPe_STNdl'], self.output_GPe_pre)
                         )

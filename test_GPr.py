@@ -66,7 +66,7 @@ def plotting(res):
     title_ax = fig.add_subplot(gs[-2, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "Input", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -89,7 +89,7 @@ def plotting(res):
 
     title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
-
+ 
     im = ax.imshow(
         actions.reshape(-1, 1).T,
         interpolation="none",
@@ -136,8 +136,7 @@ def parse_args():
         "-d",
         "--da",
         type=float,
-        nargs=2,
-        default=(0.0, 0.0),
+        default=0.0,
         help="Set dopaminergic input to Basal Ganglia (e.g; 1.0 0.0)"
     )
     parser.add_argument(
@@ -190,6 +189,8 @@ if __name__ == '__main__':
 
     for t in range(timesteps):
 
+        # if t == timesteps*0.6:
+        #     da *= 0.0
         C_Th_BG.step(inp, da)
 
         action = C_Th_BG.MC.output.copy()
