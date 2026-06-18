@@ -87,7 +87,7 @@
         "STNdl_GPi_W": 3.0,
         "STNdl_GPe_W": 2.0,
         "GPe_STNdl_W": 1.5,
-        "GPe_GPi_W": 1.0
+        "GPe_GPi_W": 0.1
     },
     "BG_dl_W": {
         "DMS_GPiSNpr_W": 1.8,

@@ -137,7 +137,7 @@ def parse_args():
         "--da",
         type=float,
         default=0.0,
-        help="Set dopaminergic input to Basal Ganglia (e.g; 1.0 0.0)"
+        help="Set dopaminergic input to Basal Ganglia (e.g; 1.0)"
     )
     parser.add_argument(
         "-t",
