@@ -504,7 +504,8 @@ class BG_v2:
     def __init__(self,
                   N,
                     tau: float,
-                      baseline_DLS: float,
+                      baseline_DLS_1: float,
+                       baseline_DLS_2: float,
                         baseline_STNdl: float,
                           baseline_GPi: float,
                             baseline_GPe: float,
@@ -518,8 +519,8 @@ class BG_v2:
                                             noise: float,
                                               threshold: float):
     
-        self.DLS_1 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
-        self.DLS_2 = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
+        self.DLS_1 = Leaky_units_inh(N, tau, baseline_DLS_1, rng, noise, threshold)
+        self.DLS_2 = Leaky_units_inh(N, tau, baseline_DLS_2, rng, noise, threshold)
         self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
         self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
         self.GPe = Leaky_units_inh(N, tau, baseline_GPe, rng, noise, threshold)

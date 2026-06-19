@@ -12,7 +12,8 @@ class GPr:
 
         self.BG_dl = BG_v2(self.parameters.N["BG_dl"], 
                             self.parameters.tau["BG_dl"], 
-                            self.parameters.baseline["DLS"],
+                            self.parameters.baseline["DLS_1"],
+                            self.parameters.baseline["DLS_2"],
                             self.parameters.baseline["STNdl"],
                             self.parameters.baseline["GPi"],
                             self.parameters.baseline["GPe"],

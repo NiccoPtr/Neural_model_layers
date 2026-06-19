@@ -18,21 +18,26 @@ def plotting(res):
     GPe = np.array(res["GPe"]) * -1
     MGV = np.array(res["MGV"])
     MC = np.array(res["MC"])
+    da = np.array(res["da"])
 
     input_ = np.array(res["input"])
-    actions = np.array(res["actions"])
 
     plots = [
-        ("DLS_1", [(DLS_1[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("DLS_2", [(DLS_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("STNdl", [(STNdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("GPi", [(GPi[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("GPe", [(GPe[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
+        ("DLS_1", [(DLS_1[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("DLS_2", [(DLS_2[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("STNdl", [(STNdl[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("GPi", [(GPi[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("GPe", [(GPe[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("MGV", [(MGV[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("MC", [(MC[:, i], f"Unit_{i+1}", None) for i in range(2)], (-0.1, 1)),
+        ("DA", [(da[:], "Dopamine", "red")], (-0.1, 1)),
+        ("Input", [
+            (input_[:, 0], "Input_1", "green"),
+            (input_[:, 1], "Input_2", "orange")
+        ], (-0.1, 1))
     ]
 
-    n_rows = len(plots) + 2
+    n_rows = len(plots)
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows, 2, width_ratios=[1, 6], hspace=0.25)
 
@@ -50,8 +55,13 @@ def plotting(res):
         title_ax.axis("off")
 
         # Right column: actual plot
-        for y, label in lines:
-            ax.plot(y, label=label)
+        for y, label, color in lines:
+            x = np.arange(len(y))
+
+            if color is None:
+                ax.plot(x, y, label=label)
+            else:
+                ax.plot(x, y, label=label, color=color)
 
         ax.set_ylim(*ylim)
         ax.legend(loc="upper right", fontsize=5)
@@ -62,55 +72,16 @@ def plotting(res):
 
         ax.tick_params(labelbottom=False)
 
-    # Input plot
-    title_ax = fig.add_subplot(gs[-2, 0])
-    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
-
-    title_ax.text(0.5, 0.5, "Input", ha="center", va="center", fontsize=12)
-    title_ax.axis("off")
-
-    im = ax.imshow(
-        input_.reshape(-1, 1).T,
-        interpolation="none",
-        aspect="auto",
-        vmin=0,
-        vmax=2
-    )
-    
-    ax.set_yticks([])  
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
-
-    # Action selection
-    title_ax = fig.add_subplot(gs[-1, 0])
-    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
-
-    title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
-    title_ax.axis("off")
- 
-    im = ax.imshow(
-        actions.reshape(-1, 1).T,
-        interpolation="none",
-        aspect="auto",
-        vmin=0,
-        vmax=2
-    )
-    
-    ax.set_yticks([])  
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
-
     # Shared x-axis
     ax.set_xlabel("Timestep")
 
     plt.tight_layout()
 
+    shared_ax.margins(x=0)
+
     xmin, xmax = shared_ax.get_xlim()
     pad = 0.1 * (xmax - xmin)
+
     shared_ax.set_xlim(xmin, xmax + pad)
 
     plt.show()
@@ -182,6 +153,7 @@ if __name__ == '__main__':
     GPe_output = []
     MGV_output = []
     MC_output = []
+    da_ = []
     _input_ = []
     actions = []
 
@@ -189,8 +161,26 @@ if __name__ == '__main__':
 
     for t in range(timesteps):
 
-        # if t == timesteps*0.6:
-        #     da *= 0.0
+        if t <= 50:
+            inp *= 0.0
+        
+        elif t == 51:
+            inp = np.array(args.food) 
+
+        if any(inp) == 1.0:
+            if np.argmax(inp) == 0 and t == timesteps//2:
+                inp *= 0.0
+                inp[1] = 1.0
+                da = 1.0
+
+            elif np.argmax(inp) == 1 and t == timesteps//2:
+                inp *= 0.0
+                inp[0] = 1.0
+                da = 1.0
+
+        if t > timesteps*0.6:
+            da = np.array(args.da)
+
         C_Th_BG.step(inp, da)
 
         action = C_Th_BG.MC.output.copy()
@@ -205,6 +195,7 @@ if __name__ == '__main__':
         STNdl_output.append(C_Th_BG.BG_dl.STNdl.output.copy())
         GPi_output.append(C_Th_BG.BG_dl.GPi.output.copy())
         GPe_output.append(C_Th_BG.BG_dl.GPe.output.copy())
+        da_.append(da)
 
         MGV_output.append(C_Th_BG.MGV.output.copy())
 
@@ -221,7 +212,8 @@ if __name__ == '__main__':
         "MGV": np.array(MGV_output),
         "MC": np.array(MC_output),
         "input": np.array(_input_),
-        "actions": np.array(actions)
+        "actions": np.array(actions),
+        "da": np.array(da_)
     }
 
     if args.mode == "plot":
