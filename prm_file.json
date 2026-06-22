@@ -158,7 +158,7 @@
         "MC_STNdl": 1.4,
         "MC_PFCd_PPC": 0.3,
         "MC_DLS_1": 0.9,
-        "MC_DLS_2": 0.9
+        "MC_DLS_2": 0.8
     },
     "DA_values": {
         "Y_DLS_1": 0.1,
@@ -166,7 +166,7 @@
         "Y_DLS": 0.2,
         "Y_DMS": 0.2,
         "Y_NAc": 1.0,
-        "delta_DLS_1": 0.8,
+        "delta_DLS_1": 0.6,
         "delta_DLS_2": 3.3,
         "delta_DLS": 5.0,
         "delta_DMS": 5.0,
