@@ -49,8 +49,10 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
-        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
+    file_path = Path.home() / "CNR_model" / "Neural_model_layers" / "prm_file.json"
+
+    if file_path.exists():
+        parameters.load(str(file_path), mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
