@@ -204,9 +204,9 @@ class Leaky_onset_units_inh(Leaky_onset_units_exc):
         self.output = - self.output
     
 
-class BG_v_Layer:
+class BG_Layer:
     
-    def __init__(self, N, tau: float, baseline_NAc: float, baseline_STNv: float, baseline_SNpr: float, NAc_SNpr_W, STNv_SNpr_W, rng, noise: float, threshold: float, lesion=False):
+    def __init__(self, N, tau: float, baseline_Str: float, baseline_STN: float, baseline_GPi_SNpr: float, Str_GPi_SNpr_W, STN_GPi_SNpr_W, rng, noise: float, threshold: float, lesion=False):
         """
         Initialize different layers of neurons of size "N"
            
@@ -218,29 +218,29 @@ class BG_v_Layer:
             - it is a np.array() like vector which keeps the activity state at a certain level even at rest
             - the baseline should be 0.0 for each layer, except for GPi layer
         """
-        self.NAc = Leaky_units_inh(N, tau, baseline_NAc, rng, noise, threshold, lesion)
-        self.STNv = Leaky_units_exc(N, tau, baseline_STNv, rng, noise, threshold)
-        self.SNpr = Leaky_units_inh(N, tau, baseline_SNpr, rng, noise, threshold)
-        self.output_BG_v = np.zeros(N)
-        self.output_NAc_pre = np.zeros(N)
-        self.output_STNv_pre = np.zeros(N)
-        self.NAc_SNpr_W = NAc_SNpr_W
-        self.STNv_SNpr_W = STNv_SNpr_W
-        self.BG_v_Ws = {
-            "NAc_SNpr" : np.eye(N).astype(float) * self.NAc_SNpr_W,
-            "STNv_SNpr" : np.ones((N, N)).astype(float) * self.STNv_SNpr_W
+        self.Str = Leaky_units_inh(N, tau, baseline_Str, rng, noise, threshold, lesion)
+        self.STN = Leaky_units_exc(N, tau, baseline_STN, rng, noise, threshold)
+        self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise, threshold)
+        self.output_BG = np.zeros(N)
+        self.output_Str_pre = np.zeros(N)
+        self.output_STN_pre = np.zeros(N)
+        self.Str_GPi_SNpr_W = Str_GPi_SNpr_W
+        self.STN_GPi_SNpr_W = STN_GPi_SNpr_W
+        self.BG_Ws = {
+            "Str_GPi_SNpr" : np.eye(N).astype(float) * self.Str_GPi_SNpr_W,
+            "STN_GPi_SNpr" : np.ones((N, N)).astype(float) * self.STN_GPi_SNpr_W
             }
         
     def reset_activity(self):
         """ 
         Reset activity values for each Layer object through the Layre's function for activity reset
         """
-        self.NAc.reset_activity()
-        self.STNv.reset_activity()
-        self.SNpr.reset_activity()
-        self.output_BG_v *= 0
-        self.output_NAc_pre *= 0
-        self.output_STNv_pre *= 0
+        self.Str.reset_activity()
+        self.STN.reset_activity()
+        self.GPi_SNpr.reset_activity()
+        self.output_BG *= 0
+        self.output_Str_pre *= 0
+        self.output_STN_pre *= 0
         
         
     def step(self, inputs, inp_feedback_NAc, inp_feedback_STNv):
@@ -253,159 +253,24 @@ class BG_v_Layer:
             - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
             - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
         """
-        self.NAc.step(inputs + inp_feedback_NAc)
-        self.STNv.step(inp_feedback_STNv)
+        self.Str.step(inputs + inp_feedback_NAc)
+        self.STN.step(inp_feedback_STNv)
         
-        output_NAc = self.NAc.output.copy()
-        output_STNv = self.STNv.output.copy()
-        
-        # print(f"[BGDL] DLS output: {output_DLS}")
-        # print(f"[BGDL] STN output: {output_STNdl}")
-        
-        self.SNpr.step(np.dot(self.BG_v_Ws["NAc_SNpr"], self.output_NAc_pre) + np.dot(self.BG_v_Ws["STNv_SNpr"], self.output_STNv_pre))
-        self.output_BG_v = self.SNpr.output.copy()
-        
-        if np.any(self.output_BG_v > 1.0):
-            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
-            
-        self.output_NAc_pre = output_NAc.copy()
-        self.output_STNv_pre = output_STNv.copy()
-
-class BG_dm_Layer:
-    
-    def __init__(self, N, tau: float, baseline_DMS: float, baseline_STNdm: float, baseline_GPi_SNpr: float, DMS_GPiSNpr_W, STNdm_GPiSNpr_W, rng, noise: float, threshold: float, lesion=False):
-        """
-        Initialize different layers of neurons of size "N"
-           
-        Create the different connection matrices for each layer's comunication:
-            - required in this case 2 matrices for comunication between 2 neuron layers with the GPi
-            - GPi will then take in as inputs this 2 outputs from the 2 neuron layers and return an outcome
-        
-        Intialize a Baseline value for the each layer:
-            - it is a np.array() like vector which keeps the activity state at a certain level even at rest
-            - the baseline should be 0.0 for each layer, except for GPi layer
-        """
-        self.DMS = Leaky_units_inh(N, tau, baseline_DMS, rng, noise, threshold, lesion)
-        self.STNdm = Leaky_units_exc(N, tau, baseline_STNdm, rng, noise, threshold)
-        self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise, threshold)
-        self.output_BG_dm = np.zeros(N)
-        self.output_DMS_pre = np.zeros(N)
-        self.output_STNdm_pre = np.zeros(N)
-        self.DMS_GPiSNpr_W = DMS_GPiSNpr_W
-        self.STNdm_GPiSNpr_W = STNdm_GPiSNpr_W
-        self.BG_dm_Ws = {
-            "DMS_GPiSNpr" : np.eye(N).astype(float) * self.DMS_GPiSNpr_W,
-            "STNdm_GPiSNpr" : np.ones((N, N)).astype(float) * self.STNdm_GPiSNpr_W
-            }
-        
-
-    def reset_activity(self):
-        """ 
-        Reset activity values for each Layer object through the Layre's function for activity reset
-        """
-        self.DMS.reset_activity()
-        self.STNdm.reset_activity()
-        self.GPi_SNpr.reset_activity()
-        self.output_BG_dm *= 0
-        self.output_DMS_pre *= 0
-        self.output_STNdm_pre *= 0
-        
-    def step(self, inputs, inp_feedback_DMS, inp_feedback_STNdm):
-        """
-        Return the output of the 2 layers below GPi layer using the input argument as Input
-        
-        Use the 2 outputs as input values for GPi activity update and return an outcome
-        
-        Each layer recalls the origin step function from its origin Class to compute the activity update:
-            - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
-            - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
-        """
-        self.DMS.step(inputs + inp_feedback_DMS)
-        self.STNdm.step(inp_feedback_STNdm)
-        
-        output_DMS = self.DMS.output.copy()
-        output_STNdm = self.STNdm.output.copy()
+        output_Str = self.Str.output.copy()
+        output_STN = self.STN.output.copy()
         
         # print(f"[BGDL] DLS output: {output_DLS}")
         # print(f"[BGDL] STN output: {output_STNdl}")
         
-        self.GPi_SNpr.step(np.dot(self.BG_dm_Ws["DMS_GPiSNpr"], self.output_DMS_pre) + np.dot(self.BG_dm_Ws["STNdm_GPiSNpr"], self.output_STNdm_pre))
-        self.output_BG_dm = self.GPi_SNpr.output.copy()
+        self.GPi_SNpr.step(np.dot(self.BG_Ws["Str_GPi_SNpr"], self.output_Str_pre) + np.dot(self.BG_Ws["STN_GPi_SNpr"], self.output_STN_pre))
+        self.output_BG = self.GPi_SNpr.output.copy()
         
-        if np.any(self.output_BG_dm > 1.0):
+        if np.any(self.output_BG > 1.0):
             raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
             
-        self.output_DMS_pre = output_DMS.copy()
-        self.output_STNdm_pre = output_STNdm.copy()
-        
-    
-class BG_dl_Layer:
-    
-    def __init__(self, N, tau: float, baseline_DLS: float, baseline_STNdl: float, baseline_GPi: float, DLS_GPi_W, STNdl_GPi_W, rng, noise: float, threshold: float):
-        """
-        Initialize different layers of neurons of size "N"
-           
-        Create the different connection matrices for each layer's comunication:
-            - required in this case 2 matrices for comunication between 2 neuron layers with the GPi
-            - GPi will then take in as inputs this 2 outputs from the 2 neuron layers and return an outcome
-        
-        Intialize a Baseline value for the each layer:
-            - it is a np.array() like vector which keeps the activity state at a certain level even at rest
-            - the baseline should be 0.0 for each layer, except for GPi layer
-        """
-        self.DLS = Leaky_units_inh(N, tau, baseline_DLS, rng, noise, threshold)
-        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
-        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
-        self.output_BG_dl = np.zeros(N)
-        self.output_DLS_pre = np.zeros(N)
-        self.output_STNdl_pre = np.zeros(N)
-        self.DLS_GPi_W = DLS_GPi_W
-        self.STNdl_GPi_W = STNdl_GPi_W
-        self.BG_dl_Ws = {
-            "DLS_GPi" : np.eye(N).astype(float) * self.DLS_GPi_W,
-            "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W
-            }
-        
+        self.output_Str_pre = output_Str.copy()
+        self.output_STN_pre = output_STN.copy()
 
-    def reset_activity(self):
-        """ 
-        Reset activity values for each Layer object through the Layre's function for activity reset
-        """
-        self.DLS.reset_activity()
-        self.STNdl.reset_activity()
-        self.GPi.reset_activity()
-        self.output_BG_dl *= 0
-        self.output_DLS_pre *= 0
-        self.output_STNdl_pre *= 0
-        
-    def step(self, inputs, inp_feedback_DLS, inp_feedback_STNdl):
-        """
-        Return the output of the 2 layers below GPi layer using the input argument as Input
-        
-        Use the 2 outputs as input values for GPi activity update and return an outcome
-        
-        Each layer recalls the origin step function from its origin Class to compute the activity update:
-            - modulate the layers's outcomes toward the GPi by using the matrices you initialized within the __init__ function 
-            - this is simply duable through multiplication (input * matrix); a Matrix of 1s will let pass the all activity as an input, meanwhile a 0s Matrix will stop the input bringing it down to 0
-        """
-        self.DLS.step(inputs + inp_feedback_DLS)
-        self.STNdl.step(inp_feedback_STNdl)
-        
-        output_DLS = self.DLS.output.copy()
-        output_STNdl = self.STNdl.output.copy()
-        
-        # print(f"[BGDL] DLS output: {output_DLS}")
-        # print(f"[BGDL] STN output: {output_STNdl}")
-        
-        self.GPi.step(np.dot(self.BG_dl_Ws["DLS_GPi"], self.output_DLS_pre) + np.dot(self.BG_dl_Ws["STNdl_GPi"], self.output_STNdl_pre))
-        self.output_BG_dl = self.GPi.output.copy()
-        
-        if np.any(self.output_BG_dl > 1.0):
-            raise ValueError(f"[ERROR] Output exceeded 1.0! Output: {self.output}, Activity: {self.activity}")
-            
-        self.output_DLS_pre = output_DLS.copy()
-        self.output_STNdl_pre = output_STNdl.copy()
-        
 
 class BLA_IC_Layer(Leaky_onset_units_exc):
     
@@ -504,79 +369,79 @@ class BG_v2:
     def __init__(self,
                   N,
                     tau: float,
-                      baseline_DLS_1: float,
-                       baseline_DLS_2: float,
-                        baseline_STNdl: float,
-                          baseline_GPi: float,
+                      baseline_Str1: float,
+                       baseline_Str2: float,
+                        baseline_STN: float,
+                          baseline_GPi_SNpr: float,
                             baseline_GPe: float,
-                              DLS_1_GPi_W,
-                                DLS_2_GPe_W,
-                                  STNdl_GPi_W,
-                                    STNdl_GPe_W,
-                                      GPe_STNdl_W,
-                                        GPe_GPi_W,
+                              Str1_GPi_SNpr_W,
+                                Str2_GPe_W,
+                                  STN_GPi_SNpr_W,
+                                    STN_GPe_W,
+                                      GPe_STN_W,
+                                        GPe_GPi_SNpr_W,
                                           rng,
                                             noise: float,
                                               threshold: float):
     
-        self.DLS_1 = Leaky_units_inh(N, tau, baseline_DLS_1, rng, noise, threshold)
-        self.DLS_2 = Leaky_units_inh(N, tau, baseline_DLS_2, rng, noise, threshold)
-        self.STNdl = Leaky_units_exc(N, tau, baseline_STNdl, rng, noise, threshold)
-        self.GPi = Leaky_units_inh(N, tau, baseline_GPi, rng, noise, threshold)
+        self.Str1 = Leaky_units_inh(N, tau, baseline_Str1, rng, noise, threshold)
+        self.Str2 = Leaky_units_inh(N, tau, baseline_Str2, rng, noise, threshold)
+        self.STN = Leaky_units_exc(N, tau, baseline_STN, rng, noise, threshold)
+        self.GPi_SNpr = Leaky_units_inh(N, tau, baseline_GPi_SNpr, rng, noise, threshold)
         self.GPe = Leaky_units_inh(N, tau, baseline_GPe, rng, noise, threshold)
 
-        self.output_BG_dl = np.zeros(N)
+        self.output_BG = np.zeros(N)
         self.output_GPe_pre = np.zeros(N)
-        self.output_DLS_1_pre = np.zeros(N)
-        self.output_DLS_2_pre = np.zeros(N)
-        self.output_STNdl_pre = np.zeros(N)
-        self.DLS_1_GPi_W = DLS_1_GPi_W
-        self.DLS_2_GPe_W = DLS_2_GPe_W
-        self.STNdl_GPi_W = STNdl_GPi_W
-        self.STNdl_GPe_W = STNdl_GPe_W
-        self.GPe_STNdl_W = GPe_STNdl_W
-        self.GPe_GPi_W = GPe_GPi_W
-        self.BG_dl_Ws = {
-            "DLS_1_GPi" : np.eye(N).astype(float) * self.DLS_1_GPi_W,
-            "DLS_2_GPe" : np.eye(N).astype(float) * self.DLS_2_GPe_W,
-            "STNdl_GPi" : np.ones((N, N)).astype(float) * self.STNdl_GPi_W,
-            "STNdl_GPe" : np.ones((N, N)).astype(float) * self.STNdl_GPe_W,
-            "GPe_STNdl" : np.eye(N).astype(float) * self.GPe_STNdl_W,
-            "GPe_GPi" : np.eye(N).astype(float) * self.GPe_GPi_W
+        self.output_Str1_pre = np.zeros(N)
+        self.output_Str2_pre = np.zeros(N)
+        self.output_STN_pre = np.zeros(N)
+        self.Str1_GPi_SNpr_W = Str1_GPi_SNpr_W
+        self.Str2_GPe_W = Str2_GPe_W
+        self.STN_GPi_SNpr_W = STN_GPi_SNpr_W
+        self.STN_GPe_W = STN_GPe_W
+        self.GPe_STN_W = GPe_STN_W
+        self.GPe_GPi_SNpr_W = GPe_GPi_SNpr_W
+        self.BG_Ws = {
+            "Str1_GPi_SNpr" : np.eye(N).astype(float) * self.Str1_GPi_SNpr_W,
+            "Str2_GPe" : np.eye(N).astype(float) * self.Str2_GPe_W,
+            "STN_GPi_SNpr" : np.ones((N, N)).astype(float) * self.STN_GPi_SNpr_W,
+            "STN_GPe" : np.ones((N, N)).astype(float) * self.STN_GPe_W,
+            "GPe_STN" : np.eye(N).astype(float) * self.GPe_STN_W,
+            "GPe_GPi_SNpr" : np.eye(N).astype(float) * self.GPe_GPi_SNpr_W
             }
 
     def reset_activity(self):
 
-        self.output_BG_dl *= 0.0
+        self.output_BG *= 0.0
         self.output_GPe_pre *= 0.0
-        self.output_DLS_1_pre *= 0.0
-        self.output_DLS_2_pre *= 0.0
-        self.output_STNdl_pre *= 0.0
+        self.output_Str1_pre *= 0.0
+        self.output_Str2_pre *= 0.0
+        self.output_STN_pre *= 0.0
 
-        self.DLS_1.reset_activity()
-        self.DLS_2.reset_activity()
-        self.STNdl.reset_activity()
-        self.GPi.reset_activity()
+        self.Str1.reset_activity()
+        self.Str2.reset_activity()
+        self.STN.reset_activity()
+        self.GPi_SNpr.reset_activity()
         self.GPe.reset_activity()
 
-    def step(self, inp_DLS_1, inp_DLS_2, inp_cortex_DLS_1, inp_cortex_DLS_2, inp_cortex_STNdl):
+    def step(self, inp_Str1, inp_Str2, inp_cortex_Str1, inp_cortex_Str2, inp_cortex_STN):
 
-        self.DLS_1.step(inp_DLS_1 + inp_cortex_DLS_1)
-        self.DLS_2.step(inp_DLS_2 + inp_cortex_DLS_2)
-        self.STNdl.step(inp_cortex_STNdl
-                        + np.dot(self.BG_dl_Ws['GPe_STNdl'], self.output_GPe_pre)
+        self.Str1.step(inp_Str1 + inp_cortex_Str1)
+        self.Str2.step(inp_Str2 + inp_cortex_Str2)
+        self.STN.step(inp_cortex_STN
+                        + np.dot(self.BG_Ws['GPe_STN'], self.output_GPe_pre)
                         )
-        self.GPe.step(np.dot(self.BG_dl_Ws['DLS_2_GPe'], self.output_DLS_2_pre)
-                       + np.dot(self.BG_dl_Ws['STNdl_GPe'], self.output_STNdl_pre)
+        self.GPe.step(np.dot(self.BG_Ws['Str2_GPe'], self.output_Str2_pre)
+                       + np.dot(self.BG_Ws['STN_GPe'], self.output_STN_pre)
                        )
-        self.GPi.step(np.dot(self.BG_dl_Ws['DLS_1_GPi'], self.output_DLS_1_pre)
-                       + np.dot(self.BG_dl_Ws['STNdl_GPi'], self.output_STNdl_pre)
-                       + np.dot(self.BG_dl_Ws['GPe_GPi'], self.output_GPe_pre)
+        self.GPi_SNpr.step(np.dot(self.BG_Ws['Str1_GPi_SNpr'], self.output_Str1_pre)
+                       + np.dot(self.BG_Ws['STN_GPi_SNpr'], self.output_STN_pre)
+                       + np.dot(self.BG_Ws['GPe_GPi_SNpr'], self.output_GPe_pre)
                        )
 
-        self.output_BG_dl = self.GPi.output.copy()
+        self.output_BG = self.GPi_SNpr.output.copy()
         self.output_GPe_pre = self.GPe.output.copy()
-        self.output_STNdl_pre = self.STNdl.output.copy()
-        self.output_DLS_1_pre = self.DLS_1.output.copy()
-        self.output_DLS_2_pre = self.DLS_2.output.copy()
+        self.output_STN_pre = self.STN.output.copy()
+        self.output_Str1_pre = self.Str1.output.copy()
+        self.output_Str2_pre = self.Str2.output.copy()
         

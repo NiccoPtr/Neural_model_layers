@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 10 09:38:31 2025
-
-@author: Nicc
-"""
 
 import numpy as np
 
-from Layer_types import (BG_dl_Layer, BG_dm_Layer, BG_v_Layer, BLA_IC_Layer,
+from Layer_types import (BG_v2, BLA_IC_Layer,
                          Leaky_onset_units_exc, Leaky_units_exc, SNpc_Layer)
 
 
@@ -77,17 +71,23 @@ class Model:
             self.parameters.threshold["SNpc"],
         )
 
-        self.BG_dl = BG_dl_Layer(
-            self.parameters.N["BG_dl"],
-            self.parameters.tau["BG_dl"],
-            self.parameters.baseline["DLS"],
+        self.BG_dl = BG_v2(
+            self.parameters.N["BG_dl"], 
+            self.parameters.tau["BG_dl"], 
+            self.parameters.baseline["DLS_1"],
+            self.parameters.baseline["DLS_2"],
             self.parameters.baseline["STNdl"],
             self.parameters.baseline["GPi"],
-            self.parameters.BG_dl_W["DLS_GPi_W"],
+            self.parameters.baseline["GPe"],
+            self.parameters.BG_dl_W["DLS_1_GPi_W"], 
+            self.parameters.BG_dl_W["DLS_2_GPe_W"],
             self.parameters.BG_dl_W["STNdl_GPi_W"],
+            self.parameters.BG_dl_W["STNdl_GPe_W"],
+            self.parameters.BG_dl_W["GPe_STNdl_W"],
+            self.parameters.BG_dl_W["GPe_GPi_W"],
             rng,
             self.parameters.noise["BG_dl"],
-            self.parameters.threshold["BG_dl"],
+            self.parameters.threshold["BG_dl"]
         )
 
         self.MGV = Leaky_units_exc(
@@ -108,17 +108,23 @@ class Model:
             self.parameters.threshold["MC"],
         )
 
-        self.BG_dm = BG_dm_Layer(
-            self.parameters.N["BG_dm"],
-            self.parameters.tau["BG_dm"],
-            self.parameters.baseline["DMS"],
+        self.BG_dm = BG_v2(
+            self.parameters.N["BG_dm"], 
+            self.parameters.tau["BG_dm"], 
+            self.parameters.baseline["DMS_1"],
+            self.parameters.baseline["DMS_2"],
             self.parameters.baseline["STNdm"],
             self.parameters.baseline["GPi_SNpr"],
-            self.parameters.BG_dm_W["DMS_GPiSNpr_W"],
-            self.parameters.BG_dm_W["STNdm_GPiSNpr_W"],
+            self.parameters.baseline["GPe"],
+            self.parameters.BG_dm_W["DMS_1_GPi_SNpr_W"], 
+            self.parameters.BG_dm_W["DMS_2_GPe_W"],
+            self.parameters.BG_dm_W["STNdl_GPi_SNpr_W"],
+            self.parameters.BG_dm_W["STNdl_GPe_W"],
+            self.parameters.BG_dm_W["GPe_STNdl_W"],
+            self.parameters.BG_dm_W["GPe_GPi_SNpr_W"],
             rng,
             self.parameters.noise["BG_dm"],
-            self.parameters.threshold["BG_dm"],
+            self.parameters.threshold["BG_dm"]
         )
 
         self.P = Leaky_units_exc(
@@ -139,17 +145,23 @@ class Model:
             self.parameters.threshold["PFCd_PPC"],
         )
 
-        self.BG_v = BG_v_Layer(
-            self.parameters.N["BG_v"],
-            self.parameters.tau["BG_v"],
-            self.parameters.baseline["NAc"],
+        self.BG_v = BG_v2(
+            self.parameters.N["BG_v"], 
+            self.parameters.tau["BG_v"], 
+            self.parameters.baseline["NAc_1"],
+            self.parameters.baseline["NAc_2"],
             self.parameters.baseline["STNv"],
             self.parameters.baseline["SNpr"],
-            self.parameters.BG_v_W["NAc_SNpr_W"],
-            self.parameters.BG_v_W["STNv_SNpr_W"],
+            self.parameters.baseline["GPe"],
+            self.parameters.BG_v2["NAc_1_SNpr_W"], 
+            self.parameters.BG_v2["NAc_2_GPe_W"],
+            self.parameters.BG_v2["STNv_SNpr_W"],
+            self.parameters.BG_v2["STNv_GPe_W"],
+            self.parameters.BG_v2["GPe_STNv_W"],
+            self.parameters.BG_v2["GPe_SNpr_W"],
             rng,
             self.parameters.noise["BG_v"],
-            self.parameters.threshold["BG_v"],
+            self.parameters.threshold["BG_v"]
         )
 
         self.DM = Leaky_units_exc(
@@ -350,47 +362,6 @@ class Model:
 
         return delta_W_inp_str
 
-    def delta_Str_learn_SV(
-        self,
-        eta_str,
-        DA,
-        v_str,
-        v_inp,
-        theta_DA_str,
-        theta_str,
-        theta_inp_str,
-        mask,
-        max_W_str,
-        W,
-    ):
-
-        DA_term = np.maximum(0, DA - theta_DA_str)
-        DA_term = np.clip(DA_term, 0, 1e6)
-        DA_term = np.nan_to_num(DA_term)
-        DA_term = DA_term[:, None]
-
-        post = np.maximum(0, v_str - theta_str)
-        pre = np.maximum(0, v_inp - theta_inp_str)
-
-        post = np.clip(post, 0, 1e6)
-        pre = np.clip(pre, 0, 1e6)
-
-        post = np.nan_to_num(post)
-        pre = np.nan_to_num(pre)
-
-        hebb = np.outer(post, pre)
-        hebb = np.nan_to_num(hebb)
-
-        w_diff = max_W_str - W
-        w_diff = np.nan_to_num(w_diff)
-        w_diff = np.clip(w_diff, -1e6, 1e6)
-
-        delta_W = eta_str * DA_term * hebb * w_diff
-
-        delta_W = np.nan_to_num(delta_W)
-        delta_W *= mask
-
-        return delta_W
 
     def learning(self, _input_):
         """
@@ -458,25 +429,25 @@ class Model:
 
         self.SNpco_output_pre_2 = self.SNpc.output_2.copy()
 
-        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        self.BG_dl_output_pre = self.BG_dl.output_BG.copy()
 
-        self.DLS_output_pre = self.BG_dl.DLS.output.copy()
+        self.DLS_output_pre = self.BG_dl.Str.output.copy()
 
         self.MGV_output_pre = self.MGV.output.copy()
 
         self.MC_output_pre = self.MC.output.copy()
 
-        self.BG_dm_output_pre = self.BG_dm.output_BG_dm.copy()
+        self.BG_dm_output_pre = self.BG_dm.output_BG.copy()
 
-        self.DMS_output_pre = self.BG_dm.DMS.output.copy()
+        self.DMS_output_pre = self.BG_dm.Str.output.copy()
 
         self.P_output_pre = self.P.output.copy()
 
         self.PFCd_PPC_output_pre = self.PFCd_PPC.output.copy()
 
-        self.BG_v_output_pre = self.BG_v.output_BG_v.copy()
+        self.BG_v_output_pre = self.BG_v.output_BG.copy()
 
-        self.NAc_output_pre = self.BG_v.NAc.output.copy()
+        self.NAc_output_pre = self.BG_v.Str.output.copy()
 
         self.DM_output_pre = self.DM.output.copy()
 
@@ -496,7 +467,11 @@ class Model:
                 + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
             )
             * np.dot(self.Ws["Mani_DMS"], _input_),
-            np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
+            (
+                self.parameters.DA_values["Y_DMS"]
+                + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
+            )
+            * np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
             np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
         )
 
@@ -506,7 +481,11 @@ class Model:
                 + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
             )
             * np.dot(self.Ws["Mani_DLS"], _input_),
-            np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+            (
+                self.parameters.DA_values["Y_DLS"]
+                + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
+            )
+            * np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
         )
 
@@ -525,7 +504,11 @@ class Model:
                 + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
             )
             * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
-            np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
+            (
+                self.parameters.DA_values["Y_NAc"]
+                + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
+            )
+            * np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
             np.dot(self.Ws["PL_STNv"], self.PL_output_pre),
         )
 

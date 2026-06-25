@@ -64,16 +64,17 @@
         "BLA_IC": 0.0,
         "SNpci": 2.0,
         "SNpco": 0.7,
+        "GPe": 0.33,
         "DLS_1": 0.2,
         "DLS_2": 0.2,
-        "DLS": 0.0,
         "STNdl": 0.2,
         "GPi": 0.33,
-        "GPe": 0.33,
-        "DMS": 0.0,
+        "DMS_1": 0.0,
+        "DMS_2": 0.0,
         "STNdm": 0.0,
         "GPi_SNpr": 0.33,
-        "NAc": 0.0,
+        "NAc_1": 0.0,
+        "NAc_2": 0.0,
         "STNv": 0.0,
         "SNpr": 0.33,
         "MGV": 0.2,
@@ -83,7 +84,7 @@
         "DM": 0.2,
         "PL": 0.0
     },
-    "BG_v2": {
+    "BG_dl_W": {
         "DLS_1_GPi_W": 4.0,
         "DLS_2_GPe_W": 3.2,
         "STNdl_GPi_W": 3.0,
@@ -91,17 +92,21 @@
         "GPe_STNdl_W": 1.5,
         "GPe_GPi_W": 0.1
     },
-    "BG_dl_W": {
-        "DMS_GPiSNpr_W": 1.8,
-        "STNdm_GPiSNpr_W": 1.6
-    },
     "BG_dm_W": {
-        "DMS_GPiSNpr_W": 1.8,
-        "STNdm_GPiSNpr_W": 1.6
+        "DMS_1_GPi_SNpr_W": 4.0,
+        "DMS_2_GPe_W": 3.2,
+        "STNdm_GPi_SNpr_W": 3.0,
+        "STNdm_GPe_W": 2.0,
+        "GPe_STNdm_W": 1.5,
+        "GPe_GPi_SNpr_W": 0.1
     },
     "BG_v_W": {
-        "NAc_SNpr_W": 1.8,
-        "STNv_SNpr_W": 1.6
+        "NAc_1_SNpr_W": 4.0,
+        "NAc_2_GPe_W": 3.2,
+        "STNv_SNpr_W": 3.0,
+        "STNv_GPe_W": 2.0,
+        "GPe_STNv_W": 1.5,
+        "GPe_SNpr_W": 0.1
     },
     "SNpc_W": {
         "SNpci_1_SNpco_1_W": 2.7,
@@ -136,8 +141,8 @@
         "BLA_IC_NAc": 0.0,
         "BLA_IC_LH": 5.0,
         "LH_VTA": 20.0,
-        "NAc_SNpci_1": 2.7,
-        "DMS_SNpci_2": 2.7,
+        "NAc_1_SNpci_1": 2.7,
+        "DMS_1_SNpci_2": 2.7,
         "GPi_MGV": 1.5,
         "GPi_SNpr_P": 1.5,
         "SNpr_DM": 1.5,
@@ -145,32 +150,35 @@
         "P_PFCd_PPC": 1.2,
         "DM_PL": 1.2,
         "PL_DM": 2.4,
-        "PL_NAc": 1.0,
+        "PL_NAc_1": 0.9,
+        "PL_NAc_2": 0.8,
         "PL_STNv": 1.4,
         "PL_PFCd_PPC": 0.3,
         "PFCd_PPC_P": 2.4,
-        "PFCd_PPC_DMS": 1.0,
+        "PFCd_PPC_DMS_1": 0.9,
+        "PFCd_PPC_DMS_2": 0.8,
         "PFCd_PPC_STNdm": 1.4,
         "PFCd_PPC_PL": 0.2,
         "PFCd_PPC_MC": 0.2,
         "MC_MGV": 2.2,
-        "MC_DLS": 1.0,
-        "MC_STNdl": 1.4,
-        "MC_PFCd_PPC": 0.3,
         "MC_DLS_1": 0.9,
-        "MC_DLS_2": 0.8
+        "MC_DLS_2": 0.8,
+        "MC_STNdl": 1.4,
+        "MC_PFCd_PPC": 0.3
     },
     "DA_values": {
         "Y_DLS_1": 0.1,
         "Y_DLS_2": 0.2,
-        "Y_DLS": 0.2,
-        "Y_DMS": 0.2,
-        "Y_NAc": 1.0,
+        "Y_DMS_1": 0.1,
+        "Y_DMS_2": 0.2,
+        "Y_NAc_1": 1.0,
+        "Y_NAc_2": 1.0,
         "delta_DLS_1": 0.6,
         "delta_DLS_2": 3.3,
-        "delta_DLS": 5.0,
-        "delta_DMS": 5.0,
-        "delta_NAc": 2.5
+        "delta_DMS_1": 0.6,
+        "delta_DMS_2": 3.3,
+        "delta_NAc_1": 2.5,
+        "delta_NAc_2": 2.5
     },
     "BLA_Learn": {
         "eta_b": 0.2,

@@ -47,10 +47,13 @@ This scenario would be handled in one these manners:
 
 
 1. In case of incongruency, the action will be considered as not valid, thus no reward will be released
-
 2. In case of incongruency, the motor cortex activity should be capable to redirect the attention toward the object at which the action can be performed
 
-- This would require the motor cortex to exert a strong modulation toward the attentive component of the cortex
+
+
+&#x20;  - This would require the motor cortex to exert a strong modulation toward the attentive component of the cortex
+
+
 
 3. In case of incongruency, the attentive component cortex activity should be capable to modulate the motor cortex activity such that the proper action will be selected
 
