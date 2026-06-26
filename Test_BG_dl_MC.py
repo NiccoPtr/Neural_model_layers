@@ -17,25 +17,25 @@ from pathlib import Path
 from CT_BG_simulation import CT_BG
 from params import Parameters
 
-plt.ion()
-
 
 def plotting(res):
 
     plt.close("all")
 
     # Isolating single layers
-    DLS = np.array(res["DLS_output"]) * -1
+    DLS_1 = np.array(res["DLS_1_output"]) * -1
+    DLS_2 = np.array(res["DLS_2_output"]) * -1
     STNdl = np.array(res["STNdl_output"])
     BG_dl = np.array(res["BG_dl_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
-    actions = np.array(res['Action_selection'])
-    W = np.array(res["Weight_timeline"])
+    W1 = np.array(res["W1_timeline"])
+    W2 = np.array(res["W2_timeline"])
 
     # Plotting set up
     plots = [
-        ("DLS", [(DLS[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("DLS_1", [(DLS_1[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("DLS_2", [(DLS_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("STNdl", [(STNdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("GPi", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
@@ -71,36 +71,38 @@ def plotting(res):
         ax.spines["right"].set_visible(False)
 
         ax.tick_params(labelbottom=False)
-    #Action selection
+
+    # Weight heatmap
     title_ax = fig.add_subplot(gs[-2, 0])
     ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Action selected", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "W_1 learning", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
-        actions.reshape(-1, 1).T,
+        W1.reshape(-1, 2 * 2).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
-        vmax=2
+        vmax=1,
     )
-    
-    ax.set_yticks([])  
+
+    ax.set_ylabel("Connections")
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
-    # Weight heatmap
     title_ax = fig.add_subplot(gs[-1, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "Weights learning", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "W_2 learning", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
-        W.reshape(-1, 2 * 2).T,
+        W2.reshape(-1, 2 * 2).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
@@ -158,18 +160,11 @@ def parse_args():
         help="Output mode ('plot')",
     )
     parser.add_argument(
-        "-da",
+        "-d",
         "--dopamine",
         type=float,
-        nargs=2,
-        default=(2.0, 0.0),
+        default=0.0,
         help="Insert dopamine for learnig: float type",
-    )
-    parser.add_argument(
-        "--PFCd_PPC_1", type=float, default=0.2, help="Insert PFCd_PPC_1 input value"
-    )
-    parser.add_argument(
-        "--PFCd_PPC_2", type=float, default=0.2, help="Insert PFCd_PPC_2 input value"
     )
     
     return parser.parse_args()
@@ -188,23 +183,47 @@ if __name__ == "__main__":
     rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)
 
-    DLS_output = []
+    DLS_1_output = []
+    DLS_2_output = []
     STNdl_output = []
     BG_dl_output = []
     MGV_output = []
     MC_output = []
-    W_timeline = []
+    W1_timeline = []
+    W2_timeline = []
     _input_ = []
-    actions = []
 
     CT_BG_model.reset_activity()
 
+    winner = None
+
     for t in range(timesteps):
         
-        # if t == timesteps*0.15:
-        #     da *= 0.0
+        if t <= timesteps*0.15:
+            da *= 0.0
+            inp *= 0.0
 
-        CT_BG_model.step(parameters, inp, da, PFCd_PPC_inp=(args.PFCd_PPC_1, args.PFCd_PPC_2), learn=True)
+        else:
+            da = np.array(args.dopamine)
+            inp = np.array(args.inp)
+
+        if winner:
+
+            if inp[winner - 1] == 0:
+                da *= 0.0
+
+            elif inp[winner -1] == 1:
+                da = np.array(args.dopamine)
+
+        # if t == timesteps//2:
+        #     if inp[0] == 1.0:
+        #         inp *= 0.0
+        #         inp[1] = 1.0
+        #     elif inp[1] == 1.0:
+        #         inp *= 0.0
+        #         inp[0] = 1.0
+
+        CT_BG_model.step(parameters, inp, da, learn=True)
         
         action = CT_BG_model.MC.output.copy()
         if np.any(action >= CT_BG_model.MC.threshold):
@@ -212,25 +231,27 @@ if __name__ == "__main__":
         else:
             winner = np.array(0)
          
-        DLS_output.append(CT_BG_model.BG_dl.DLS.output.copy())
-        STNdl_output.append(CT_BG_model.BG_dl.STNdl.output.copy())
-        BG_dl_output.append(CT_BG_model.BG_dl.output_BG_dl.copy())
+        DLS_1_output.append(CT_BG_model.BG_dl.Str1.output.copy())
+        DLS_2_output.append(CT_BG_model.BG_dl.Str2.output.copy())
+        STNdl_output.append(CT_BG_model.BG_dl.STN.output.copy())
+        BG_dl_output.append(CT_BG_model.BG_dl.output_BG.copy())
         MGV_output.append(CT_BG_model.MGV.output.copy())
         MC_output.append(CT_BG_model.MC.output.copy())
-        W_timeline.append(CT_BG_model.Ws["inp_DLS"].copy())
+        W1_timeline.append(CT_BG_model.Ws["inp_DLS_1"].copy())
+        W2_timeline.append(CT_BG_model.Ws["inp_DLS_2"].copy())
         _input_.append(inp.copy())
-        actions.append(winner.copy())
 
     result = {
         "Seed": np.ones(timesteps) * parameters.seed,
         "Inputs_timeline": _input_,
-        'DLS_output': DLS_output,
+        'DLS_1_output': DLS_1_output,
+        'DLS_2_output': DLS_2_output,
         'STNdl_output': STNdl_output,
         "BG_dl_output": BG_dl_output,
         "MGV_output": MGV_output,
         "MC_output": MC_output,
-        "Weight_timeline": W_timeline,
-        'Action_selection': actions
+        "W1_timeline": W1_timeline,
+        "W2_timeline": W2_timeline
     }
     
     if args.mode == "plot":
@@ -240,7 +261,6 @@ if __name__ == "__main__":
               MC Noise: {parameters.noise['MC']}
               GPi Baseline: {parameters.baseline['GPi']}
               MGV Baseline: {parameters.baseline['MGV']}
-              PFCd_PPC inp: {(args.PFCd_PPC_1, args.PFCd_PPC_2)}
               """)
         plotting(result)
         plt.show()

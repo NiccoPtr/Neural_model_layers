@@ -5,23 +5,33 @@ Created on Mon Feb  9 17:03:56 2026
 @author: Nicc
 """
 
-from Layer_types import BG_dl_Layer, Leaky_units_exc
+from Layer_types import BG_v2, Leaky_units_exc
 import numpy as np
 
 class CT_BG():
     
     def __init__(self, parameters, rng):
+
+        self.parameters = parameters
         
-        self.BG_dl = BG_dl_Layer(parameters.N["BG_dl"], 
-                            parameters.tau["BG_dl"], 
-                            parameters.baseline["DLS"],
-                            parameters.baseline["STNdl"],
-                            parameters.baseline["GPi"],
-                            parameters.BG_dl_W["DLS_GPi_W"], 
-                            parameters.BG_dl_W["STNdl_GPi_W"],
-                            rng,
-                            parameters.noise["BG_dl"],
-                            parameters.threshold["BG_dl"])
+        self.BG_dl = BG_v2(
+            self.parameters.N["BG_dl"], 
+            self.parameters.tau["BG_dl"], 
+            self.parameters.baseline["DLS_1"],
+            self.parameters.baseline["DLS_2"],
+            self.parameters.baseline["STNdl"],
+            self.parameters.baseline["GPi"],
+            self.parameters.baseline["GPe"],
+            self.parameters.BG_dl_W["DLS_1_GPi_W"], 
+            self.parameters.BG_dl_W["DLS_2_GPe_W"],
+            self.parameters.BG_dl_W["STNdl_GPi_W"],
+            self.parameters.BG_dl_W["STNdl_GPe_W"],
+            self.parameters.BG_dl_W["GPe_STNdl_W"],
+            self.parameters.BG_dl_W["GPe_GPi_W"],
+            rng,
+            self.parameters.noise["BG_dl"],
+            self.parameters.threshold["BG_dl"]
+        )
         
         self.MGV = Leaky_units_exc(parameters.N["MGV"], 
                               parameters.tau["MGV"],
@@ -37,13 +47,16 @@ class CT_BG():
                              parameters.noise["MC"],
                              parameters.threshold["MC"])
         
-        self.Ws = {"inp_DLS": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
-              "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
-              "MGV_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["MGV_MC"],
-              "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],
-              "MC_DLS": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS"],
-              "MC_STNdl": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_STNdl"],
-              "PFCd_PPC_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars['PFCd_PPC_MC']
+        self.Ws = {
+            "inp_DLS_1": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
+            "inp_DLS_2": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
+            "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
+            "MGV_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["MGV_MC"],
+            "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],
+            "MC_DLS_1": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS_1"],
+            "MC_DLS_2": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_DLS_2"],
+            "MC_STNdl": np.eye(parameters.N["BG_dl"]) * parameters.Matrices_scalars["MC_STNdl"],
+            "PFCd_PPC_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars['PFCd_PPC_MC']
               }
         
         self.W_learn_mask = np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]])
@@ -60,13 +73,13 @@ class CT_BG():
         
     def update_output_pre(self):
         
-        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        self.BG_dl_output_pre = self.BG_dl.output_BG.copy()
         self.MGV_output_pre = self.MGV.output.copy()
         self.MC_output_pre = self.MC.output.copy()
         
-    def delta_Str_learn_USV(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+    def delta_Str_learn_1(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
         
-        DA_term = np.maximum(0, DA - theta_DA_str)[:, None]
+        DA_term = np.maximum(0, DA - theta_DA_str)
         delta_W_inp_str = (eta_str *
                            DA_term * 
                            np.outer(
@@ -79,28 +92,59 @@ class CT_BG():
         
         return delta_W_inp_str
     
+    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+        
+        DA_term = np.maximum(0, theta_DA_str - DA)
+        delta_W_inp_str = (eta_str *
+                           DA_term * 
+                           np.outer(
+                               np.maximum(0, v_str - theta_str),
+                               np.maximum(0, v_inp - theta_inp_str)
+                               ) *
+                           (max_W_str - W))
+        
+        delta_W_inp_str *= mask
+        
+        return delta_W_inp_str
+
     def learning(self, parameters, da, inp):
         
-        self.delta_W_inp_DLS = self.delta_Str_learn_USV(parameters.Str_Learn["eta_DLS"],
+        self.delta_W_inp_DLS_1 = self.delta_Str_learn_1(parameters.Str_Learn["eta_DLS"],
                                            da,
-                                           np.abs(self.BG_dl.output_DLS_pre),
+                                           self.BG_dl.output_Str1_pre * -1,
                                            inp,
                                            parameters.Str_Learn["theta_DA_DLS"],
                                            parameters.Str_Learn["theta_DLS"],
                                            parameters.Str_Learn["theta_inp_DLS"],
                                            self.W_learn_mask,
                                            parameters.Str_Learn["max_W_DLS"],
-                                           self.Ws["inp_DLS"]
+                                           self.Ws["inp_DLS_1"]
                                            )
         
-        self.Ws['inp_DLS'] += self.delta_W_inp_DLS
+        self.Ws['inp_DLS_1'] += self.delta_W_inp_DLS_1
+
+        self.delta_W_inp_DLS_2 = self.delta_Str_learn_2(parameters.Str_Learn["eta_DLS"],
+                                           da,
+                                           self.BG_dl.output_Str2_pre * -1,
+                                           inp,
+                                           parameters.Str_Learn["theta_DA_DLS"],
+                                           parameters.Str_Learn["theta_DLS"],
+                                           parameters.Str_Learn["theta_inp_DLS"],
+                                           self.W_learn_mask,
+                                           parameters.Str_Learn["max_W_DLS"],
+                                           self.Ws["inp_DLS_2"]
+                                           )
+        
+        self.Ws['inp_DLS_2'] += self.delta_W_inp_DLS_2
         
         
     def step(self, parameters, inp, da, PFCd_PPC_inp = (0.0, 0.0), learn = True):
         
         self.BG_dl.step(
-            (parameters.DA_values["Y_DLS"] + parameters.DA_values["delta_DLS"] * da) * np.dot(self.Ws["inp_DLS"], inp),
-            np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+            (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["inp_DLS_1"], inp),
+            ((1/(self.parameters.DA_values["Y_DLS_2"] + self.parameters.DA_values["delta_DLS_2"] * da)) * np.dot(self.Ws["inp_DLS_2"], inp)),
+            (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
+            ((1/(self.parameters.DA_values["Y_DLS_2"] + self.parameters.DA_values["delta_DLS_2"] * da)) * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre)),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre)
             )
         

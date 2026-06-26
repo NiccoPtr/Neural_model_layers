@@ -1,8 +1,7 @@
 
 import numpy as np
 
-from Layer_types import (BG_v2, BLA_IC_Layer,
-                         Leaky_onset_units_exc, Leaky_units_exc, SNpc_Layer)
+from Layer_types import (BG_v2, BLA_IC_Layer, Leaky_onset_units_exc, Leaky_units_exc, SNpc_Layer)
 
 
 class Model:
@@ -334,7 +333,7 @@ class Model:
             "BLA_IC_NAc": np.array([[0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]]),
         }
 
-    def delta_Str_learn_USV(
+    def delta_Str_learn_1(
         self,
         eta_str,
         DA,
@@ -361,6 +360,34 @@ class Model:
         delta_W_inp_str *= mask
 
         return delta_W_inp_str
+    
+    def delta_Str_learn_2(
+        self,
+        eta_str,
+        DA,
+        v_str,
+        v_inp,
+        theta_DA_str,
+        theta_str,
+        theta_inp_str,
+        mask,
+        max_W_str,
+        W,
+    ):
+
+        DA_term = np.maximum(0, theta_DA_str - DA)[:, None]
+        delta_W_inp_str = (
+            eta_str
+            * DA_term
+            * np.outer(
+                np.maximum(0, v_str - theta_str), np.maximum(0, v_inp - theta_inp_str)
+            )
+            * (max_W_str - W)
+        )
+
+        delta_W_inp_str *= mask
+
+        return delta_W_inp_str
 
 
     def learning(self, _input_):
@@ -370,7 +397,7 @@ class Model:
 
         self.BLA_IC.learn(self.VTA_output_pre)
 
-        delta_W_BLA_IC_NAc = self.delta_Str_learn_USV(
+        delta_W_BLA_IC_NAc = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_NAc"],
             self.VTA_output_pre,
             self.NAc_output_pre * -1,
