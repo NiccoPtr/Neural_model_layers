@@ -27,6 +27,7 @@ def plotting(res):
     DLS_2 = np.array(res["DLS_2_output"]) * -1
     STNdl = np.array(res["STNdl_output"])
     BG_dl = np.array(res["BG_dl_output"]) * -1
+    GPe = np.array(res["GPe_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
     W1 = np.array(res["W1_timeline"])
@@ -38,6 +39,7 @@ def plotting(res):
         ("DLS_2", [(DLS_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("STNdl", [(STNdl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("GPi", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("GPe", [(GPe[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
     ]
@@ -187,6 +189,7 @@ if __name__ == "__main__":
     DLS_2_output = []
     STNdl_output = []
     BG_dl_output = []
+    GPe_output = []
     MGV_output = []
     MC_output = []
     W1_timeline = []
@@ -207,13 +210,16 @@ if __name__ == "__main__":
             da = np.array(args.dopamine)
             inp = np.array(args.inp)
 
-        if winner:
+        if winner and t <= timesteps//2:
 
             if inp[winner - 1] == 0:
                 da *= 0.0
 
             elif inp[winner -1] == 1:
-                da = np.array(args.dopamine)
+                da = 1.0
+
+        if t > timesteps//2:
+            da = np.array(args.dopamine)
 
         # if t == timesteps//2:
         #     if inp[0] == 1.0:
@@ -224,17 +230,18 @@ if __name__ == "__main__":
         #         inp[0] = 1.0
 
         CT_BG_model.step(parameters, inp, da, learn=True)
-        
+
         action = CT_BG_model.MC.output.copy()
         if np.any(action >= CT_BG_model.MC.threshold):
             winner = np.argmax(action) + 1
         else:
             winner = np.array(0)
-         
+        
         DLS_1_output.append(CT_BG_model.BG_dl.Str1.output.copy())
         DLS_2_output.append(CT_BG_model.BG_dl.Str2.output.copy())
         STNdl_output.append(CT_BG_model.BG_dl.STN.output.copy())
         BG_dl_output.append(CT_BG_model.BG_dl.output_BG.copy())
+        GPe_output.append(CT_BG_model.BG_dl.GPe.output.copy())
         MGV_output.append(CT_BG_model.MGV.output.copy())
         MC_output.append(CT_BG_model.MC.output.copy())
         W1_timeline.append(CT_BG_model.Ws["inp_DLS_1"].copy())
@@ -248,6 +255,7 @@ if __name__ == "__main__":
         'DLS_2_output': DLS_2_output,
         'STNdl_output': STNdl_output,
         "BG_dl_output": BG_dl_output,
+        "GPe_output": GPe_output,
         "MGV_output": MGV_output,
         "MC_output": MC_output,
         "W1_timeline": W1_timeline,

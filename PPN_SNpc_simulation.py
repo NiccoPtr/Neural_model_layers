@@ -37,8 +37,8 @@ class PPN_SNpc():
         self.Ws = {
             "Food_PPN": np.array([1.0, 1.0]) * parameters.Matrices_scalars["Food_PPN"],
             "PPN_SNpco": np.array([1.0]) * parameters.Matrices_scalars["PPN_SNpco"],
-            "NAc_SNpci_1": np.eye(parameters.N["SNpc"]) * parameters.Matrices_scalars["NAc_SNpci_1"],
-            "DMS_SNpci_2": np.eye(parameters.N["SNpc"]) * parameters.Matrices_scalars["DMS_SNpci_2"]
+            "NAc_SNpci_1": np.eye(parameters.N["SNpc"]) * parameters.Matrices_scalars["NAc_1_SNpci_1"],
+            "DMS_SNpci_2": np.eye(parameters.N["SNpc"]) * parameters.Matrices_scalars["DMS_1_SNpci_2"]
             }
         
         self.PPN_output_pre = np.zeros(parameters.N['PPN'])

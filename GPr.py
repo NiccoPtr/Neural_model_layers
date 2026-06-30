@@ -10,22 +10,24 @@ class GPr:
 
         rng = np.random.RandomState(self.parameters.seed)
 
-        self.BG_dl = BG_v2(self.parameters.N["BG_dl"], 
-                            self.parameters.tau["BG_dl"], 
-                            self.parameters.baseline["DLS_1"],
-                            self.parameters.baseline["DLS_2"],
-                            self.parameters.baseline["STNdl"],
-                            self.parameters.baseline["GPi"],
-                            self.parameters.baseline["GPe"],
-                            self.parameters.BG_v2["DLS_1_GPi_W"], 
-                            self.parameters.BG_v2["DLS_2_GPe_W"],
-                            self.parameters.BG_v2["STNdl_GPi_W"],
-                            self.parameters.BG_v2["STNdl_GPe_W"],
-                            self.parameters.BG_v2["GPe_STNdl_W"],
-                            self.parameters.BG_v2["GPe_GPi_W"],
-                            rng,
-                            self.parameters.noise["BG_dl"],
-                            self.parameters.threshold["BG_dl"])
+        self.BG_dl = BG_v2(
+            self.parameters.N["BG_dl"], 
+            self.parameters.tau["BG_dl"], 
+            self.parameters.baseline["DLS_1"],
+            self.parameters.baseline["DLS_2"],
+            self.parameters.baseline["STNdl"],
+            self.parameters.baseline["GPi"],
+            self.parameters.baseline["GPe"],
+            self.parameters.BG_dl_W["DLS_1_GPi_W"], 
+            self.parameters.BG_dl_W["DLS_2_GPe_W"],
+            self.parameters.BG_dl_W["STNdl_GPi_W"],
+            self.parameters.BG_dl_W["STNdl_GPe_W"],
+            self.parameters.BG_dl_W["GPe_STNdl_W"],
+            self.parameters.BG_dl_W["GPe_GPi_W"],
+            rng,
+            self.parameters.noise["BG_dl"],
+            self.parameters.threshold["BG_dl"]
+        )
         
         self.MGV = Leaky_units_exc(self.parameters.N["MGV"], 
                               self.parameters.tau["MGV"],
@@ -40,7 +42,7 @@ class GPr:
                              rng,
                              self.parameters.noise["MC"],
                              self.parameters.threshold["MC"])
-        
+                                                            
         self.Ws = {"inp_DLS": np.eye(self.parameters.N["BG_dl"]), 
               "GPi_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["GPi_MGV"],
               "MC_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["MC_MGV"],
@@ -62,7 +64,7 @@ class GPr:
 
     def update_output_pre(self):
         
-        self.BG_dl_output_pre = self.BG_dl.output_BG_dl.copy()
+        self.BG_dl_output_pre = self.BG_dl.output_BG.copy()
         self.MGV_output_pre = self.MGV.output.copy()
         self.MC_output_pre = self.MC.output.copy()
 

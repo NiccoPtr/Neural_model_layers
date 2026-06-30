@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb  9 17:03:56 2026
+Created on Mon Feb 9 17:03:56 2026
 
 @author: Nicc
 """
@@ -109,13 +109,13 @@ class CT_BG():
 
     def learning(self, parameters, da, inp):
         
-        self.delta_W_inp_DLS_1 = self.delta_Str_learn_1(parameters.Str_Learn["eta_DLS"],
+        self.delta_W_inp_DLS_1 = self.delta_Str_learn_1(parameters.Str_Learn["eta_DLS_1"],
                                            da,
                                            self.BG_dl.output_Str1_pre * -1,
                                            inp,
-                                           parameters.Str_Learn["theta_DA_DLS"],
-                                           parameters.Str_Learn["theta_DLS"],
-                                           parameters.Str_Learn["theta_inp_DLS"],
+                                           parameters.Str_Learn["theta_DA_DLS_1"],
+                                           parameters.Str_Learn["theta_DLS_1"],
+                                           parameters.Str_Learn["theta_inp_DLS_1"],
                                            self.W_learn_mask,
                                            parameters.Str_Learn["max_W_DLS"],
                                            self.Ws["inp_DLS_1"]
@@ -123,13 +123,13 @@ class CT_BG():
         
         self.Ws['inp_DLS_1'] += self.delta_W_inp_DLS_1
 
-        self.delta_W_inp_DLS_2 = self.delta_Str_learn_2(parameters.Str_Learn["eta_DLS"],
+        self.delta_W_inp_DLS_2 = self.delta_Str_learn_2(parameters.Str_Learn["eta_DLS_2"],
                                            da,
                                            self.BG_dl.output_Str2_pre * -1,
                                            inp,
-                                           parameters.Str_Learn["theta_DA_DLS"],
-                                           parameters.Str_Learn["theta_DLS"],
-                                           parameters.Str_Learn["theta_inp_DLS"],
+                                           parameters.Str_Learn["theta_DA_DLS_2"],
+                                           parameters.Str_Learn["theta_DLS_2"],
+                                           parameters.Str_Learn["theta_inp_DLS_2"],
                                            self.W_learn_mask,
                                            parameters.Str_Learn["max_W_DLS"],
                                            self.Ws["inp_DLS_2"]

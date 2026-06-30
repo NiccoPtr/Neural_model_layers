@@ -135,10 +135,11 @@ if __name__ == '__main__':
     timesteps = args.timesteps
 
     parameters = Parameters()
-    file_path = Path.home() / "CNR_model" / "Neural_model_layers" / "prm_file.json"
+    # file_path = Path.home() / "CNR_model" / "Neural_model_layers" / "prm_file.json"
 
-    if file_path.exists():
-        parameters.load(str(file_path), mode="json")
+    if Path("prm_file.json").exists():
+        parameters.load("prm_file.json", mode="json")
+        # parameters.load(str(file_path), mode="json")
 
     else:
         raise ValueError('Parameters file not found')
@@ -169,16 +170,16 @@ if __name__ == '__main__':
         elif t == 51:
             inp = np.array(args.food) 
 
-        if any(inp) == 1.0:
-            if np.argmax(inp) == 0 and t == timesteps//2:
-                inp *= 0.0
-                inp[1] = 1.0
-                da = 1.0
+        # if any(inp) == 1.0:
+        #     if np.argmax(inp) == 0 and t == timesteps//2:
+        #         inp *= 0.0
+        #         inp[1] = 1.0
+        #         da = 1.0
 
-            elif np.argmax(inp) == 1 and t == timesteps//2:
-                inp *= 0.0
-                inp[0] = 1.0
-                da = 1.0
+        #     elif np.argmax(inp) == 1 and t == timesteps//2:
+        #         inp *= 0.0
+        #         inp[0] = 1.0
+        #         da = 1.0
 
         if t > timesteps*0.6:
             da = np.array(args.da)
@@ -192,10 +193,10 @@ if __name__ == '__main__':
             winner = np.array(0)
         actions.append(winner)
 
-        DLS_1_output.append(C_Th_BG.BG_dl.DLS_1.output.copy())
-        DLS_2_output.append(C_Th_BG.BG_dl.DLS_2.output.copy())
-        STNdl_output.append(C_Th_BG.BG_dl.STNdl.output.copy())
-        GPi_output.append(C_Th_BG.BG_dl.GPi.output.copy())
+        DLS_1_output.append(C_Th_BG.BG_dl.Str1.output.copy())
+        DLS_2_output.append(C_Th_BG.BG_dl.Str2.output.copy())
+        STNdl_output.append(C_Th_BG.BG_dl.STN.output.copy())
+        GPi_output.append(C_Th_BG.BG_dl.GPi_SNpr.output.copy())
         GPe_output.append(C_Th_BG.BG_dl.GPe.output.copy())
         da_.append(da)
 

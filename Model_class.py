@@ -199,7 +199,9 @@ class Model:
 
         self.BG_dl_output_pre = np.zeros(self.parameters.N["BG_dl"])
 
-        self.DLS_output_pre = np.zeros(self.parameters.N["BG_dl"])
+        self.DLS_output_pre_1 = np.zeros(self.parameters.N["BG_dl"])
+
+        self.DLS_output_pre_2 = np.zeros(self.parameters.N["BG_dl"])
 
         self.MGV_output_pre = np.zeros(self.parameters.N["MGV"])
 
@@ -207,7 +209,9 @@ class Model:
 
         self.BG_dm_output_pre = np.zeros(self.parameters.N["BG_dm"])
 
-        self.DMS_output_pre = np.zeros(self.parameters.N["BG_dm"])
+        self.DMS_output_pre_1 = np.zeros(self.parameters.N["BG_dm"])
+
+        self.DMS_output_pre_2 = np.zeros(self.parameters.N["BG_dm"])
 
         self.P_output_pre = np.zeros(self.parameters.N["P"])
 
@@ -215,7 +219,9 @@ class Model:
 
         self.BG_v_output_pre = np.zeros(self.parameters.N["BG_v"])
 
-        self.NAc_output_pre = np.zeros(self.parameters.N["BG_v"])
+        self.NAc_output_pre_1 = np.zeros(self.parameters.N["BG_v"])
+
+        self.NAc_output_pre_2 = np.zeros(self.parameters.N["BG_v"])
 
         self.DM_output_pre = np.zeros(self.parameters.N["DM"])
 
@@ -261,11 +267,19 @@ class Model:
                     [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC']],
                 ]
             ),
-            "Mani_DLS": np.array(
+            "Mani_DLS_1": np.array(
                 [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Mani_DLS"],
-            "Mani_DMS": np.array(
+            "Mani_DLS_2": np.array(
+                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            )
+            * self.parameters.Matrices_scalars["Mani_DLS"],
+            "Mani_DMS_1": np.array(
+                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            )
+            * self.parameters.Matrices_scalars["Mani_DMS"],
+            "Mani_DMS_2": np.array(
                 [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Mani_DMS"],
@@ -274,7 +288,9 @@ class Model:
             "Food_LH": np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_LH"],
             "PPN_SNpco": np.array([1.0]) * self.parameters.Matrices_scalars["PPN_SNpco"],
-            "BLA_IC_NAc": np.array([[0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]])
+            "BLA_IC_NAc_1": np.array([[0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]])
+            * self.parameters.Matrices_scalars["BLA_IC_NAc"],
+            "BLA_IC_NAc_2": np.array([[0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]])
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
             "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0])
             * self.parameters.Matrices_scalars["BLA_IC_LH"],
@@ -397,47 +413,89 @@ class Model:
 
         self.BLA_IC.learn(self.VTA_output_pre)
 
-        delta_W_BLA_IC_NAc = self.delta_Str_learn_1(
-            self.parameters.Str_Learn["eta_NAc"],
+        delta_W_BLA_IC_NAc_1 = self.delta_Str_learn_1(
+            self.parameters.Str_Learn["eta_NAc_1"],
             self.VTA_output_pre,
-            self.NAc_output_pre * -1,
+            self.NAc_output_pre_1 * -1,
             self.BLA_IC_output_pre,
-            self.parameters.Str_Learn["theta_DA_NAc"],
-            self.parameters.Str_Learn["theta_NAc"],
-            self.parameters.Str_Learn["theta_inp_NAc"],
+            self.parameters.Str_Learn["theta_DA_NAc_1"],
+            self.parameters.Str_Learn["theta_NAc_1"],
+            self.parameters.Str_Learn["theta_inp_NAc_1"],
             self.Ws_learn_masks["BLA_IC_NAc"],
             self.parameters.Str_Learn["max_W_NAc"],
-            self.Ws["BLA_IC_NAc"],
+            self.Ws["BLA_IC_NAc_1"],
         )
-        self.Ws["BLA_IC_NAc"] += delta_W_BLA_IC_NAc
+        self.Ws["BLA_IC_NAc_1"] += delta_W_BLA_IC_NAc_1
 
-        delta_W_Mani_DMS = self.delta_Str_learn_USV(
-            self.parameters.Str_Learn["eta_DMS"],
+        delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_1(
+            self.parameters.Str_Learn["eta_NAc_2"],
+            self.VTA_output_pre,
+            self.NAc_output_pre_2 * -1,
+            self.BLA_IC_output_pre,
+            self.parameters.Str_Learn["theta_DA_NAc_2"],
+            self.parameters.Str_Learn["theta_NAc_2"],
+            self.parameters.Str_Learn["theta_inp_NAc_2"],
+            self.Ws_learn_masks["BLA_IC_NAc"],
+            self.parameters.Str_Learn["max_W_NAc"],
+            self.Ws["BLA_IC_NAc_2"],
+        )
+        self.Ws["BLA_IC_NAc_2"] += delta_W_BLA_IC_NAc_2
+
+        delta_W_Mani_DMS_1 = self.delta_Str_learn_USV(
+            self.parameters.Str_Learn["eta_DMS_1"],
             self.SNpco_output_pre_1,
-            self.DMS_output_pre * -1,
+            self.DMS_output_pre_1 * -1,
             _input_,
-            self.parameters.Str_Learn["theta_DA_DMS"],
-            self.parameters.Str_Learn["theta_DMS"],
-            self.parameters.Str_Learn["theta_inp_DMS"],
+            self.parameters.Str_Learn["theta_DA_DMS_1"],
+            self.parameters.Str_Learn["theta_DMS_1"],
+            self.parameters.Str_Learn["theta_inp_DMS_1"],
             self.Ws_learn_masks["Mani_DMS"],
             self.parameters.Str_Learn["max_W_DMS"],
-            self.Ws["Mani_DMS"],
+            self.Ws["Mani_DMS_1"],
         )
-        self.Ws["Mani_DMS"] += delta_W_Mani_DMS
+        self.Ws["Mani_DMS_1"] += delta_W_Mani_DMS_1
 
-        delta_W_Mani_DLS = self.delta_Str_learn_USV(
-            self.parameters.Str_Learn["eta_DLS"],
-            self.SNpco_output_pre_2,
-            self.DLS_output_pre * -1,
+        delta_W_Mani_DMS_2 = self.delta_Str_learn_USV(
+            self.parameters.Str_Learn["eta_DMS_2"],
+            self.SNpco_output_pre_1,
+            self.DMS_output_pre_2 * -1,
             _input_,
-            self.parameters.Str_Learn["theta_DA_DLS"],
-            self.parameters.Str_Learn["theta_DLS"],
-            self.parameters.Str_Learn["theta_inp_DLS"],
+            self.parameters.Str_Learn["theta_DA_DMS_2"],
+            self.parameters.Str_Learn["theta_DMS_2"],
+            self.parameters.Str_Learn["theta_inp_DMS_2"],
+            self.Ws_learn_masks["Mani_DMS"],
+            self.parameters.Str_Learn["max_W_DMS"],
+            self.Ws["Mani_DMS_2"],
+        )
+        self.Ws["Mani_DMS_2"] += delta_W_Mani_DMS_2
+
+        delta_W_Mani_DLS_1 = self.delta_Str_learn_USV(
+            self.parameters.Str_Learn["eta_DLS_1"],
+            self.SNpco_output_pre_2,
+            self.DLS_output_pre_1 * -1,
+            _input_,
+            self.parameters.Str_Learn["theta_DA_DLS_1"],
+            self.parameters.Str_Learn["theta_DLS_1"],
+            self.parameters.Str_Learn["theta_inp_DLS_1"],
             self.Ws_learn_masks["Mani_DLS"],
             self.parameters.Str_Learn["max_W_DLS"],
-            self.Ws["Mani_DLS"],
+            self.Ws["Mani_DLS_1"],
         )
-        self.Ws["Mani_DLS"] += delta_W_Mani_DLS
+        self.Ws["Mani_DLS_1"] += delta_W_Mani_DLS_1
+
+        delta_W_Mani_DLS_2 = self.delta_Str_learn_USV(
+            self.parameters.Str_Learn["eta_DLS_2"],
+            self.SNpco_output_pre_2,
+            self.DLS_output_pre_2 * -1,
+            _input_,
+            self.parameters.Str_Learn["theta_DA_DLS_2"],
+            self.parameters.Str_Learn["theta_DLS_2"],
+            self.parameters.Str_Learn["theta_inp_DLS_2"],
+            self.Ws_learn_masks["Mani_DLS"],
+            self.parameters.Str_Learn["max_W_DLS"],
+            self.Ws["Mani_DLS_2"],
+        )
+        self.Ws["Mani_DLS_2"] += delta_W_Mani_DLS_2
 
     def update_output_pre(self):
         """
@@ -458,7 +516,9 @@ class Model:
 
         self.BG_dl_output_pre = self.BG_dl.output_BG.copy()
 
-        self.DLS_output_pre = self.BG_dl.Str.output.copy()
+        self.DLS_output_pre_1 = self.BG_dl.Str1.output.copy()
+
+        self.DLS_output_pre_2 = self.BG_dl.Str2.output.copy()
 
         self.MGV_output_pre = self.MGV.output.copy()
 
@@ -466,7 +526,9 @@ class Model:
 
         self.BG_dm_output_pre = self.BG_dm.output_BG.copy()
 
-        self.DMS_output_pre = self.BG_dm.Str.output.copy()
+        self.DMS_output_pre_1 = self.BG_dm.Str1.output.copy()
+        
+        self.DMS_output_pre_2 = self.BG_dm.Str2.output.copy()
 
         self.P_output_pre = self.P.output.copy()
 
@@ -474,7 +536,9 @@ class Model:
 
         self.BG_v_output_pre = self.BG_v.output_BG.copy()
 
-        self.NAc_output_pre = self.BG_v.Str.output.copy()
+        self.NAc_output_pre_1 = self.BG_v.Str1.output.copy()
+
+        self.NAc_output_pre_2 = self.BG_v.Str2.output.copy()
 
         self.DM_output_pre = self.DM.output.copy()
 
@@ -540,8 +604,8 @@ class Model:
         )
 
         self.SNpc.step(
-            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre),
-            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre),
+            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1),
+            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1),
             np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre),
         )
 
