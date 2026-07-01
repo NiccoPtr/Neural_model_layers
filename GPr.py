@@ -43,13 +43,15 @@ class GPr:
                              self.parameters.noise["MC"],
                              self.parameters.threshold["MC"])
                                                             
-        self.Ws = {"inp_DLS": np.eye(self.parameters.N["BG_dl"]), 
-              "GPi_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["GPi_MGV"],
-              "MC_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["MC_MGV"],
-              "MGV_MC": np.eye(self.parameters.N["MC"]) * self.parameters.Matrices_scalars["MGV_MC"],
-              "MC_DLS_1": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_DLS_1"],
-              "MC_DLS_2": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_DLS_2"],
-              "MC_STNdl": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_STNdl"]
+        self.Ws = {
+            "inp_DLS_1": np.eye(self.parameters.N["BG_dl"]),
+            "inp_DLS_2": np.eye(self.parameters.N["BG_dl"]),
+            "GPi_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["GPi_MGV"],
+            "MC_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["MC_MGV"],
+            "MGV_MC": np.eye(self.parameters.N["MC"]) * self.parameters.Matrices_scalars["MGV_MC"],
+            "MC_DLS_1": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_DLS_1"],
+            "MC_DLS_2": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_DLS_2"],
+            "MC_STNdl": np.eye(self.parameters.N["BG_dl"]) * self.parameters.Matrices_scalars["MC_STNdl"]   
               }
         
         self.BG_dl_output_pre = np.zeros(self.parameters.N["BG_dl"])
@@ -71,8 +73,8 @@ class GPr:
     def step(self, inp, da):
         
         self.BG_dl.step(
-            (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["inp_DLS"], inp),
-            ((1/(self.parameters.DA_values["Y_DLS_2"] + self.parameters.DA_values["delta_DLS_2"] * da)) * np.dot(self.Ws["inp_DLS"], inp)),
+            (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["inp_DLS_1"], inp),
+            ((1/(self.parameters.DA_values["Y_DLS_2"] + self.parameters.DA_values["delta_DLS_2"] * da)) * np.dot(self.Ws["inp_DLS_2"], inp)),
             (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
             ((1/(self.parameters.DA_values["Y_DLS_2"] + self.parameters.DA_values["delta_DLS_2"] * da)) * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre)),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre)

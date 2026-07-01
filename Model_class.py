@@ -117,9 +117,9 @@ class Model:
             self.parameters.baseline["GPe"],
             self.parameters.BG_dm_W["DMS_1_GPi_SNpr_W"], 
             self.parameters.BG_dm_W["DMS_2_GPe_W"],
-            self.parameters.BG_dm_W["STNdl_GPi_SNpr_W"],
-            self.parameters.BG_dm_W["STNdl_GPe_W"],
-            self.parameters.BG_dm_W["GPe_STNdl_W"],
+            self.parameters.BG_dm_W["STNdm_GPi_SNpr_W"],
+            self.parameters.BG_dm_W["STNdm_GPe_W"],
+            self.parameters.BG_dm_W["GPe_STNdm_W"],
             self.parameters.BG_dm_W["GPe_GPi_SNpr_W"],
             rng,
             self.parameters.noise["BG_dm"],
@@ -152,12 +152,12 @@ class Model:
             self.parameters.baseline["STNv"],
             self.parameters.baseline["SNpr"],
             self.parameters.baseline["GPe"],
-            self.parameters.BG_v2["NAc_1_SNpr_W"], 
-            self.parameters.BG_v2["NAc_2_GPe_W"],
-            self.parameters.BG_v2["STNv_SNpr_W"],
-            self.parameters.BG_v2["STNv_GPe_W"],
-            self.parameters.BG_v2["GPe_STNv_W"],
-            self.parameters.BG_v2["GPe_SNpr_W"],
+            self.parameters.BG_v_W["NAc_1_SNpr_W"], 
+            self.parameters.BG_v_W["NAc_2_GPe_W"],
+            self.parameters.BG_v_W["STNv_SNpr_W"],
+            self.parameters.BG_v_W["STNv_GPe_W"],
+            self.parameters.BG_v_W["GPe_STNv_W"],
+            self.parameters.BG_v_W["GPe_SNpr_W"],
             rng,
             self.parameters.noise["BG_v"],
             self.parameters.threshold["BG_v"]
@@ -295,10 +295,10 @@ class Model:
             "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0])
             * self.parameters.Matrices_scalars["BLA_IC_LH"],
             "LH_VTA": np.array([1.0]) * self.parameters.Matrices_scalars["LH_VTA"],
-            "NAc_SNpci_1": np.eye(self.parameters.N["SNpc"])
-            * self.parameters.Matrices_scalars["NAc_SNpci_1"],
-            "DMS_SNpci_2": np.eye(self.parameters.N["SNpc"])
-            * self.parameters.Matrices_scalars["DMS_SNpci_2"],
+            "NAc_SNpci_1": np.ones(self.parameters.N["SNpc"])
+            * self.parameters.Matrices_scalars["NAc_1_SNpci_1"],
+            "DMS_SNpci_2": np.ones(self.parameters.N["SNpc"])
+            * self.parameters.Matrices_scalars["DMS_1_SNpci_2"],
             "GPi_MGV": np.eye(self.parameters.N["MGV"])
             * self.parameters.Matrices_scalars["GPi_MGV"],
             "GPi_SNpr_P": np.eye(self.parameters.N["P"])
@@ -310,16 +310,20 @@ class Model:
             * self.parameters.Matrices_scalars["P_PFCd_PPC"],
             "DM_PL": np.eye(self.parameters.N["PL"]) * self.parameters.Matrices_scalars["DM_PL"],
             "PL_DM": np.eye(self.parameters.N["DM"]) * self.parameters.Matrices_scalars["PL_DM"],
-            "PL_NAc": np.eye(self.parameters.N["BG_v"])
-            * self.parameters.Matrices_scalars["PL_NAc"],
+            "PL_NAc_1": np.eye(self.parameters.N["BG_v"])
+            * self.parameters.Matrices_scalars["PL_NAc_1"],
+            "PL_NAc_2": np.eye(self.parameters.N["BG_v"])
+            * self.parameters.Matrices_scalars["PL_NAc_2"],
             "PL_STNv": np.eye(self.parameters.N["BG_v"])
             * self.parameters.Matrices_scalars["PL_STNv"],
             "PL_PFCd_PPC": np.eye(self.parameters.N["PFCd_PPC"])
             * self.parameters.Matrices_scalars["PL_PFCd_PPC"],
             "PFCd_PPC_P": np.eye(self.parameters.N["P"])
             * self.parameters.Matrices_scalars["PFCd_PPC_P"],
-            "PFCd_PPC_DMS": np.eye(self.parameters.N["BG_dm"])
-            * self.parameters.Matrices_scalars["PFCd_PPC_DMS"],
+            "PFCd_PPC_DMS_1": np.eye(self.parameters.N["BG_dm"])
+            * self.parameters.Matrices_scalars["PFCd_PPC_DMS_1"],
+            "PFCd_PPC_DMS_2": np.eye(self.parameters.N["BG_dm"])
+            * self.parameters.Matrices_scalars["PFCd_PPC_DMS_2"],
             "PFCd_PPC_STNdm": np.eye(self.parameters.N["BG_dm"])
             * self.parameters.Matrices_scalars["PFCd_PPC_STNdm"],
             "PFCd_PPC_PL": np.eye(self.parameters.N["PL"])
@@ -327,8 +331,10 @@ class Model:
             "PFCd_PPC_MC": np.eye(self.parameters.N["MC"])
             * self.parameters.Matrices_scalars["PFCd_PPC_MC"],
             "MC_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["MC_MGV"],
-            "MC_DLS": np.eye(self.parameters.N["BG_dl"])
-            * self.parameters.Matrices_scalars["MC_DLS"],
+            "MC_DLS_1": np.eye(self.parameters.N["BG_dl"])
+            * self.parameters.Matrices_scalars["MC_DLS_1"],
+            "MC_DLS_2": np.eye(self.parameters.N["BG_dl"])
+            * self.parameters.Matrices_scalars["MC_DLS_2"],
             "MC_STNdl": np.eye(self.parameters.N["BG_dl"])
             * self.parameters.Matrices_scalars["MC_STNdl"],
             "MC_PFCd_PPC": np.eye(self.parameters.N["PFCd_PPC"])
@@ -427,7 +433,7 @@ class Model:
         )
         self.Ws["BLA_IC_NAc_1"] += delta_W_BLA_IC_NAc_1
 
-        delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_1(
+        delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_NAc_2"],
             self.VTA_output_pre,
             self.NAc_output_pre_2 * -1,
@@ -441,7 +447,7 @@ class Model:
         )
         self.Ws["BLA_IC_NAc_2"] += delta_W_BLA_IC_NAc_2
 
-        delta_W_Mani_DMS_1 = self.delta_Str_learn_USV(
+        delta_W_Mani_DMS_1 = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_DMS_1"],
             self.SNpco_output_pre_1,
             self.DMS_output_pre_1 * -1,
@@ -455,7 +461,7 @@ class Model:
         )
         self.Ws["Mani_DMS_1"] += delta_W_Mani_DMS_1
 
-        delta_W_Mani_DMS_2 = self.delta_Str_learn_USV(
+        delta_W_Mani_DMS_2 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_DMS_2"],
             self.SNpco_output_pre_1,
             self.DMS_output_pre_2 * -1,
@@ -469,7 +475,7 @@ class Model:
         )
         self.Ws["Mani_DMS_2"] += delta_W_Mani_DMS_2
 
-        delta_W_Mani_DLS_1 = self.delta_Str_learn_USV(
+        delta_W_Mani_DLS_1 = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_DLS_1"],
             self.SNpco_output_pre_2,
             self.DLS_output_pre_1 * -1,
@@ -483,7 +489,7 @@ class Model:
         )
         self.Ws["Mani_DLS_1"] += delta_W_Mani_DLS_1
 
-        delta_W_Mani_DLS_2 = self.delta_Str_learn_USV(
+        delta_W_Mani_DLS_2 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_DLS_2"],
             self.SNpco_output_pre_2,
             self.DLS_output_pre_2 * -1,
@@ -554,29 +560,49 @@ class Model:
 
         self.BG_dm.step(
             (
-                self.parameters.DA_values["Y_DMS"]
-                + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
+                self.parameters.DA_values["Y_DMS_1"]
+                + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
             )
-            * np.dot(self.Ws["Mani_DMS"], _input_),
+            * np.dot(self.Ws["Mani_DMS_1"], _input_),
+            (1/(
+                self.parameters.DA_values["Y_DMS_2"]
+                + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
+            ))
+            * np.dot(self.Ws["Mani_DMS_2"], _input_),
             (
-                self.parameters.DA_values["Y_DMS"]
-                + (self.parameters.DA_values["delta_DMS"] * self.SNpco_output_pre_1)
+                self.parameters.DA_values["Y_DMS_1"]
+                + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
             )
-            * np.dot(self.Ws["PFCd_PPC_DMS"], self.PFCd_PPC_output_pre),
+            * np.dot(self.Ws["PFCd_PPC_DMS_1"], self.PFCd_PPC_output_pre),
+            (1/(
+                self.parameters.DA_values["Y_DMS_2"]
+                + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
+            ))
+            * np.dot(self.Ws["PFCd_PPC_DMS_2"], self.PFCd_PPC_output_pre),
             np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
         )
 
         self.BG_dl.step(
             (
-                self.parameters.DA_values["Y_DLS"]
-                + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
+                self.parameters.DA_values["Y_DLS_1"]
+                + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
             )
-            * np.dot(self.Ws["Mani_DLS"], _input_),
+            * np.dot(self.Ws["Mani_DLS_1"], _input_),
+            (1/(
+                self.parameters.DA_values["Y_DLS_2"]
+                + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
+            ))
+            * np.dot(self.Ws["Mani_DLS_2"], _input_),
             (
-                self.parameters.DA_values["Y_DLS"]
-                + (self.parameters.DA_values["delta_DLS"] * self.SNpco_output_pre_2)
+                self.parameters.DA_values["Y_DLS_1"]
+                + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
             )
-            * np.dot(self.Ws["MC_DLS"], self.MC_output_pre),
+            * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
+            (1/(
+                self.parameters.DA_values["Y_DLS_2"]
+                + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
+            ))
+            * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
         )
 
@@ -591,21 +617,31 @@ class Model:
 
         self.BG_v.step(
             (
-                self.parameters.DA_values["Y_NAc"]
-                + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
+                self.parameters.DA_values["Y_NAc_1"]
+                + (self.parameters.DA_values["delta_NAc_1"] * self.VTA_output_pre)
             )
-            * np.dot(self.Ws["BLA_IC_NAc"], self.BLA_IC_output_pre),
+            * np.dot(self.Ws["BLA_IC_NAc_1"], self.BLA_IC_output_pre),
+            (1/(
+                self.parameters.DA_values["Y_NAc_2"]
+                + (self.parameters.DA_values["delta_NAc_2"] * self.VTA_output_pre)
+            ))
+            * np.dot(self.Ws["BLA_IC_NAc_2"], self.BLA_IC_output_pre),
             (
-                self.parameters.DA_values["Y_NAc"]
-                + (self.parameters.DA_values["delta_NAc"] * self.VTA_output_pre)
+                self.parameters.DA_values["Y_NAc_1"]
+                + (self.parameters.DA_values["delta_NAc_1"] * self.VTA_output_pre)
             )
-            * np.dot(self.Ws["PL_NAc"], self.PL_output_pre),
+            * np.dot(self.Ws["PL_NAc_1"], self.PL_output_pre),
+            (1/(
+                self.parameters.DA_values["Y_NAc_2"]
+                + (self.parameters.DA_values["delta_NAc_2"] * self.VTA_output_pre)
+            ))
+            * np.dot(self.Ws["PL_NAc_2"], self.PL_output_pre),
             np.dot(self.Ws["PL_STNv"], self.PL_output_pre),
         )
 
         self.SNpc.step(
-            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1),
-            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1),
+            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmax(self.NAc_output_pre_1)]),
+            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmax(self.DMS_output_pre_1)]),
             np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre),
         )
 

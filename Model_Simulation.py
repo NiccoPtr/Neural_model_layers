@@ -47,13 +47,17 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    file_path = Path.home() / "CNR_model" / "Neural_model_layers" / "prm_file.json"
 
-    if file_path.exists():
-        parameters.load(str(file_path), mode="json")
-        print('Imported parameters succesfully')
+    BASE_DIR = Path(__file__).resolve().parent
+
+    # Full path to the JSON file
+    prm_file = BASE_DIR / "prm_file.json"
+
+    if prm_file.exists():
+        parameters.load(prm_file, mode="json")
+        print("Imported parameters successfully")
     else:
-        raise ValueError('Parameters file not found')
+        raise ValueError(f"Parameters file not found: {prm_file}")
         
     scheduling = Scheduling()
     if args.scheduling is not None:
@@ -95,35 +99,51 @@ if __name__ == "__main__":
         PFCd_PPC_output = np.empty((timesteps, model.PFCd_PPC.N), dtype=np.float32)
         PL_output = np.empty((timesteps, model.PL.N), dtype=np.float32)
         state_t = np.empty((timesteps, len(states[0])), dtype=np.float32)
-        DLS_output = np.empty((timesteps, model.BG_dl.DLS.N), dtype=np.float32)
-        DMS_output = np.empty((timesteps, model.BG_dm.DMS.N), dtype=np.float32)
+        DLS_output_1 = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
+        DLS_output_2 = np.empty((timesteps, model.BG_dl.Str2.N), dtype=np.float32)
+        DMS_output_1 = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
+        DMS_output_2 = np.empty((timesteps, model.BG_dm.Str2.N), dtype=np.float32)
         BLA_IC_output = np.empty((timesteps, model.BLA_IC.N), dtype=np.float32)
-        NAc_output = np.empty((timesteps, model.BG_v.NAc.N), dtype=np.float32)
-        BGv_output = np.empty((timesteps, model.BG_v.SNpr.N), dtype=np.float32)
+        NAc_output_1 = np.empty((timesteps, model.BG_v.Str1.N), dtype=np.float32)
+        NAc_output_2 = np.empty((timesteps, model.BG_v.Str2.N), dtype=np.float32)
+        BGv_output = np.empty((timesteps, model.BG_v.GPi_SNpr.N), dtype=np.float32)
         BGdm_output = np.empty((timesteps, model.BG_dm.GPi_SNpr.N), dtype=np.float32)
-        BGdl_output = np.empty((timesteps, model.BG_dl.GPi.N), dtype=np.float32)
+        BGdl_output = np.empty((timesteps, model.BG_dl.GPi_SNpr.N), dtype=np.float32)
         MGV_output = np.empty((timesteps, model.MGV.N), dtype=np.float32)
         P_output = np.empty((timesteps, model.P.N), dtype=np.float32)
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
-        W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.NAc.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS = np.empty((timesteps, model.BG_dl.DLS.N, len(states[0])), dtype=np.float32)
-        W_Mani_DMS = np.empty((timesteps, model.BG_dm.DMS.N, len(states[0])), dtype=np.float32)
+        DA_timeline = np.empty((timesteps, 2), dtype=np.float32)
+        W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
+        W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
+        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(states[0])), dtype=np.float32)
+        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(states[0])), dtype=np.float32)
+        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(states[0])), dtype=np.float32)
+        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(states[0])), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         if trial <= phase_limits[0]:
             phase = 1
         elif trial <= phase_limits[1]:
             phase = 2
+        elif trial <= phase_limits[2]:
+            phase = 3
+        elif trial <= phase_limits[3]:
+            phase = 4
 
         state = np.asanyarray(states[phase - 1])
 
         MC = model.MC
         PFCd_PPC = model.PFCd_PPC
         PL = model.PL
-        NAc = model.BG_v.NAc
-        DMS = model.BG_dm.DMS
-        DLS = model.BG_dl.DLS
+        NAc_1 = model.BG_v.Str1
+        DMS_1 = model.BG_dm.Str1
+        DLS_1 = model.BG_dl.Str1
+        NAc_2 = model.BG_v.Str2
+        DMS_2 = model.BG_dm.Str2
+        DLS_2 = model.BG_dl.Str2
         BLA_IC = model.BLA_IC
+        DA_1 = model.SNpc.SNpco_1
+        DA_2 = model.SNpc.SNpco_2
 
         for t in range(timesteps):
             
@@ -136,18 +156,27 @@ if __name__ == "__main__":
             model.step(state)
             action = MC.output.copy()
 
+            da = np.array([DA_1.output, DA_2.output]).squeeze()
+
             MC_output[t] = action
             PFCd_PPC_output[t] = PFCd_PPC.output
             PL_output[t] = PL.output
             state_t[t] = state
-            DLS_output[t] = DLS.output
-            DMS_output[t] = DMS.output
+            DLS_output_1[t] = DLS_1.output
+            DLS_output_2[t] = DLS_2.output
+            DMS_output_1[t] = DMS_1.output
+            DMS_output_2[t] = DMS_2.output
             BLA_IC_output[t] = BLA_IC.output
-            NAc_output[t] = NAc.output
+            NAc_output_1[t] = NAc_1.output
+            NAc_output_2[t] = NAc_2.output
+            DA_timeline[t] = da
             W_BLA_IC[t] = BLA_IC.W
-            W_BLA_IC_NAc[t] = model.Ws["BLA_IC_NAc"]
-            W_Mani_DLS[t] = model.Ws["Mani_DLS"]
-            W_Mani_DMS[t] = model.Ws["Mani_DMS"]
+            W_BLA_IC_NAc_1[t] = model.Ws["BLA_IC_NAc_1"]
+            W_BLA_IC_NAc_2[t] = model.Ws["BLA_IC_NAc_2"]
+            W_Mani_DLS_1[t] = model.Ws["Mani_DLS_1"]
+            W_Mani_DLS_2[t] = model.Ws["Mani_DLS_2"]
+            W_Mani_DMS_1[t] = model.Ws["Mani_DMS_1"]
+            W_Mani_DMS_2[t] = model.Ws["Mani_DMS_2"]
 
             if np.any(action >= MC.threshold):
                 winner = np.argmax(action)
@@ -167,16 +196,20 @@ if __name__ == "__main__":
             "Timesteps": np.arange(0, timesteps),
             "States_timeline": state_t.copy(),
             "BLA_IC_output": BLA_IC_output.copy(),
-            "NAc_output": NAc_output.copy(),
-            "DMS_output": DMS_output.copy(),
-            "DLS_output": DLS_output.copy(),
+            "NAc_output_1": NAc_output_1.copy(),
+            "NAc_output_2": NAc_output_2.copy(),
+            "DMS_output_1": DMS_output_1.copy(),
+            "DMS_output_2": DMS_output_2.copy(),
+            "DLS_output_1": DLS_output_1.copy(),
+            "DLS_output_2": DLS_output_2.copy(),
             "MC_output": MC_output.copy(),
             "PFCd_PPC_output": PFCd_PPC_output.copy(),
             "PL_output": PL_output.copy(),
+            "DA_timeline": DA_timeline,
             "W_BLA_IC": W_BLA_IC,
-            "W_BLA_IC_NAc": W_BLA_IC_NAc,
-            "W_Mani_DLS": W_Mani_DLS,
-            "W_Mani_DMS": W_Mani_DMS,
+            "W_BLA_IC_NAc_1": W_BLA_IC_NAc_1,
+            "W_Mani_DLS_1": W_Mani_DLS_1,
+            "W_Mani_DMS_1": W_Mani_DMS_1,
         }
 
         results.append(result)
@@ -195,31 +228,35 @@ if __name__ == "__main__":
     phase_col = ["Phase"]
     state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
-    NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.NAc.N)]
-    DMS_cols = [f"DMS_Unit_{i}" for i in range(model.BG_dm.DMS.N)]
-    DLS_cols = [f"DLS_Unit_{i}" for i in range(model.BG_dl.DLS.N)]
+    NAc_1_cols = [f"NAc_1_Unit_{i}" for i in range(model.BG_v.Str1.N)]
+    NAc_2_cols = [f"NAc_2_Unit_{i}" for i in range(model.BG_v.Str2.N)]
+    DMS_1_cols = [f"DMS_1_Unit_{i}" for i in range(model.BG_dm.Str1.N)]
+    DMS_2_cols = [f"DMS_2_Unit_{i}" for i in range(model.BG_dm.Str2.N)]
+    DLS_1_cols = [f"DLS_1_Unit_{i}" for i in range(model.BG_dl.Str1.N)]
+    DLS_2_cols = [f"DLS_2_Unit_{i}" for i in range(model.BG_dl.Str2.N)]
     MC_out_cols = [f"MC_Unit_{i}" for i in range(model.MC.N)]
     PFCd_PPC_out_cols = [f"PFCd_PPC_Unit_{i}" for i in range(model.PFCd_PPC.N)]
     PL_out_cols = [f"PL_Unit_{i}" for i in range(model.PL.N)]
+    DA_cols = [f"DA_Unit{i}" for i in range(2)]
     W_cols_1 = [
         f"BLA_IC_W{x}_{y}"
         for x in range(model.BLA_IC.W.shape[0])
         for y in range(model.BLA_IC.W.shape[1])
     ]
     W_cols_2 = [
-        f"BLA_IC_NAc_W{x}_{y}"
-        for x in range(model.Ws["BLA_IC_NAc"].shape[0])
-        for y in range(model.Ws["BLA_IC_NAc"].shape[1])
+        f"BLA_IC_NAc_1_W{x}_{y}"
+        for x in range(model.Ws["BLA_IC_NAc_1"].shape[0])
+        for y in range(model.Ws["BLA_IC_NAc_1"].shape[1])
     ]
     W_cols_3 = [
-        f"Mani_DLS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DLS"].shape[0])
-        for y in range(model.Ws["Mani_DLS"].shape[1])
+        f"Mani_DLS_1_W{x}_{y}"
+        for x in range(model.Ws["Mani_DLS_1"].shape[0])
+        for y in range(model.Ws["Mani_DLS_1"].shape[1])
     ]
     W_cols_4 = [
-        f"Mani_DMS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DMS"].shape[0])
-        for y in range(model.Ws["Mani_DMS"].shape[1])
+        f"Mani_DMS_1_W{x}_{y}"
+        for x in range(model.Ws["Mani_DMS_1"].shape[0])
+        for y in range(model.Ws["Mani_DMS_1"].shape[1])
     ]
 
     cols = (
@@ -229,12 +266,16 @@ if __name__ == "__main__":
         + timestep_col
         + state_cols
         + BLA_IC_cols
-        + NAc_cols
-        + DMS_cols
-        + DLS_cols
+        + NAc_1_cols
+        + NAc_2_cols
+        + DMS_1_cols
+        + DMS_2_cols
+        + DLS_1_cols
+        + DLS_2_cols
         + MC_out_cols
         + PFCd_PPC_out_cols
         + PL_out_cols
+        + DA_cols
         + W_cols_1
         + W_cols_2
         + W_cols_3

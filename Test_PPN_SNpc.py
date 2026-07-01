@@ -29,10 +29,10 @@ def plotting(res):
     PPN = np.array(res['PPN_output'])
     # Plotting set up
     plots = [
-        ("SNpci_1", [(SNpci_1[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("SNpci_2", [(SNpci_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("SNpc_output_1", [(SNpc_1[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("SNpc_output_2", [(SNpc_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("SNpci_1", [(SNpci_1[:, i], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
+        ("SNpci_2", [(SNpci_2[:, i], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
+        ("SNpc_output_1", [(SNpc_1[:, i], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
+        ("SNpc_output_2", [(SNpc_2[:, i], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
         ("PPN", [(PPN[:, i], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
     ]
 
@@ -100,15 +100,13 @@ def parse_args():
     parser.add_argument(
         "--NAc",
         type=float,
-        nargs=2,
-        default=(0.0, 0.0),
+        default=0.0,
         help="NAc input",
     )
     parser.add_argument(
         "--DMS",
         type=float,
-        nargs=2,
-        default=(0.0, 0.0),
+        default=0.0,
         help="DMS input",
     )
     

@@ -6,7 +6,7 @@
         "MGV": 2,
         "MC": 2,
         "BLA_IC": 4,
-        "SNpc": 2,
+        "SNpc": 1,
         "PPN": 1,
         "LH": 1,
         "VTA": 1,
@@ -60,7 +60,7 @@
     "baseline": {
         "PPN": 0.0,
         "LH": 0.0,
-        "VTA": 0.2,
+        "VTA": 0.3,
         "BLA_IC": 0.0,
         "SNpci": 2.0,
         "SNpco": 0.7,
@@ -150,10 +150,10 @@
         "P_PFCd_PPC": 1.5,
         "DM_PL": 1.5,
         "PL_DM": 2.4,
-        "PL_NAc_1": 0.9,
-        "PL_NAc_2": 0.8,
+        "PL_NAc_1": 1.2,
+        "PL_NAc_2": 1.0,
         "PL_STNv": 1.4,
-        "PL_PFCd_PPC": 0.3,
+        "PL_PFCd_PPC": 0.1,
         "PFCd_PPC_P": 2.4,
         "PFCd_PPC_DMS_1": 0.9,
         "PFCd_PPC_DMS_2": 0.8,
@@ -164,7 +164,7 @@
         "MC_DLS_1": 0.9,
         "MC_DLS_2": 0.8,
         "MC_STNdl": 1.4,
-        "MC_PFCd_PPC": 0.3
+        "MC_PFCd_PPC": 0.1
     },
     "DA_values": {
         "Y_DLS_1": 0.1,

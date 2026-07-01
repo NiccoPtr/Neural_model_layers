@@ -331,8 +331,8 @@ class SNpc_Layer:
         self.SNpci_1_SNpco_1_W = SNpci_1_SNpco_1_W
         self.SNpci_2_SNpco_2_W = SNpci_2_SNpco_2_W
         self.SNpc_Ws = {
-            "SNpci_1_SNpco_1_W" : np.eye(N).astype(float) * self.SNpci_1_SNpco_1_W,
-            "SNpci_2_SNpco_2_W" : np.eye(N).astype(float) * self.SNpci_2_SNpco_2_W
+            "SNpci_1_SNpco_1_W" : np.ones(N).astype(float) * self.SNpci_1_SNpco_1_W,
+            "SNpci_2_SNpco_2_W" : np.ones(N).astype(float) * self.SNpci_2_SNpco_2_W
             }
         
     def reset_activity(self):

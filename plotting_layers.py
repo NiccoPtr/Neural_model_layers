@@ -47,9 +47,13 @@ if __name__ == "__main__":
     PFCd_PPC = df_new.filter(like="PFCd_PPC_Unit").to_numpy()
     PL = df_new.filter(like="PL_Unit").to_numpy()
     BLA_IC = df_new.filter(like="BLA_IC_Unit").to_numpy()
-    NAc = df_new.filter(like="NAc_Unit").to_numpy() * -1
-    DMS = df_new.filter(like="DMS_Unit").to_numpy() * -1
-    DLS = df_new.filter(like="DLS_Unit").to_numpy() * -1
+    NAc_1 = df_new.filter(like="NAc_1_Unit").to_numpy() * -1
+    NAc_2 = df_new.filter(like="NAc_2_Unit").to_numpy() * -1
+    DMS_1 = df_new.filter(like="DMS_1_Unit").to_numpy() * -1
+    DMS_2 = df_new.filter(like="DMS_2_Unit").to_numpy() * -1
+    DLS_1 = df_new.filter(like="DLS_1_Unit").to_numpy() * -1
+    DLS_2 = df_new.filter(like="DLS_2_Unit").to_numpy() * -1
+    DA = df_new.filter(like="DA_Unit").to_numpy()
     
     #State
     state = df_new.filter(like='Input').to_numpy()
@@ -59,12 +63,16 @@ if __name__ == "__main__":
     #Plotting set up
     plots = [
         ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(4)], (-0.1, 1.2)),
-        ('NAc', [(NAc[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DMS', [(DMS[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DLS', [(DLS[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2))
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ("DA", [(DA[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2))
         ]
     
     n_rows = len(plots) + 1
@@ -72,7 +80,7 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
                   hspace=0.25
                   )
     

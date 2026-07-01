@@ -44,23 +44,23 @@ if __name__ == "__main__":
     
     #Matrices
     W_BLA_IC = df_new.filter(like="BLA_IC_W").to_numpy()
-    W_BLA_IC_NAc = df_new.filter(like="BLA_IC_NAc_W").to_numpy()
-    W_Mani_DLS = df_new.filter(like="Mani_DLS_W").to_numpy()
-    W_Mani_DMS = df_new.filter(like="Mani_DMS_W").to_numpy()
-    
+    W_BLA_IC_NAc_1 = df_new.filter(like="BLA_IC_NAc_1_W").to_numpy()
+    W_Mani_DLS_1 = df_new.filter(like="Mani_DLS_1_W").to_numpy()
+    W_Mani_DMS_1 = df_new.filter(like="Mani_DMS_1_W").to_numpy()
+
     #Matrices reshape 
     W_BLA_IC = W_BLA_IC.reshape(timesteps, 4, 4)
-    W_BLA_IC_NAc = W_BLA_IC_NAc.reshape(timesteps, 2, 4)
-    W_Mani_DLS = W_Mani_DLS.reshape(timesteps, 2, 6)
-    W_Mani_DMS = W_Mani_DMS.reshape(timesteps, 2, 6)
+    W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 4)
+    W_Mani_DLS_1 = W_Mani_DLS_1.reshape(timesteps, 2, 6)
+    W_Mani_DMS_1 = W_Mani_DMS_1.reshape(timesteps, 2, 6)
     
     #Isolate Matrices' connections of interest
     rows, cols = np.ix_([0, 1], [2, 3])
-    W_BLA_IC_NAc = W_BLA_IC_NAc[:, rows, cols]
-    
+    W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1[:, rows, cols]
+
     rows, cols = np.ix_([0, 1], [0, 1])
-    W_Mani_DLS = W_Mani_DLS[:, rows, cols]
-    W_Mani_DMS = W_Mani_DMS[:, rows, cols]
+    W_Mani_DLS_1 = W_Mani_DLS_1[:, rows, cols]
+    W_Mani_DMS_1 = W_Mani_DMS_1[:, rows, cols]
     
     plt.close('all')
     
@@ -108,11 +108,11 @@ if __name__ == "__main__":
     title_ax = fig.add_subplot(gs[1, 0])
     ax = fig.add_subplot(gs[1, 1], sharex=shared_ax)
 
-    title_ax.text(0.3, 0.5, "Weights BLA_IC_NAc", ha="center", va="center", fontsize=15)
+    title_ax.text(0.3, 0.5, "Weights BLA_IC_NAc_1", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
-        W_BLA_IC_NAc.reshape(-1, 2 * 2).T,
+        W_BLA_IC_NAc_1.reshape(-1, 2 * 2).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
@@ -135,11 +135,11 @@ if __name__ == "__main__":
     title_ax = fig.add_subplot(gs[2, 0])
     ax = fig.add_subplot(gs[2, 1], sharex=shared_ax)
 
-    title_ax.text(0.3, 0.5, "Weights Mani_DLS", ha="center", va="center", fontsize=15)
+    title_ax.text(0.3, 0.5, "Weights Mani_DLS_1", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
-        W_Mani_DLS.reshape(-1, 2 * 2).T,
+        W_Mani_DLS_1.reshape(-1, 2 * 2).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
@@ -162,11 +162,11 @@ if __name__ == "__main__":
     title_ax = fig.add_subplot(gs[3, 0])
     ax = fig.add_subplot(gs[3, 1], sharex=shared_ax)
 
-    title_ax.text(0.3, 0.5, "Weights Mani_DMS", ha="center", va="center", fontsize=15)
+    title_ax.text(0.3, 0.5, "Weights Mani_DMS_1", ha="center", va="center", fontsize=15)
     title_ax.axis("off")
 
     im = ax.imshow(
-        W_Mani_DMS.reshape(-1, 2 * 2).T,
+        W_Mani_DMS_1.reshape(-1, 2 * 2).T,
         interpolation="none",
         aspect="auto",
         vmin=0,
