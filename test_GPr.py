@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
 import argparse
+from scipy.special import softmax
 
 def plotting(res):
 
@@ -166,10 +167,15 @@ if __name__ == '__main__':
 
         if t <= 50:
             inp *= 0.0
+            da *= 0.0
         
         elif t == 51:
-            inp = np.array(args.food) 
+            inp = np.array(args.food)
+            da = np.array(args.da)
 
+        # if (t % int(timesteps*0.1)) == 0:
+        #     inp = softmax(np.random.rand(2) * 10)  
+            
         # if any(inp) == 1.0:
         #     if np.argmax(inp) == 0 and t == timesteps//2:
         #         inp *= 0.0
@@ -181,8 +187,8 @@ if __name__ == '__main__':
         #         inp[0] = 1.0
         #         da = 1.0
 
-        if t > timesteps*0.6:
-            da = np.array(args.da)
+        # if t > timesteps*0.6:
+        #     da = np.array(args.da)
 
         C_Th_BG.step(inp, da)
 

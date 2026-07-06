@@ -72,7 +72,7 @@ if __name__ == "__main__":
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ("DA", [(DA[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1.2))
+        ("DA", [(DA[:, i], ["SNpco_1", "SNpco_2", "VTA"][i]) for i in range(3)], (-0.1, 1.2))
         ]
     
     n_rows = len(plots) + 1

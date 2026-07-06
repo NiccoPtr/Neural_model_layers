@@ -92,20 +92,30 @@ class CT_BG():
         
         return delta_W_inp_str
     
-    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W, lambda_xor = 0.1):
         
-        DA_term = np.maximum(0, theta_DA_str - DA)
-        delta_W_inp_str = (eta_str *
-                           DA_term * 
-                           np.outer(
-                               np.maximum(0, v_str - theta_str),
-                               np.maximum(0, v_inp - theta_inp_str)
-                               ) *
-                           (max_W_str - W))
-        
-        delta_W_inp_str *= mask
-        
-        return delta_W_inp_str
+        DA_term = np.maximum(0, DA - theta_DA_str)
+
+        pre = np.maximum(0, v_inp - theta_inp_str)
+        post = np.maximum(0, v_str - theta_str)
+
+        hebb = np.outer(post, pre)
+
+        A = pre[None, :]
+        B = post[:, None]
+
+        xor_term = A + B - (2 * A * B)
+
+        delta_W = (
+            eta_str
+            * DA_term
+            * (hebb - lambda_xor * xor_term)
+            * (max_W_str - W)
+        )
+
+        delta_W *= mask
+
+        return delta_W
 
     def learning(self, parameters, da, inp):
         
@@ -136,7 +146,7 @@ class CT_BG():
                                            )
         
         self.Ws['inp_DLS_2'] += self.delta_W_inp_DLS_2
-        
+        self.Ws['inp_DLS_2'] = np.maximum(self.Ws['inp_DLS_2'], 0)
         
     def step(self, parameters, inp, da, PFCd_PPC_inp = (0.0, 0.0), learn = True):
         

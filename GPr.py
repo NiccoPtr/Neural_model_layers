@@ -45,7 +45,7 @@ class GPr:
                                                             
         self.Ws = {
             "inp_DLS_1": np.eye(self.parameters.N["BG_dl"]),
-            "inp_DLS_2": np.eye(self.parameters.N["BG_dl"]),
+            "inp_DLS_2": np.ones((self.parameters.N["BG_dl"], self.parameters.N["BG_dl"])) * 0.5,
             "GPi_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["GPi_MGV"],
             "MC_MGV": np.eye(self.parameters.N["MGV"]) * self.parameters.Matrices_scalars["MC_MGV"],
             "MGV_MC": np.eye(self.parameters.N["MC"]) * self.parameters.Matrices_scalars["MGV_MC"],

@@ -112,7 +112,7 @@ if __name__ == "__main__":
         MGV_output = np.empty((timesteps, model.MGV.N), dtype=np.float32)
         P_output = np.empty((timesteps, model.P.N), dtype=np.float32)
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
-        DA_timeline = np.empty((timesteps, 2), dtype=np.float32)
+        DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
         W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
         W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(states[0])), dtype=np.float32)
@@ -144,6 +144,7 @@ if __name__ == "__main__":
         BLA_IC = model.BLA_IC
         DA_1 = model.SNpc.SNpco_1
         DA_2 = model.SNpc.SNpco_2
+        DA_3 = model.VTA
 
         for t in range(timesteps):
             
@@ -156,7 +157,7 @@ if __name__ == "__main__":
             model.step(state)
             action = MC.output.copy()
 
-            da = np.array([DA_1.output, DA_2.output]).squeeze()
+            da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
             MC_output[t] = action
             PFCd_PPC_output[t] = PFCd_PPC.output
@@ -210,6 +211,9 @@ if __name__ == "__main__":
             "W_BLA_IC_NAc_1": W_BLA_IC_NAc_1,
             "W_Mani_DLS_1": W_Mani_DLS_1,
             "W_Mani_DMS_1": W_Mani_DMS_1,
+            "W_BLA_IC_NAc_2": W_BLA_IC_NAc_2,
+            "W_Mani_DLS_2": W_Mani_DLS_2,
+            "W_Mani_DMS_2": W_Mani_DMS_2
         }
 
         results.append(result)
@@ -237,7 +241,7 @@ if __name__ == "__main__":
     MC_out_cols = [f"MC_Unit_{i}" for i in range(model.MC.N)]
     PFCd_PPC_out_cols = [f"PFCd_PPC_Unit_{i}" for i in range(model.PFCd_PPC.N)]
     PL_out_cols = [f"PL_Unit_{i}" for i in range(model.PL.N)]
-    DA_cols = [f"DA_Unit{i}" for i in range(2)]
+    DA_cols = [f"DA_Unit{i}" for i in range(3)]
     W_cols_1 = [
         f"BLA_IC_W{x}_{y}"
         for x in range(model.BLA_IC.W.shape[0])
@@ -257,6 +261,21 @@ if __name__ == "__main__":
         f"Mani_DMS_1_W{x}_{y}"
         for x in range(model.Ws["Mani_DMS_1"].shape[0])
         for y in range(model.Ws["Mani_DMS_1"].shape[1])
+    ]
+    W_cols_5 = [
+        f"BLA_IC_NAc_2_W{x}_{y}"
+        for x in range(model.Ws["BLA_IC_NAc_2"].shape[0])
+        for y in range(model.Ws["BLA_IC_NAc_2"].shape[1])
+    ]
+    W_cols_6 = [
+        f"Mani_DLS_2_W{x}_{y}"
+        for x in range(model.Ws["Mani_DLS_2"].shape[0])
+        for y in range(model.Ws["Mani_DLS_2"].shape[1])
+    ]
+    W_cols_7 = [
+        f"Mani_DMS_2_W{x}_{y}"
+        for x in range(model.Ws["Mani_DMS_2"].shape[0])
+        for y in range(model.Ws["Mani_DMS_2"].shape[1])
     ]
 
     cols = (
@@ -280,6 +299,9 @@ if __name__ == "__main__":
         + W_cols_2
         + W_cols_3
         + W_cols_4
+        + W_cols_5
+        + W_cols_6
+        + W_cols_7
     )
     dfs = []
 

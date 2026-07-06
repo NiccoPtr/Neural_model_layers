@@ -45,33 +45,41 @@ if __name__ == "__main__":
     #Matrices
     W_BLA_IC = df_new.filter(like="BLA_IC_W").to_numpy()
     W_BLA_IC_NAc_1 = df_new.filter(like="BLA_IC_NAc_1_W").to_numpy()
+    W_BLA_IC_NAc_2 = df_new.filter(like="BLA_IC_NAc_2_W").to_numpy()
     W_Mani_DLS_1 = df_new.filter(like="Mani_DLS_1_W").to_numpy()
+    W_Mani_DLS_2 = df_new.filter(like="Mani_DLS_2_W").to_numpy()
     W_Mani_DMS_1 = df_new.filter(like="Mani_DMS_1_W").to_numpy()
+    W_Mani_DMS_2 = df_new.filter(like="Mani_DMS_2_W").to_numpy()
 
     #Matrices reshape 
     W_BLA_IC = W_BLA_IC.reshape(timesteps, 4, 4)
     W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 4)
+    W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2.reshape(timesteps, 2, 4)
     W_Mani_DLS_1 = W_Mani_DLS_1.reshape(timesteps, 2, 6)
+    W_Mani_DLS_2 = W_Mani_DLS_2.reshape(timesteps, 2, 6)
     W_Mani_DMS_1 = W_Mani_DMS_1.reshape(timesteps, 2, 6)
-    
+    W_Mani_DMS_2 = W_Mani_DMS_2.reshape(timesteps, 2, 6)
+
     #Isolate Matrices' connections of interest
     rows, cols = np.ix_([0, 1], [2, 3])
     W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1[:, rows, cols]
 
     rows, cols = np.ix_([0, 1], [0, 1])
     W_Mani_DLS_1 = W_Mani_DLS_1[:, rows, cols]
+    W_Mani_DLS_2 = W_Mani_DLS_2[:, rows, cols]
     W_Mani_DMS_1 = W_Mani_DMS_1[:, rows, cols]
+    W_Mani_DMS_2 = W_Mani_DMS_2[:, rows, cols]
     
     plt.close('all')
     
     #Plotting set up
     
-    n_rows = 4
+    n_rows = 7
     fig = plt.figure(figsize=(14, 2.2 * n_rows))
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[1, 6],
-                  height_ratios=[3.2, 1, 1, 1],
+                  height_ratios=[3.2, 1, 1, 1, 1, 1, 1],
                   hspace=0.25
                   )
     
@@ -93,7 +101,7 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
 
-    ax.set_ylabel("Connections")
+    ax.set_ylabel("Connections", fontsize=10)
     ax.set_yticks(np.arange(16), [f"W_{j}_{i}" for j in range(4) for i in range(4)])
     
     ax.spines["top"].set_visible(False)
@@ -120,7 +128,7 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
 
-    ax.set_ylabel("Connections")
+    ax.set_ylabel("Connections", fontsize=10)
     ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
     
     ax.spines["top"].set_visible(False)
@@ -147,7 +155,7 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
 
-    ax.set_ylabel("Connections")
+    ax.set_ylabel("Connections", fontsize=10)
     ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
     
     ax.spines["top"].set_visible(False)
@@ -174,13 +182,96 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
 
-    ax.set_ylabel("Connections")
+    ax.set_ylabel("Connections", fontsize=10)
     ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
     
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    ax.tick_params(labelbottom=False)
+
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[4, 0])
+    ax = fig.add_subplot(gs[4, 1], sharex=shared_ax)
+
+    title_ax.text(0.3, 0.5, "Weights BLA_IC_NAc_2", ha="center", va="center", fontsize=15)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_BLA_IC_NAc_2.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
+        cmap='YlOrRd'
+    )
+
+    ax.set_ylabel("Connections", fontsize=10)
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    ax.tick_params(labelbottom=False)
+
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[5, 0])
+    ax = fig.add_subplot(gs[5, 1], sharex=shared_ax)
+
+    title_ax.text(0.3, 0.5, "Weights Mani_DLS_2", ha="center", va="center", fontsize=15)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_Mani_DLS_2.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
+        cmap='YlOrRd'
+    )
+
+    ax.set_ylabel("Connections", fontsize=10)
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    ax.tick_params(labelbottom=False)
+
+    #-----------------------------------------------
+    
+    title_ax = fig.add_subplot(gs[6, 0])
+    ax = fig.add_subplot(gs[6, 1], sharex=shared_ax)
+
+    title_ax.text(0.3, 0.5, "Weights Mani_DMS_2", ha="center", va="center", fontsize=15)
+    title_ax.axis("off")
+
+    im = ax.imshow(
+        W_Mani_DMS_2.reshape(-1, 2 * 2).T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=1,
+        cmap='YlOrRd'
+    )
+
+    ax.set_ylabel("Connections", fontsize=10)
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+
+    ax.tick_params(labelbottom=False)
     
     # Shared x-axis
     ax.set_xlabel("Timestep")

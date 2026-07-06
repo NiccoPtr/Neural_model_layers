@@ -894,5 +894,69 @@
 
 
 
+### Parameters #3
 
+
+
+"Str\_Learn": {
+
+&#x20;       "eta\_DLS\_1": 0.04,
+
+&#x20;       "eta\_DLS\_2": 0.04,
+
+&#x20;       "eta\_DMS\_1": 0.04,
+
+&#x20;       "eta\_DMS\_2": 0.04,
+
+&#x20;       "eta\_NAc\_1": 0.1,
+
+&#x20;       "eta\_NAc\_2": 0.1,
+
+&#x20;       "theta\_DA\_DLS\_1": 0.5,
+
+&#x20;       "theta\_DA\_DLS\_2": 0.5,
+
+&#x20;       "theta\_DA\_DMS\_1": 0.5,
+
+&#x20;       "theta\_DA\_DMS\_2": 0.5,
+
+&#x20;       "theta\_DA\_NAc\_1": 0.5,
+
+&#x20;       "theta\_DA\_NAc\_2": 0.5,
+
+&#x20;       "theta\_DLS\_1": 0.45,
+
+&#x20;       "theta\_DLS\_2": 0.2,
+
+&#x20;       "theta\_DMS\_1": 0.45,
+
+&#x20;       "theta\_DMS\_2": 0.2,
+
+&#x20;       "theta\_NAc\_1": 0.45,
+
+&#x20;       "theta\_NAc\_2": 0.2,
+
+&#x20;       "theta\_inp\_DLS\_1": 0.5,
+
+&#x20;       "theta\_inp\_DLS\_2": 0.5,
+
+&#x20;       "theta\_inp\_DMS\_1": 0.5,
+
+&#x20;       "theta\_inp\_DMS\_2": 0.5,
+
+&#x20;       "theta\_inp\_NAc\_1": 0.5,
+
+&#x20;       "theta\_inp\_NAc\_2": 0.5,
+
+&#x20;       "max\_W\_DLS": 1,
+
+&#x20;       "max\_W\_DMS": 1,
+
+&#x20;       "max\_W\_NAc": 2
+
+&#x20;   }
+
+
+
+* Changing in the Str\_Learn parameters for D2 learning after learning function adaptation: **ΔW∝AB−λXOR(A,B)**
 
