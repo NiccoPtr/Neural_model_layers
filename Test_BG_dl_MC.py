@@ -30,6 +30,7 @@ def plotting(res):
     GPe = np.array(res["GPe_output"]) * -1
     MGV = np.array(res["MGV_output"])
     MC = np.array(res["MC_output"])
+    DA = np.array(res["DA_timeline"])
     W1 = np.array(res["W1_timeline"])
     W2 = np.array(res["W2_timeline"])
 
@@ -41,7 +42,8 @@ def plotting(res):
         ("GPi", [(BG_dl[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("GPe", [(GPe[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
         ("MGV", [(MGV[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
-        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1))
+        ("MC", [(MC[:, i], f"Unit_{i+1}") for i in range(2)], (-0.1, 1)),
+        ("DA", [(DA[:], f"Unit_{i+1}") for i in range(1)], (-0.1, 1)),
     ]
 
     n_rows = len(plots) + 2
@@ -192,6 +194,7 @@ if __name__ == "__main__":
     GPe_output = []
     MGV_output = []
     MC_output = []
+    DA = []
     W1_timeline = []
     W2_timeline = []
     _input_ = []
@@ -202,23 +205,24 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        if t <= timesteps*0.15:
-            da *= 0.0
-            inp *= 0.0
+        # if t <= 50:
+        #     inp *= 0.0
 
-        else:
-            da = np.array(args.dopamine)
-            inp = np.array(args.inp)
+        # else:
+        #     da = np.array(args.dopamine)
+        #     inp = np.array(args.inp)
 
-        if winner and t <= timesteps//2:
+        if winner and t <= 100:
 
-            if inp[winner - 1] == 0:
-                da *= 0.0
+            da = 1.0
 
-            elif inp[winner -1] == 1:
-                da = 1.0
+            # if inp[winner - 1] == 0:
+            #     da = np.array(args.dopamine)
 
-        if t > timesteps//2:
+            # elif inp[winner -1] == 1:
+            #     da = 1.0
+
+        if t > 100:
             da = np.array(args.dopamine)
 
         # if t == timesteps//2:
@@ -244,6 +248,7 @@ if __name__ == "__main__":
         GPe_output.append(CT_BG_model.BG_dl.GPe.output.copy())
         MGV_output.append(CT_BG_model.MGV.output.copy())
         MC_output.append(CT_BG_model.MC.output.copy())
+        DA.append(da)
         W1_timeline.append(CT_BG_model.Ws["inp_DLS_1"].copy())
         W2_timeline.append(CT_BG_model.Ws["inp_DLS_2"].copy())
         _input_.append(inp.copy())
@@ -258,6 +263,7 @@ if __name__ == "__main__":
         "GPe_output": GPe_output,
         "MGV_output": MGV_output,
         "MC_output": MC_output,
+        "DA_timeline": DA,
         "W1_timeline": W1_timeline,
         "W2_timeline": W2_timeline
     }

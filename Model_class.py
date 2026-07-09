@@ -383,33 +383,30 @@ class Model:
 
         return delta_W_inp_str
     
-    def delta_Str_learn_2(
-        self,
-        eta_str,
-        DA,
-        v_str,
-        v_inp,
-        theta_DA_str,
-        theta_str,
-        theta_inp_str,
-        mask,
-        max_W_str,
-        W,
-    ):
+    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W, lambda_xor = 0.1):
+        
+        DA_term = np.maximum(0, DA - theta_DA_str)
 
-        DA_term = np.maximum(0, theta_DA_str - DA)[:, None]
-        delta_W_inp_str = (
+        pre = np.maximum(0, v_inp - theta_inp_str)
+        post = np.maximum(0, v_str - theta_str)
+
+        hebb = np.outer(post, pre)
+
+        A = pre[None, :]
+        B = post[:, None]
+
+        xor_term = A + B - (2 * A * B)
+
+        delta_W = (
             eta_str
             * DA_term
-            * np.outer(
-                np.maximum(0, v_str - theta_str), np.maximum(0, v_inp - theta_inp_str)
-            )
+            * (hebb - lambda_xor * xor_term)
             * (max_W_str - W)
         )
 
-        delta_W_inp_str *= mask
+        delta_W *= mask
 
-        return delta_W_inp_str
+        return delta_W
 
 
     def learning(self, _input_):
@@ -446,6 +443,7 @@ class Model:
             self.Ws["BLA_IC_NAc_2"],
         )
         self.Ws["BLA_IC_NAc_2"] += delta_W_BLA_IC_NAc_2
+        self.Ws["BLA_IC_NAc_2"] = np.maximum(self.Ws["BLA_IC_NAc_2"], 0.0)
 
         delta_W_Mani_DMS_1 = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_DMS_1"],
@@ -474,6 +472,7 @@ class Model:
             self.Ws["Mani_DMS_2"],
         )
         self.Ws["Mani_DMS_2"] += delta_W_Mani_DMS_2
+        self.Ws["Mani_DMS_2"] = np.maximum(self.Ws["Mani_DMS_2"], 0.0)
 
         delta_W_Mani_DLS_1 = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_DLS_1"],
@@ -502,6 +501,7 @@ class Model:
             self.Ws["Mani_DLS_2"],
         )
         self.Ws["Mani_DLS_2"] += delta_W_Mani_DLS_2
+        self.Ws["Mani_DLS_2"] = np.maximum(self.Ws["Mani_DLS_2"], 0.0)
 
     def update_output_pre(self):
         """
@@ -640,8 +640,8 @@ class Model:
         )
 
         self.SNpc.step(
-            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmax(self.NAc_output_pre_1)]),
-            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmax(self.DMS_output_pre_1)]),
+            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmin(self.NAc_output_pre_1)]),
+            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmin(self.DMS_output_pre_1)]),
             np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre),
         )
 

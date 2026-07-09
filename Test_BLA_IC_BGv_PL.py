@@ -28,6 +28,7 @@ def plotting(res):
     BGv = -np.array(res["BGv"])
     DM = np.array(res["DM"])
     PL = np.array(res["PL"])
+    DA = np.array(res["DA"])
     W_1 = np.array(res["W_timeline_1"])
     W_2 = np.array(res["W_timeline_2"])
     W_BLA_IC = np.array(res['W_BLA_IC'])
@@ -44,7 +45,8 @@ def plotting(res):
         ("NAc_2", [(NAc_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("BGv", [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("DM", [(DM[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
-        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2))
+        ("PL", [(PL[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
+        ("DA", [(DA[:, i], f"Unit_{i+1}") for i in range(1)], (-0.2, 1.2))
     ]
 
     n_rows = len(plots) + 4
@@ -92,8 +94,8 @@ def plotting(res):
         vmax=1,
     )
 
-    ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(6), ["L", "C", "F_1", "F_2", "S_1", "S_2"])
+    ax.set_ylabel("Connections", fontsize=7)
+    ax.set_yticks(np.arange(6), ["L", "C", "F_1", "F_2", "S_1", "S_2"], fontsize=5)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -115,8 +117,8 @@ def plotting(res):
         vmax=2,
     )
 
-    ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(16), [f"W_{j}_{i}" for j in range(4) for i in range(4)])
+    ax.set_ylabel("Connections", fontsize=7)
+    ax.set_yticks(np.arange(16), [f"W_{j}_{i}" for j in range(4) for i in range(4)], fontsize=5)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -127,7 +129,7 @@ def plotting(res):
     title_ax = fig.add_subplot(gs[-2, 0])
     ax = fig.add_subplot(gs[-2, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "BLA_IC_NAc Weight", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "BLA_IC_NAc_1 Weight", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -138,8 +140,8 @@ def plotting(res):
         vmax=2,
     )
 
-    ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    ax.set_ylabel("Connections", fontsize=7)
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)], fontsize=5)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -149,7 +151,7 @@ def plotting(res):
     title_ax = fig.add_subplot(gs[-1, 0])
     ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
 
-    title_ax.text(0.5, 0.5, "BLA_IC_NAc Weight", ha="center", va="center", fontsize=12)
+    title_ax.text(0.5, 0.5, "BLA_IC_NAc_2 Weight", ha="center", va="center", fontsize=12)
     title_ax.axis("off")
 
     im = ax.imshow(
@@ -160,8 +162,8 @@ def plotting(res):
         vmax=2,
     )
 
-    ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)])
+    ax.set_ylabel("Connections", fontsize=7)
+    ax.set_yticks(np.arange(4), [f"W_{j}_{i}" for j in range(2) for i in range(2)], fontsize=5)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -169,7 +171,7 @@ def plotting(res):
     fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
 
     # Shared x-axis
-    ax.set_xlabel("Timestep")
+    ax.set_xlabel("Timestep", fontsize=14)
 
     plt.tight_layout()
 
@@ -178,7 +180,6 @@ def plotting(res):
     shared_ax.set_xlim(xmin, xmax + pad)
 
     plt.show()
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description="BG_dl-MGV-MC loop simulation")
@@ -201,7 +202,7 @@ def parse_args():
         "-t",
         "--trials",
         type=int,
-        default=20,
+        default=1,
         help="Number of trials",
     )
     parser.add_argument(
@@ -244,6 +245,7 @@ if __name__ == "__main__":
     BGv_ouput = []
     DM_output = []
     PL_output = []
+    DA_output = []
     W_timeline_1 = []
     W_timeline_2 = []
     W_BLA_IC = []
@@ -260,10 +262,10 @@ if __name__ == "__main__":
             elif t == 50:
                 inp = np.array(args.inp)
 
-            if args.inp[0] == 1.0 and t == timesteps * 0.18:
+            if args.inp[0] == 1.0 and t == timesteps * 0.15:
                 inp[2] = 1.0
 
-            elif args.inp[1] == 1.0 and t == timesteps * 0.18:
+            elif args.inp[1] == 1.0 and t == timesteps * 0.15:
                 inp[3] = 1.0
 
             CT_BGv_BLA_IC_model.step(parameters, inp)
@@ -276,6 +278,7 @@ if __name__ == "__main__":
             BGv_ouput.append(CT_BGv_BLA_IC_model.BG_v.output_BG.copy())
             DM_output.append(CT_BGv_BLA_IC_model.DM.output.copy())
             PL_output.append(CT_BGv_BLA_IC_model.PL.output.copy())
+            DA_output.append(CT_BGv_BLA_IC_model.VTA.output.copy())
             W_timeline_1.append(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc_1"].copy())
             W_timeline_2.append(CT_BGv_BLA_IC_model.Ws["BLA_IC_NAc_2"].copy())
             W_BLA_IC.append(CT_BGv_BLA_IC_model.BLA_IC.W.copy())
@@ -296,7 +299,8 @@ if __name__ == "__main__":
                     "NAc_2": NAc_output_2,
                     "BGv": BGv_ouput,
                     "DM": DM_output,
-                    "PL": PL_output
+                    "PL": PL_output,
+                    "DA": DA_output
                 }
 
     if args.mode == "plot":

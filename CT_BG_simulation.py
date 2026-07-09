@@ -104,7 +104,7 @@ class CT_BG():
         A = pre[None, :]
         B = post[:, None]
 
-        xor_term = A + B - (2 * A * B)
+        xor_term = (A + B) - (2 * A * B)
 
         delta_W = (
             eta_str

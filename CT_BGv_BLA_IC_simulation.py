@@ -139,20 +139,30 @@ class CT_BGv_BLA_IC():
         
         return delta_W_inp_str
     
-    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W):
+    def delta_Str_learn_2(self, eta_str, DA, v_str, v_inp, theta_DA_str, theta_str, theta_inp_str, mask, max_W_str, W, lambda_xor = 0.1):
         
-        DA_term = np.maximum(0, theta_DA_str - DA)
-        delta_W_inp_str = (eta_str *
-                           DA_term * 
-                           np.outer(
-                               np.maximum(0, v_str - theta_str),
-                               np.maximum(0, v_inp - theta_inp_str)
-                               ) *
-                           (max_W_str - W))
-        
-        delta_W_inp_str *= mask
-        
-        return delta_W_inp_str
+        DA_term = np.maximum(0, DA - theta_DA_str)
+
+        pre = np.maximum(0, v_inp - theta_inp_str)
+        post = np.maximum(0, v_str - theta_str)
+
+        hebb = np.outer(post, pre)
+
+        A = pre[None, :]
+        B = post[:, None]
+
+        xor_term = A + B - (2 * A * B)
+
+        delta_W = (
+            eta_str
+            * DA_term
+            * (hebb - lambda_xor * xor_term)
+            * (max_W_str - W)
+        )
+
+        delta_W *= mask
+
+        return delta_W
     
     def learning(self, parameters):
         
@@ -172,7 +182,7 @@ class CT_BGv_BLA_IC():
         
         self.Ws["BLA_IC_NAc_1"] +=  delta_W_BLA_IC_NAc_1
 
-        delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_1(parameters.Str_Learn["eta_NAc_2"],
+        delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_2(parameters.Str_Learn["eta_NAc_2"],
                                            self.VTA_output_pre,
                                            self.NAc_output_pre_2 * -1,
                                            self.BLA_IC_output_pre,
@@ -185,6 +195,7 @@ class CT_BGv_BLA_IC():
                                            )
         
         self.Ws["BLA_IC_NAc_2"] +=  delta_W_BLA_IC_NAc_2
+        self.Ws["BLA_IC_NAc_2"] = np.maximum(0, self.Ws["BLA_IC_NAc_2"])
         
     def step(self, parameters, inp, PFCd_PPC_inp = [0.0, 0.0], learning = True):
         
