@@ -79,7 +79,7 @@ def parse_args():
         "--inp",
         type=float,
         nargs=6,
-        default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        default=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         help="Input values (six floats)",
     )
     parser.add_argument(

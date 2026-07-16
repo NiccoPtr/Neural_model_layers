@@ -64,9 +64,6 @@ if __name__ == "__main__":
         scheduling.load(args.scheduling, mode="json")
     parameters.scheduling = scheduling._params_to_dict()
     parameters.seed = args.seed
-
-    if len(scheduling.states) != len(scheduling.phases):
-        raise ValueError("Input and Phases must have same length")
         
     model = Model(parameters)
     
@@ -87,20 +84,19 @@ if __name__ == "__main__":
     sched = parameters.scheduling
     timesteps = sched["timesteps"]
     trials = sched["trials"]
-    states = sched["states"]
-    phases = sched["phases"]
-    phase_limits = np.array(phases) * trials
 
     results = []
 
     for trial in range(trials):
+
+        state = np.array(sched["states"])
 
         model.reset_activity()
         model.update_output_pre()
         MC_output = np.empty((timesteps, model.MC.N), dtype=np.float32)
         PFCd_PPC_output = np.empty((timesteps, model.PFCd_PPC.N), dtype=np.float32)
         PL_output = np.empty((timesteps, model.PL.N), dtype=np.float32)
-        state_t = np.empty((timesteps, len(states[0])), dtype=np.float32)
+        state_t = np.empty((timesteps, len(state)), dtype=np.float32)
         DLS_output_1 = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
         DLS_output_2 = np.empty((timesteps, model.BG_dl.Str2.N), dtype=np.float32)
         DMS_output_1 = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
@@ -117,22 +113,11 @@ if __name__ == "__main__":
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
         W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(states[0])), dtype=np.float32)
-        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(states[0])), dtype=np.float32)
-        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(states[0])), dtype=np.float32)
-        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(states[0])), dtype=np.float32)
+        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(state)), dtype=np.float32)
+        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(state)), dtype=np.float32)
+        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(state)), dtype=np.float32)
+        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(state)), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
-
-        if trial <= phase_limits[0]:
-            phase = 1
-        elif trial <= phase_limits[1]:
-            phase = 2
-        elif trial <= phase_limits[2]:
-            phase = 3
-        elif trial <= phase_limits[3]:
-            phase = 4
-
-        state = np.asanyarray(states[phase - 1])
 
         MC = model.MC
         PFCd_PPC = model.PFCd_PPC
@@ -147,24 +132,26 @@ if __name__ == "__main__":
         DA_1 = model.SNpc.SNpco_1
         DA_2 = model.SNpc.SNpco_2
         DA_3 = model.VTA
+        inp = state.copy()
 
         for t in range(timesteps):
             
             if t < 50:
-                state[0:2] = 0.0
+                inp = np.zeros_like(state)
                 
             elif t == 50:
-                state = np.asanyarray(states[phase - 1])
+                inp = np.asanyarray(state)
 
-            model.step(state)
+            model.step(inp)
+
             action = MC.output.copy()
-
+            attention = PFCd_PPC.output.copy()
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
             MC_output[t] = action
-            PFCd_PPC_output[t] = PFCd_PPC.output
+            PFCd_PPC_output[t] = attention
             PL_output[t] = PL.output
-            state_t[t] = state
+            state_t[t] = inp.copy()
             DLS_output_1[t] = DLS_1.output
             DLS_output_2[t] = DLS_2.output
             DMS_output_1[t] = DMS_1.output
@@ -181,20 +168,26 @@ if __name__ == "__main__":
             W_Mani_DMS_1[t] = model.Ws["Mani_DMS_1"]
             W_Mani_DMS_2[t] = model.Ws["Mani_DMS_2"]
 
-            if np.any(action >= MC.threshold):
-                winner = np.argmax(action)
+            if np.any(attention >= PFCd_PPC.threshold):
+                attention_winner = np.argmax(attention)
+                state[0:2] = 0.0
+                state[attention_winner] = 1.0
+            else:
+                state[0:2] = 0.0
 
-                if state[0] == 1.0 and winner == 0:
-                    state[2:4] = 0.0
-                    state[2 + winner] = 1.0
+            if t >= 100 and np.any(action >= MC.threshold):
+                action_winner = np.argmax(action)
 
-                elif state[1] == 1.0 and winner == 1:
+                if state[0] == 1.0 and action_winner == 0:
                     state[2:4] = 0.0
-                    state[2 + winner] = 1.0
+                    state[2 + action_winner] = 1.0
+
+                elif state[1] == 1.0 and action_winner == 1:
+                    state[2:4] = 0.0
+                    state[2 + action_winner] = 1.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
-            "Phase": np.ones(timesteps) * phase,
             "Trial": np.ones(timesteps) * trial,
             "Timesteps": np.arange(0, timesteps),
             "States_timeline": state_t.copy(),
@@ -205,8 +198,8 @@ if __name__ == "__main__":
             "DMS_output_2": DMS_output_2.copy(),
             "DLS_output_1": DLS_output_1.copy(),
             "DLS_output_2": DLS_output_2.copy(),
-            "MC_output": MC_output.copy(),
-            "PFCd_PPC_output": PFCd_PPC_output.copy(),
+            "Action": MC_output.copy(),
+            "Attention": PFCd_PPC_output.copy(),
             "PL_output": PL_output.copy(),
             "DA_timeline": DA_timeline,
             "W_BLA_IC": W_BLA_IC,
@@ -219,7 +212,7 @@ if __name__ == "__main__":
         }
 
         results.append(result)
-
+    
     print(
         f'Simulation termined: Trials({trials}), Timesteps per-trial({timesteps})'
     )
@@ -231,7 +224,6 @@ if __name__ == "__main__":
     seed_col = ["Seed"]
     trial_col = ["Trial"]
     timestep_col = ["Timestep"]
-    phase_col = ["Phase"]
     state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
     NAc_1_cols = [f"NAc_1_Unit_{i}" for i in range(model.BG_v.Str1.N)]
@@ -282,7 +274,6 @@ if __name__ == "__main__":
 
     cols = (
         seed_col
-        + phase_col
         + trial_col
         + timestep_col
         + state_cols

@@ -205,12 +205,12 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
         
-        # if t <= 50:
-        #     inp *= 0.0
+        if t <= 50:
+            inp *= 0.0
 
-        # else:
-        #     da = np.array(args.dopamine)
-        #     inp = np.array(args.inp)
+        else:
+            da = np.array(args.dopamine)
+            inp = np.array(args.inp)
 
         if winner and t <= 100:
 
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         CT_BG_model.step(parameters, inp, da, learn=True)
 
         action = CT_BG_model.MC.output.copy()
-        if np.any(action >= CT_BG_model.MC.threshold):
+        if np.any(action >= CT_BG_model.MC.threshold) and t > 50:
             winner = np.argmax(action) + 1
         else:
             winner = np.array(0)

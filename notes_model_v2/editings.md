@@ -20,3 +20,32 @@
 
 * ATTENTIONAL DRIVE would avoid unmatching conditions since the input will be based on PFCd\_PPC activity, so it would be matching. Plus, MC would allow dopamine release for learning only if it matches, thus decreased uncongruent conditions.
 
+
+
+
+
+
+
+* Need to check for learning hebb - xor in BGv since the input is onset, thus the "- xor" component creates damages
+* Also, need to check for lasting duration of DA signal given by the VTA, it shouldn't last longer than the BLA input otherwise wrong learnings will happen
+
+&#x09;
+
+&#x09;- Need to work on Matrices LH\_VTA \& Food\_LH power
+
+
+
+* Solve the double spikes in the VTA through the LH
+
+
+
+&#x09;- Need to allow first input to let the LH spike (conditional), but the second input (unconditional) shoouldn't permit a second spike
+
+
+
+* Need for less lock in activity and more random activity to learn
+
+
+
+&#x09;- Check for theta\_DA for learning, baseline DA
+

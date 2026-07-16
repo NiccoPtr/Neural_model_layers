@@ -23,6 +23,7 @@ def plotting(res):
 
     # Isolating single layers
     BLA_IC = np.array(res["BLA_IC"])
+    LH = np.array(res["LH"])
     NAc_1 = -np.array(res["NAc_1"])
     NAc_2 = -np.array(res["NAc_2"])
     BGv = -np.array(res["BGv"])
@@ -41,6 +42,7 @@ def plotting(res):
     # Plotting set up
     plots = [
         ("BLA_IC", [(BLA_IC[:, i], f"Unit_{i+1}") for i in range(4)], (-0.2, 1.2)),
+        ("LH", [(LH[:, i], f"Unit_{i+1}") for i in range(1)], (-0.2, 1.2)),
         ("NAc_1", [(NAc_1[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("NAc_2", [(NAc_2[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
         ("BGv", [(BGv[:, i], f"Unit_{i+1}") for i in range(2)], (-0.2, 1.2)),
