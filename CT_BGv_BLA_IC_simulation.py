@@ -74,7 +74,7 @@ class CT_BGv_BLA_IC():
         self.Ws = {'inp_BLA_IC': np.array([
                                         [1.0 * parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0],
                                         [0.0, 1.0 * parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0],
-                                        [1.0, 0.0, 1.0 * parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
+                                        [0.0, 0.0, 1.0 * parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
                                         [0.0, 0.0, 0.0, 1.0 * parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * parameters.Matrices_scalars['Sat_BLA_IC']]]),
                    'Food_LH': np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0]) * parameters.Matrices_scalars["Food_LH"],
                    "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0]) * parameters.Matrices_scalars["BLA_IC_LH"],
