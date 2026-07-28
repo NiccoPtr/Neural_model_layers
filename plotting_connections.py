@@ -63,6 +63,7 @@ if __name__ == "__main__":
     #Isolate Matrices' connections of interest
     rows, cols = np.ix_([0, 1], [2, 3])
     W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1[:, rows, cols]
+    W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2[:, rows, cols]
 
     rows, cols = np.ix_([0, 1], [0, 1])
     W_Mani_DLS_1 = W_Mani_DLS_1[:, rows, cols]

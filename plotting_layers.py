@@ -63,12 +63,12 @@ if __name__ == "__main__":
     #Plotting set up
     plots = [
         ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(4)], (-0.1, 1.2)),
-        # ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        # ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        # ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),

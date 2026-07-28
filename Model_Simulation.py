@@ -139,8 +139,12 @@ if __name__ == "__main__":
             if t < 50:
                 inp = np.zeros_like(state)
                 
-            elif t == 50:
-                inp = np.asanyarray(state)
+            elif t >= 50:
+                if np.any(inp[2:4] == 1.0):
+                    inp *= 1.0
+
+                else:
+                    inp = state.copy()
 
             model.step(inp)
 
