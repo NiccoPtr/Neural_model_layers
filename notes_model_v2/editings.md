@@ -39,7 +39,7 @@
 
 
 
-&#x09;- Need to allow first input to let the LH spike (conditional), but the second input (unconditional) shoouldn't permit a second spike
+&#x09;- Need to allow first input to let the LH spike (conditional), but the second input (unconditional) shouldn't permit a second spike
 
 
 
