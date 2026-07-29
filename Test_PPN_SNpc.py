@@ -80,7 +80,7 @@ def parse_args():
         "--food",
         type=float,
         nargs=2,
-        default=(1.0, 1.0),
+        default=(1.0, 0.0),
         help="Input values (two floats)",
     )
     parser.add_argument(

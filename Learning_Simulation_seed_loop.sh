@@ -2,7 +2,7 @@
 
 scheduling=$(cat << EOF 
 {
-    "trials": 50,
+    "trials": 100,
     "timesteps": 1000,
     "states": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 }   

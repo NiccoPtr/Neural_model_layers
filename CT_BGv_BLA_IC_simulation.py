@@ -197,7 +197,7 @@ class CT_BGv_BLA_IC():
         self.Ws["BLA_IC_NAc_2"] +=  delta_W_BLA_IC_NAc_2
         self.Ws["BLA_IC_NAc_2"] = np.maximum(0, self.Ws["BLA_IC_NAc_2"])
         
-    def step(self, parameters, inp, PFCd_PPC_inp = [0.0, 0.0], learning = True):
+    def step(self, parameters, inp, PFCd_PPC_inp = [0.8, 0.2], learning = True):
         
         self.BLA_IC.step(np.dot(self.Ws["inp_BLA_IC"], inp))
         self.LH.step(np.dot(self.Ws["Food_LH"], inp) + np.dot(self.Ws["BLA_IC_LH"], self.BLA_IC_output_pre))
