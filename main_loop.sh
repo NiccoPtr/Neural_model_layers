@@ -5,12 +5,10 @@
 
 conditions=(
     "None None 00"
-    "PL None PL_pre_00"
-    "None PL PL_post_00"
 )
 
 seed_start=1
-seed_end=20
+seed_end=5
 
 SRC=$(dirname "$0"| xargs realpath)
 export PYTHONPATH=$SRC
@@ -36,41 +34,41 @@ for condition in "${conditions[@]}"; do
     # TRAINING SCHEDULING
     # ==========================================
 
-    scheduling=$(cat << EOF
-{
-    "trials": 100,
-    "timesteps": 1000,
-    "states": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-}
-EOF
-)
+#     scheduling=$(cat << EOF
+# {
+#     "trials": 100,
+#     "timesteps": 1000,
+#     "states": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+# }
+# EOF
+# )
 
-# # ==========================================
-#     # TRAINING LOOP
-#     # ==========================================
+# # # ==========================================
+# #     # TRAINING LOOP
+# #     # ==========================================
 
-    for seed in $(seq $seed_start 1 $seed_end); do
+#     for seed in $(seq $seed_start 1 $seed_end); do
 
-        SIM="${TRAIN_DIR}/sim_seed${seed}"
+#         SIM="${TRAIN_DIR}/sim_seed${seed}"
 
-        mkdir -p "$SIM"
+#         mkdir -p "$SIM"
 
-        cd "$SIM"
+#         cd "$SIM"
 
-        cp "$CURR_DIR/prm_file.json" "$SIM/"
+#         cp "$CURR_DIR/prm_file.json" "$SIM/"
 
-        echo "$scheduling" > scheduling.json
+#         echo "$scheduling" > scheduling.json
 
-        echo "Running TRAINING simulation seed=$seed"
+#         echo "Running TRAINING simulation seed=$seed"
 
-        python ${SRC}/Model_Simulation.py \
-            -d scheduling.json \
-            -s $seed \
-            -l $lesion_pre
+#         python ${SRC}/Model_Simulation.py \
+#             -d scheduling.json \
+#             -s $seed \
+#             -l $lesion_pre
 
-        cd "$CURR_DIR"
+#         cd "$CURR_DIR"
 
-    done
+#     done
 
 # ==========================================
     # TEST SCHEDULING

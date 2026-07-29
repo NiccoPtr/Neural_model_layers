@@ -112,8 +112,8 @@ if __name__ == "__main__":
         P_output = np.empty((timesteps, model.P.N), dtype=np.float32)
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
         W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(state[0])), dtype=np.float32)
-        W_Mani_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(state[0])), dtype=np.float32)
+        W_Mani_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(states[0])), dtype=np.float32)
+        W_Mani_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(states[0])), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         if trial <= phase_limits[0]:
@@ -151,9 +151,9 @@ if __name__ == "__main__":
             BLA_IC_output[t] = BLA_IC.output
             NAc_output[t] = NAc.output
             W_BLA_IC[t] = BLA_IC.W
-            W_BLA_IC_NAc[t] = model.Ws["BLA_IC_NAc"]
-            W_Mani_DLS[t] = model.Ws["Mani_DLS"]
-            W_Mani_DMS[t] = model.Ws["Mani_DMS"]
+            W_BLA_IC_NAc[t] = model.Ws["BLA_IC_NAc_1"]
+            W_Mani_DLS[t] = model.Ws["Mani_DLS_1"]
+            W_Mani_DMS[t] = model.Ws["Mani_DMS_1"]
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
