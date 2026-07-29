@@ -49,13 +49,16 @@ if __name__ == "__main__":
 
     args = parse_args()
     parameters = Parameters()
-    file_path = Path.home() / "CNR_model" / "Neural_model_layers" / "prm_file.json"
+    BASE_DIR = Path(__file__).resolve().parent
+    
+    # Full path to the JSON file
+    prm_file = BASE_DIR / "prm_file.json"
 
-    if file_path.exists():
-        parameters.load(str(file_path), mode="json")
-        print('Imported parameters succesfully')
+    if prm_file.exists():
+        parameters.load(prm_file, mode="json")
+        print("Imported parameters successfully")
     else:
-        raise ValueError('Parameters file not found')
+        raise ValueError(f"Parameters file not found: {prm_file}")
         
     parameters.seed = args.seed
     scheduling = Scheduling()
