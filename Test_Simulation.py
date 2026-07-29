@@ -101,19 +101,19 @@ if __name__ == "__main__":
         PFCd_PPC_output = np.empty((timesteps, model.PFCd_PPC.N), dtype=np.float32)
         PL_output = np.empty((timesteps, model.PL.N), dtype=np.float32)
         state_t = np.empty((timesteps, len(parameters.scheduling["states"][0])), dtype=np.float32)
-        DLS_output = np.empty((timesteps, model.BG_dl.DLS.N), dtype=np.float32)
-        DMS_output = np.empty((timesteps, model.BG_dm.DMS.N), dtype=np.float32)
+        DLS_output = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
+        DMS_output = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
         BLA_IC_output = np.empty((timesteps, model.BLA_IC.N), dtype=np.float32)
-        NAc_output = np.empty((timesteps, model.BG_v.NAc.N), dtype=np.float32)
-        BGv_output = np.empty((timesteps, model.BG_v.SNpr.N), dtype=np.float32)
+        NAc_output = np.empty((timesteps, model.BG_v.Str1.N), dtype=np.float32)
+        BGv_output = np.empty((timesteps, model.BG_v.GPi_SNpr.N), dtype=np.float32)
         BGdm_output = np.empty((timesteps, model.BG_dm.GPi_SNpr.N), dtype=np.float32)
-        BGdl_output = np.empty((timesteps, model.BG_dl.GPi.N), dtype=np.float32)
+        BGdl_output = np.empty((timesteps, model.BG_dl.GPi_SNpr.N), dtype=np.float32)
         MGV_output = np.empty((timesteps, model.MGV.N), dtype=np.float32)
         P_output = np.empty((timesteps, model.P.N), dtype=np.float32)
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
-        W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.NAc.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS = np.empty((timesteps, model.BG_dl.DLS.N, len(states[0])), dtype=np.float32)
-        W_Mani_DMS = np.empty((timesteps, model.BG_dm.DMS.N, len(states[0])), dtype=np.float32)
+        W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
+        W_Mani_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(state[0])), dtype=np.float32)
+        W_Mani_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(state[0])), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         if trial <= phase_limits[0]:
@@ -126,9 +126,9 @@ if __name__ == "__main__":
         MC = model.MC
         PFCd_PPC = model.PFCd_PPC
         PL = model.PL
-        NAc = model.BG_v.NAc
-        DMS = model.BG_dm.DMS
-        DLS = model.BG_dl.DLS
+        NAc = model.BG_v.Str1
+        DMS = model.BG_dm.Str1
+        DLS = model.BG_dl.Str1
         BLA_IC = model.BLA_IC
 
         for t in range(timesteps):
@@ -189,9 +189,9 @@ if __name__ == "__main__":
     phase_col = ["Phase"]
     state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
-    NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.NAc.N)]
-    DMS_cols = [f"DMS_Unit_{i}" for i in range(model.BG_dm.DMS.N)]
-    DLS_cols = [f"DLS_Unit_{i}" for i in range(model.BG_dl.DLS.N)]
+    NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.Str1.N)]
+    DMS_cols = [f"DMS_Unit_{i}" for i in range(model.BG_dm.Str1.N)]
+    DLS_cols = [f"DLS_Unit_{i}" for i in range(model.BG_dl.Str1.N)]
     MC_out_cols = [f"MC_Unit_{i}" for i in range(model.MC.N)]
     PFCd_PPC_out_cols = [f"PFCd_PPC_Unit_{i}" for i in range(model.PFCd_PPC.N)]
     PL_out_cols = [f"PL_Unit_{i}" for i in range(model.PL.N)]
@@ -202,18 +202,18 @@ if __name__ == "__main__":
     ]
     W_cols_2 = [
         f"BLA_IC_NAc_W{x}_{y}"
-        for x in range(model.Ws["BLA_IC_NAc"].shape[0])
-        for y in range(model.Ws["BLA_IC_NAc"].shape[1])
+        for x in range(model.Ws["BLA_IC_NAc_1"].shape[0])
+        for y in range(model.Ws["BLA_IC_NAc_1"].shape[1])
     ]
     W_cols_3 = [
         f"Mani_DLS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DLS"].shape[0])
-        for y in range(model.Ws["Mani_DLS"].shape[1])
+        for x in range(model.Ws["Mani_DLS_1"].shape[0])
+        for y in range(model.Ws["Mani_DLS_1"].shape[1])
     ]
     W_cols_4 = [
         f"Mani_DMS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DMS"].shape[0])
-        for y in range(model.Ws["Mani_DMS"].shape[1])
+        for x in range(model.Ws["Mani_DMS_1"].shape[0])
+        for y in range(model.Ws["Mani_DMS_1"].shape[1])
     ]
 
     cols = (
