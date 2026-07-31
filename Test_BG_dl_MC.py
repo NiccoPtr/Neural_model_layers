@@ -212,8 +212,7 @@ if __name__ == "__main__":
             da = np.array(args.dopamine)
             inp = np.array(args.inp)
 
-        if winner and t <= 150:
-
+        if winner and t > 70:
             da = 1.0
 
             # if inp[winner - 1] == 0:
@@ -222,7 +221,7 @@ if __name__ == "__main__":
             # elif inp[winner -1] == 1:
             #     da = 1.0
 
-        if t > 150:
+        if t > 90:
             da = np.array(args.dopamine)
 
         # if t == timesteps//2:

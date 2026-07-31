@@ -89,7 +89,13 @@ if __name__ == "__main__":
 
     for trial in range(trials):
 
-        state = np.array(sched["states"])
+        if trial < (trials*(sched["phases"][0])):
+            env = np.array(sched["states"][0])
+
+        elif trial >= (trials*(sched["phases"][0])):
+            env = np.array(sched["states"][1])
+
+        state = env.copy() * 0.0
 
         model.reset_activity()
         model.update_output_pre()
@@ -174,19 +180,18 @@ if __name__ == "__main__":
 
             if np.any(attention >= PFCd_PPC.threshold):
                 attention_winner = np.argmax(attention)
-                state[0:2] = 0.0
-                state[attention_winner] = 1.0
+
+                if env[attention_winner] == 1.0:
+                    state[0:2] = 0.0
+                    state[attention_winner] = 1.0
+
             else:
                 state[0:2] = 0.0
 
             if t >= 100 and np.any(action >= MC.threshold):
                 action_winner = np.argmax(action)
 
-                if state[0] == 1.0 and action_winner == 0:
-                    state[2:4] = 0.0
-                    state[2 + action_winner] = 1.0
-
-                elif state[1] == 1.0 and action_winner == 1:
+                if state[action_winner] == 1.0:
                     state[2:4] = 0.0
                     state[2 + action_winner] = 1.0
         

@@ -49,3 +49,33 @@
 
 &#x09;- Check for theta\_DA for learning, baseline DA
 
+
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+
+
+Changes to be made to the behavioural model during the learning phase:
+
+
+
+* Set a baseline DA value other than zero (e.g. 0.2) and a maximum achievable value for tonic DA caused by lock-in in the striatal ‘disinhibition’ components (e.g. 0.5)
+
+
+
+* Make the phasic peak of DA as rapid and instantaneous as possible so as not to affect subsequent timesteps
+
+
+
+* Add the presence of one of the two manipulande via the scheduling function:
+
+
+
+&#x09;- If attention is directed towards a manipulanda that is not present in the environment (not initialised by scheduling), the input will not allow the manipulanda to be entered
+
+
+
+&#x09;- inp \[n] = 1.0 if attention\[n] and state\[n], else inp\[0:2] = 0.0
+
+
+

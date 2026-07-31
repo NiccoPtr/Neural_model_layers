@@ -148,7 +148,7 @@ class CT_BG():
         self.Ws['inp_DLS_2'] += self.delta_W_inp_DLS_2
         self.Ws['inp_DLS_2'] = np.maximum(self.Ws['inp_DLS_2'], 0)
         
-    def step(self, parameters, inp, da, PFCd_PPC_inp = (0.0, 0.0), learn = True):
+    def step(self, parameters, inp, da, PFCd_PPC_inp = (0.8, 0.2), learn = True):
         
         self.BG_dl.step(
             (self.parameters.DA_values["Y_DLS_1"] + self.parameters.DA_values["delta_DLS_1"] * da) * np.dot(self.Ws["inp_DLS_1"], inp),

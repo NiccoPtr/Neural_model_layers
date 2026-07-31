@@ -43,27 +43,27 @@
         "BG_v": 6,
         "BLA_IC": [
             2,
-            10
+            8
         ],
         "SNpc_i": 6,
-        "SNpc_o": 6,
+        "SNpc_o": 2,
         "PPN": [
             2,
-            10
+            5
         ],
         "LH": [
             2,
-            10
+            5
         ],
         "VTA": 2
     },
     "baseline": {
         "PPN": 0.0,
         "LH": 0.0,
-        "VTA": 0.3,
+        "VTA": 0.36,
         "BLA_IC": 0.0,
         "SNpci": 1.8,
-        "SNpco": 0.3,
+        "SNpco": 0.6,
         "GPe": 0.33,
         "DLS_1": 0.2,
         "DLS_2": 0.2,
@@ -109,8 +109,8 @@
         "GPe_SNpr_W": 0.1
     },
     "SNpc_W": {
-        "SNpci_1_SNpco_1_W": 0.52,
-        "SNpci_2_SNpco_2_W": 0.52
+        "SNpci_1_SNpco_1_W": 0.43,
+        "SNpci_2_SNpco_2_W": 0.43
     },
     "seed": 0,
     "noise": {
@@ -133,16 +133,16 @@
         "Mani_DLS": 0.0,
         "Mani_DMS": 0.0,
         "Mani_BLA_IC": 5.0,
-        "Food_PPN": 2.5,
+        "Food_PPN": 4.0,
         "Food_BLA_IC": 5.0,
         "Food_LH": 1.0,
         "Sat_BLA_IC": 20.0,
-        "PPN_SNpco": 2.0,
+        "PPN_SNpco": 3.6,
         "BLA_IC_NAc": 0.0,
-        "BLA_IC_LH": 2.0,
+        "BLA_IC_LH": 3.0,
         "LH_VTA": 2.0,
-        "NAc_1_SNpci_1": 6.5,
-        "DMS_1_SNpci_2": 6.5,
+        "NAc_1_SNpci_1": 2.2,
+        "DMS_1_SNpci_2": 2.2,
         "GPi_MGV": 1.5,
         "GPi_SNpr_P": 1.5,
         "SNpr_DM": 1.5,
@@ -153,7 +153,7 @@
         "PL_NAc_1": 0.9,
         "PL_NAc_2": 0.8,
         "PL_STNv": 1.4,
-        "PL_PFCd_PPC": 0.1,
+        "PL_PFCd_PPC": 0.2,
         "PFCd_PPC_P": 2.2,
         "PFCd_PPC_DMS_1": 0.9,
         "PFCd_PPC_DMS_2": 0.8,
@@ -173,27 +173,27 @@
         "Y_DMS_2": 0.2,
         "Y_NAc_1": 0.1,
         "Y_NAc_2": 0.2,
-        "delta_DLS_1": 1.0,
+        "delta_DLS_1": 0.9,
         "delta_DLS_2": 5.0,
-        "delta_DMS_1": 1.0,
+        "delta_DMS_1": 0.9,
         "delta_DMS_2": 5.0,
-        "delta_NAc_1": 1.0,
+        "delta_NAc_1": 0.9,
         "delta_NAc_2": 5.0
     },
     "BLA_Learn": {
-        "eta_b": 0.1,
+        "eta_b": 0.15,
         "alpha_t": 50.0,
         "tau_t": 80,
         "theta_DA": 0.5,
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS_1": 0.04,
-        "eta_DLS_2": 0.06,
-        "eta_DMS_1": 0.04,
-        "eta_DMS_2": 0.06,
+        "eta_DLS_1": 0.09,
+        "eta_DLS_2": 0.09,
+        "eta_DMS_1": 0.09,
+        "eta_DMS_2": 0.09,
         "eta_NAc_1": 0.1,
-        "eta_NAc_2": 0.15,
+        "eta_NAc_2": 0.1,
         "theta_DA_DLS_1": 0.6,
         "theta_DA_DLS_2": 0.6,
         "theta_DA_DMS_1": 0.6,
@@ -210,8 +210,8 @@
         "theta_inp_DLS_2": 0.5,
         "theta_inp_DMS_1": 0.5,
         "theta_inp_DMS_2": 0.5,
-        "theta_inp_NAc_1": 0.2,
-        "theta_inp_NAc_2": 0.2,
+        "theta_inp_NAc_1": 0.5,
+        "theta_inp_NAc_2": 0.5,
         "max_W_DLS": 1,
         "max_W_DMS": 1,
         "max_W_NAc": 2

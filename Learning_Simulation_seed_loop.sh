@@ -4,8 +4,12 @@ scheduling=$(cat << EOF
 {
     "trials": 100,
     "timesteps": 1000,
-    "states": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-}   
+    "states": [
+        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+    ],
+    "phases": [0.5, 1.0]
+}
 EOF
 )
 
@@ -15,7 +19,7 @@ export PATH=$PATH:$SRC
 
 CURR_DIR=$(pwd)
 
-for seed in $(seq 0 1 0); do
+for seed in $(seq 1 1 1); do
     SIM=sim_seed${seed}
     mkdir -p $SIM
     cd $SIM
