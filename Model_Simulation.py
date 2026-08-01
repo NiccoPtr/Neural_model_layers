@@ -89,10 +89,10 @@ if __name__ == "__main__":
 
     for trial in range(trials):
 
-        if trial < (trials*(sched["phases"][0])):
+        if trial <= (trials*(sched["phases"][0])):
             env = np.array(sched["states"][0])
 
-        elif trial >= (trials*(sched["phases"][0])):
+        elif trial <= (trials*(sched["phases"][1])):
             env = np.array(sched["states"][1])
 
         state = env.copy() * 0.0

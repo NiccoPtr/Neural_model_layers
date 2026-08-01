@@ -50,6 +50,7 @@ if __name__ == "__main__":
     NAc = df_new.filter(like="NAc_Unit").to_numpy() * -1
     DMS = df_new.filter(like="DMS_Unit").to_numpy() * -1
     DLS = df_new.filter(like="DLS_Unit").to_numpy() * -1
+    DA = df_new.filter(like="DA_Unit").to_numpy()
     
     #State
     state = df_new.filter(like='Input').to_numpy()
@@ -64,7 +65,8 @@ if __name__ == "__main__":
         ('DLS', [(DLS[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2))
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ("DA", [(DA[:, i], ["SNpco_1", "SNpco_2", "VTA"][i]) for i in range(3)], (-0.1, 1.2))
         ]
     
     n_rows = len(plots) + 1
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
                   hspace=0.25
                   )
     

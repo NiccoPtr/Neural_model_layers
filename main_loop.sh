@@ -4,10 +4,10 @@
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None 00"
+    "None None 01"
 )
 
-seed_start=21
+seed_start=1
 seed_end=40
 
 SRC=$(dirname "$0"| xargs realpath)
@@ -38,7 +38,11 @@ for condition in "${conditions[@]}"; do
 {
     "trials": 100,
     "timesteps": 1000,
-    "states": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    "states": [
+        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+    ],
+    "phases": [0.5, 1.0]
 }
 EOF
 )

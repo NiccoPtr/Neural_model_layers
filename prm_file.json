@@ -181,19 +181,19 @@
         "delta_NAc_2": 5.0
     },
     "BLA_Learn": {
-        "eta_b": 0.15,
+        "eta_b": 0.18,
         "alpha_t": 50.0,
         "tau_t": 80,
         "theta_DA": 0.5,
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS_1": 0.09,
-        "eta_DLS_2": 0.09,
-        "eta_DMS_1": 0.09,
-        "eta_DMS_2": 0.09,
-        "eta_NAc_1": 0.1,
-        "eta_NAc_2": 0.1,
+        "eta_DLS_1": 0.1,
+        "eta_DLS_2": 0.1,
+        "eta_DMS_1": 0.1,
+        "eta_DMS_2": 0.1,
+        "eta_NAc_1": 0.12,
+        "eta_NAc_2": 0.12,
         "theta_DA_DLS_1": 0.6,
         "theta_DA_DLS_2": 0.6,
         "theta_DA_DMS_1": 0.6,
