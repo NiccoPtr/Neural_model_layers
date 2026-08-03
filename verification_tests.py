@@ -60,37 +60,37 @@ if __name__ == '__main__':
             cond_n = df[
                 (df["Trial"] == lim_n)
                 ].sort_values("Timestep").copy()
-            cond_n = cond_n[cond_n['Input_0'] == 1.0]
+            cond_n = cond_n[cond_n['Env_0'] == 1.0]
             MC_condn = cond_n.filter(like="MC_Unit").to_numpy()
-            inp_condn = cond_n.filter(like="Input").to_numpy()
-            inp_condn = inp_condn[-1]
+            env_condn = cond_n.filter(like="Env").to_numpy()
+            env_condn = env_condn[-1]
             winner_n = np.argmax(MC_condn[-1])
             
             cond_1 = df[
                 (df["Trial"] == lim_1)
                 ].sort_values("Timestep").copy()
-            cond_1 = cond_1[cond_1['Input_0'] == 1.0]
+            cond_1 = cond_1[cond_1['Env_0'] == 1.0]
             MC_cond1 = cond_1.filter(like="MC_Unit").to_numpy()
-            inp_cond1 = cond_1.filter(like="Input").to_numpy()
-            inp_cond1 = inp_cond1[-1]
+            env_cond1 = cond_1.filter(like="Env").to_numpy()
+            env_cond1 = env_cond1[-1]
             winner_1 = np.argmax(MC_cond1[-1])
             
             verification["Neutral_condition"] = winner_n
             ver_single_seed[f"Neutral_condition_t{data}"] = winner_n
             
-            if winner_1 == 0 and inp_cond1[-1] == 1.0:
+            if winner_1 == 0 and env_cond1[-1] == 1.0:
                 verification["Condition_1"] = 1.0
                 ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 1.0
             
-            elif winner_1 == 1 and inp_cond1[-2] == 1.0:
+            elif winner_1 == 1 and env_cond1[-2] == 1.0:
                 verification["Condition_1"] = 1.0
                 ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 1.0
                 
-            elif winner_1 == 0 and inp_cond1[-2] == 1.0:
+            elif winner_1 == 0 and env_cond1[-2] == 1.0:
                 verification["Condition_1"] = 0.0
                 ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 0.0
                 
-            elif winner_1 == 1 and inp_cond1[-1] == 1.0:
+            elif winner_1 == 1 and env_cond1[-1] == 1.0:
                 verification["Condition_1"] = 0.0
                 ver_single_seed[f"Condition_1_t{int(data) + int(((df.iloc[-1]['Trial'] * 0.5)))}"] = 0.0
                 

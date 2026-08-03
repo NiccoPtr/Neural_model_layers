@@ -49,7 +49,9 @@ class CT_BG():
         
         self.Ws = {
             "inp_DLS_1": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
-            "inp_DLS_2": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"], 
+            "inp_DLS_2": np.ones([parameters.N["BG_dl"], parameters.N["BG_dl"]]) * parameters.Matrices_scalars["Mani_DLS"],
+            # "inp_DLS_1": np.eye(parameters.N["BG_dl"]),
+            # "inp_DLS_2": np.eye(parameters.N["BG_dl"]),
             "MC_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["MC_MGV"],
             "MGV_MC": np.eye(parameters.N["MC"]) * parameters.Matrices_scalars["MGV_MC"],
             "GPi_MGV": np.eye(parameters.N["MGV"]) * parameters.Matrices_scalars["GPi_MGV"],

@@ -108,6 +108,7 @@ if __name__ == "__main__":
         MC_output = np.empty((timesteps, model.MC.N), dtype=np.float32)
         PFCd_PPC_output = np.empty((timesteps, model.PFCd_PPC.N), dtype=np.float32)
         PL_output = np.empty((timesteps, model.PL.N), dtype=np.float32)
+        env_t = np.empty((timesteps, len(env)), dtype=np.float32)
         state_t = np.empty((timesteps, len(state)), dtype=np.float32)
         DLS_output = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
         DMS_output = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
@@ -141,9 +142,11 @@ if __name__ == "__main__":
             
             if t < 50:
                 inp = np.zeros_like(state)
-                
+                env *= 0.0
+
             elif t >= 50:
                 inp = state.copy()
+                env = np.array(sched["states"][phase - 1])
 
             model.step(inp, learning=False)
             action = MC.output.copy()
@@ -153,7 +156,8 @@ if __name__ == "__main__":
             MC_output[t] = action
             PFCd_PPC_output[t] = attention
             PL_output[t] = PL.output
-            state_t[t] = state
+            env_t[t] = env.copy()
+            state_t[t] = state.copy()
             DLS_output[t] = DLS.output
             DMS_output[t] = DMS.output
             BLA_IC_output[t] = BLA_IC.output
@@ -179,6 +183,7 @@ if __name__ == "__main__":
             "Phase": np.ones(timesteps) * phase,
             "Trial": np.ones(timesteps) * trial,
             "Timesteps": np.arange(0, timesteps),
+            "Env_timeline": env_t.copy(),
             "States_timeline": state_t.copy(),
             "BLA_IC_output": BLA_IC_output.copy(),
             "NAc_output": NAc_output.copy(),
@@ -207,6 +212,7 @@ if __name__ == "__main__":
     trial_col = ["Trial"]
     timestep_col = ["Timestep"]
     phase_col = ["Phase"]
+    env_cols = [f"Env_{i}" for i in range(len(env.copy()))]
     state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
     NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.Str1.N)]
@@ -242,6 +248,7 @@ if __name__ == "__main__":
         + phase_col
         + trial_col
         + timestep_col
+        + env_cols
         + state_cols
         + BLA_IC_cols
         + NAc_cols
