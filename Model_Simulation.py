@@ -141,6 +141,16 @@ if __name__ == "__main__":
         inp = state.copy()
 
         for t in range(timesteps):
+
+            # if t < 50:
+            #     model.SNpc.SNpco_1.baseline = 0.1
+            #     model.SNpc.SNpco_2.baseline = 0.1
+            #     model.VTA.baseline = 0.1
+
+            # elif t == 50:
+            #     model.SNpc.SNpco_1.baseline = parameters.baseline["SNpco"]
+            #     model.SNpc.SNpco_2.baseline = parameters.baseline["SNpco"]
+            #     model.VTA.baseline = parameters.baseline["VTA"]
             
             if t < 50:
                 inp = np.zeros_like(state)

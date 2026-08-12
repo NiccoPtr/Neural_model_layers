@@ -53,7 +53,7 @@ class Leaky_units_exc:
             ValueError: If the start activity vector does not have N elements.
         """
         self.activity *= 0
-        self.activity += self.baseline.copy()
+        self.activity += self.baseline
         self.output *= 0
         
     def step(self, inputs):
