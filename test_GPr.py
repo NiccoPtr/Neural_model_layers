@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
         if t <= 50:
             inp *= 0.0
-            da *= 0.0
+            da = 0.2
         
         elif t == 51:
             inp = np.array(args.food)

@@ -76,10 +76,12 @@ if __name__ == "__main__":
         model.BLA_IC.lesion = True
         
     elif args.lesion == "NAc":
-        model.BG_v.NAc.lesion = True
+        model.BG_v.Str1.lesion = True
+        model.BG_v.Str2.lesion = True
         
     elif args.lesion == "DMS":
-        model.BG_dm.DMS.lesion = True
+        model.BG_dm.Str1.lesion = True
+        model.BG_dm.Str2.lesion = True
         
     elif args.lesion == "PL":
         model.PL.lesion = True

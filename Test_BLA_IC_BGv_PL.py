@@ -261,8 +261,10 @@ if __name__ == "__main__":
         for t in range(timesteps):
             if t < 50:
                 inp[0:2] = 0.0
+                #CT_BGv_BLA_IC_model.VTA.baseline = 0.1 
             elif t == 50:
                 inp = np.array(args.inp)
+                #CT_BGv_BLA_IC_model.VTA.baseline = parameters.baseline["VTA"]
 
             if args.inp[0] == 1.0 and t == timesteps * 0.15:
                 inp[2] = 1.0
@@ -270,7 +272,7 @@ if __name__ == "__main__":
             elif args.inp[1] == 1.0 and t == timesteps * 0.15:
                 inp[3] = 1.0
 
-            CT_BGv_BLA_IC_model.step(parameters, inp)
+            CT_BGv_BLA_IC_model.step(parameters, inp, learning=True)
 
             BLA_IC_output.append(CT_BGv_BLA_IC_model.BLA_IC.output.copy())
             LH_output.append(CT_BGv_BLA_IC_model.LH.output.copy())

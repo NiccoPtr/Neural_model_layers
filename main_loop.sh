@@ -4,7 +4,7 @@
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None 01"
+    "NAc None NAc_pre_1"
 )
 
 seed_start=1
@@ -80,7 +80,7 @@ EOF
 
     scheduling=$(cat << EOF
 {
-    "trials": 80,
+    "trials": 100,
     "timesteps": 1000,
     "states": [
         [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],

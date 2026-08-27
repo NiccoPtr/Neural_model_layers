@@ -79,10 +79,10 @@ class CT_BGv_BLA_IC():
                    'Food_LH': np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0]) * parameters.Matrices_scalars["Food_LH"],
                    "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0]) * parameters.Matrices_scalars["BLA_IC_LH"],
                    'LH_VTA': np.array([1.0]) * parameters.Matrices_scalars["LH_VTA"],
-                   "BLA_IC_NAc_1": np.array([[0.0, 0.0, 1.0, 1.0],
-                                           [0.0, 0.0, 1.0, 1.0]]) * parameters.Matrices_scalars["BLA_IC_NAc"],
-                   "BLA_IC_NAc_2": np.array([[0.0, 0.0, 1.0, 1.0],
-                                           [0.0, 0.0, 1.0, 1.0]]) * parameters.Matrices_scalars["BLA_IC_NAc"],
+                   "BLA_IC_NAc_1": np.array([[0.0, 0.0, 1.0, 0.0],
+                                           [0.0, 0.0, 0.0, 1.0]]) * parameters.Matrices_scalars["BLA_IC_NAc"],
+                   "BLA_IC_NAc_2": np.array([[0.0, 0.0, 1.0, 0.0],
+                                           [0.0, 0.0, 0.0, 1.0]]) * parameters.Matrices_scalars["BLA_IC_NAc"],
                    "SNpr_DM": np.eye(parameters.N["DM"]) * parameters.Matrices_scalars["SNpr_DM"],
                    "DM_PL": np.eye(parameters.N["PL"]) * parameters.Matrices_scalars["DM_PL"],
                    "PL_DM": np.eye(parameters.N["DM"]) * parameters.Matrices_scalars["PL_DM"],
@@ -168,7 +168,7 @@ class CT_BGv_BLA_IC():
         
         self.BLA_IC.learn(self.VTA_output_pre)
         
-        delta_W_BLA_IC_NAc_1 = self.delta_Str_learn_1(parameters.Str_Learn["eta_NAc_1"],
+        delta_W_BLA_IC_NAc_1 = self.delta_Str_learn_2(parameters.Str_Learn["eta_NAc_1"],
                                            self.VTA_output_pre,
                                            self.NAc_output_pre_1 * -1,
                                            self.BLA_IC_output_pre,
@@ -181,6 +181,7 @@ class CT_BGv_BLA_IC():
                                            )
         
         self.Ws["BLA_IC_NAc_1"] +=  delta_W_BLA_IC_NAc_1
+        self.Ws["BLA_IC_NAc_1"] = np.maximum(0, self.Ws["BLA_IC_NAc_1"])
 
         delta_W_BLA_IC_NAc_2 = self.delta_Str_learn_2(parameters.Str_Learn["eta_NAc_2"],
                                            self.VTA_output_pre,
