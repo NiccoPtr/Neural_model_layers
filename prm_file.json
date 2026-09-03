@@ -140,6 +140,7 @@
         "PPN_SNpco": 3.6,
         "BLA_IC_NAc": 0.0,
         "BLA_IC_LH": 3.0,
+        "BLA_IC_PPN": 1.0,
         "LH_VTA": 2.0,
         "NAc_1_SNpci_1": 1.8,
         "DMS_1_SNpci_2": 1.8,

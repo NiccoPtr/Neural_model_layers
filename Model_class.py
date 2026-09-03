@@ -294,6 +294,8 @@ class Model:
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
             "BLA_IC_LH": np.array([0.0, 0.0, 1.0, 1.0])
             * self.parameters.Matrices_scalars["BLA_IC_LH"],
+            "BLA_IC_PPN": np.array([0.0, 0.0, 1.0, 1.0])
+            * self.parameters.Matrices_scalars["BLA_IC_PPN"],
             "LH_VTA": np.array([1.0]) * self.parameters.Matrices_scalars["LH_VTA"],
             "NAc_SNpci_1": np.ones(self.parameters.N["SNpc"])
             * self.parameters.Matrices_scalars["NAc_1_SNpci_1"],
@@ -607,7 +609,10 @@ class Model:
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
         )
 
-        self.PPN.step(np.dot(self.Ws["Food_PPN"], _input_))
+        self.PPN.step(
+            np.dot(self.Ws["Food_PPN"], _input_)
+            + np.dot(self.Ws["BLA_IC_PPN"], self.BLA_IC_output_pre)
+        )
 
         self.LH.step(
             np.dot(self.Ws["Food_LH"], _input_)
