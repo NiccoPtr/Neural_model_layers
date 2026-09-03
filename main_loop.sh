@@ -4,7 +4,7 @@
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "NAc None NAc_pre_1"
+    "None None 02"
 )
 
 seed_start=1
@@ -84,7 +84,7 @@ EOF
     "timesteps": 1000,
     "states": [
         [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        [1.0, 1.0, 0.0, 0.0, 1.0, 0.0]
     ],
     "phases": [0.5, 1.0]
 }
