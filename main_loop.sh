@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
+set -e
 
 #Use even numbers for ID for Non-lesion simulation
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None 02"
+    "None None 00"
 )
 
 seed_start=1
@@ -14,7 +15,7 @@ SRC=$(dirname "$0"| xargs realpath)
 export PYTHONPATH=$SRC
 export PATH=$PATH:$SRC
 
-CURR_DIR=$(pwd)
+CURR_DIR="$SRC"
 
 for condition in "${conditions[@]}"; do
 
@@ -27,8 +28,8 @@ for condition in "${conditions[@]}"; do
     echo "ID          = $id"
     echo "======================================"
 
-    TRAIN_DIR="/c/Users/Nicc/Desktop/CNR_Model/trainings/training_$id"
-    TEST_DIR="/c/Users/Nicc/Desktop/CNR_Model/testings/testing_$id"
+    TRAIN_DIR="${SRC}/trainings/training_${id}"
+    TEST_DIR="${SRC}/testings/testing_${id}"
 
     # ==========================================
     # TRAINING SCHEDULING
@@ -84,7 +85,7 @@ EOF
     "timesteps": 1000,
     "states": [
         [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 1.0, 0.0, 0.0, 1.0, 0.0]
+        [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
     ],
     "phases": [0.5, 1.0]
 }

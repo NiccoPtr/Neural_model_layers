@@ -118,8 +118,9 @@ if __name__ == "__main__":
     timesteps = args.timesteps
 
     parameters = Parameters()
-    if Path("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json").exists():
-        parameters.load("C:/Users/Nicc/Desktop/CNR_Model/prm_file.json", mode="json")
+    BASE_DIR = Path(__file__).resolve().parent
+    if Path(BASE_DIR / "prm_file.json").exists():
+        parameters.load(BASE_DIR / "prm_file.json", mode="json")
 
     else:
         raise ValueError('Parameters file not found')

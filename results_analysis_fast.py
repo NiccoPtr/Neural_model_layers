@@ -38,7 +38,7 @@ def parse_args():
 
 def mean_act(x, thr):
     
-    res = x.iloc[900:, :].mean(0)
+    res = x.iloc[900:, :].mean(axis=0)
     res = res.argmax() if sum(res >= thr) == 1 else 2
     
     return res
@@ -57,13 +57,14 @@ if __name__ == '__main__':
     
     args = parse_args()
     parameters = Parameters()
-    if Path(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{str(args.id)}/sim_seed1/prm_file.json").exists():
-        parameters.load(f"C:/Users/Nicc/Desktop/CNR_Model/trainings/training_{str(args.id)}/sim_seed1/prm_file.json", mode="json")
+    BASE_DIR = Path(__file__).resolve().parent
+    if Path(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json").exists():
+        parameters.load(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
         
-    files = glob.glob(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed*/Test_Simulation.csv")
+    files = glob.glob(f"{BASE_DIR}/testings/testing_{str(args.id)}/test_seed*/Test_Simulation.csv")
     
     thr = parameters.threshold["MC"]
     dfs = [pd.read_csv(f) for f in files]

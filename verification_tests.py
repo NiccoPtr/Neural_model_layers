@@ -6,6 +6,7 @@ Created on Tue Apr 28 17:10:51 2026
 """
 
 import argparse
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -38,6 +39,7 @@ def parse_args():
     
 if __name__ == '__main__':
     args = parse_args()
+    BASE_DIR = Path(__file__).resolve().parent
     fin_results = []
     single_trials = []
     
@@ -45,7 +47,7 @@ if __name__ == '__main__':
     for seed in range(((args.seeds_max + 1) - args.seeds), args.seeds_max + 1):
         
         print(f'Reading file with seed {seed}')
-        df = pd.read_csv(f"C:/Users/Nicc/Desktop/CNR_Model/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
+        df = pd.read_csv(f"{BASE_DIR}/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
         ver_single_seed = {}
         
         print('Starting data extraction')
