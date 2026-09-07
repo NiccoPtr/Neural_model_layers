@@ -79,3 +79,25 @@ Changes to be made to the behavioural model during the learning phase:
 
 
 
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+
+
+Need to increase the amount of spontaneous actions at low DA levels while maintaining CS bias and devaluation bias:
+
+
+
+* Increase random activity within the MC and PFCd\_PPC, trying both noise ratio or DA sensitivity
+
+
+
+* Permit the influence from the NAc to guide the action choice in case of Devaluation test
+
+
+
+* Enhance the influence of NAc and DMS onto DA release from the SNpc
+
+
+
+* Pay attention to theta\_DA for striatal learning, probably it will have to be increased
+
