@@ -78,13 +78,21 @@ if __name__ == "__main__":
     elif args.lesion == "NAc":
         model.BG_v.Str1.lesion = True
         model.BG_v.Str2.lesion = True
-        
+
     elif args.lesion == "DMS":
         model.BG_dm.Str1.lesion = True
         model.BG_dm.Str2.lesion = True
         
     elif args.lesion == "PL":
         model.PL.lesion = True
+
+    else:
+        model.BLA_IC.lesion = False
+        model.BG_v.Str1.lesion = False
+        model.BG_v.Str2.lesion = False
+        model.BG_dm.Str1.lesion = False
+        model.BG_dm.Str2.lesion = False
+        model.PL.lesion = False
 
     sched = parameters.scheduling
     timesteps = sched["timesteps"]
