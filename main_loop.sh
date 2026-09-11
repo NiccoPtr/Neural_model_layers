@@ -5,7 +5,15 @@ set -e
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None 00"
+#    "None None 6"
+#    "NAc None NAc_pre_1"
+#    "None NAc NAc_post_1"
+    "BLA None BLA_pre_1"
+    "None BLA BLA_post_1"
+    "DMS None DMS_pre_1"
+    "None DMS DMS_post_1"
+    "PL None PL_pre_1"
+#    "None PL PL_post_1"
 )
 
 seed_start=1
