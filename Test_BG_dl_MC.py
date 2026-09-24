@@ -209,7 +209,6 @@ if __name__ == "__main__":
             inp *= 0.0
 
         else:
-            da = np.array(args.dopamine)
             inp = np.array(args.inp)
 
         if winner and t > 70:

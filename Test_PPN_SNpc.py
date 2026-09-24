@@ -144,6 +144,12 @@ if __name__ == "__main__":
 
     for t in range(timesteps):
 
+        if t <= 100:
+            inp = np.array(args.food) * 0.0
+
+        else:
+            inp = np.array(args.food)
+
         PPN_SNpc_model.step(inp, NAc_inp, DMS_inp)
          
         PPN_output.append(PPN_SNpc_model.PPN.output.copy())
