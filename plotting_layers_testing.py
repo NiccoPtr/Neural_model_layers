@@ -59,7 +59,7 @@ if __name__ == "__main__":
     
     #Plotting set up
     plots = [
-        ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(4)], (-0.1, 1.2)),
+        ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(6)], (-0.1, 1.2)),
         ('NAc', [(NAc[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('DMS', [(DMS[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('DLS', [(DLS[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),

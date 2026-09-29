@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 14 17:46:01 2025
+Created on Tue Sept 29 6:29:01 2026
 
 @author: Nicc
 """
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parameters.scheduling = scheduling._params_to_dict()
     parameters.seed = args.seed
         
-    model = Model(parameters)
+    model = Model(parameters, phase="pavlovian")
     
     if args.lesion == "BLA":
         model.BLA_IC.lesion = True
@@ -95,14 +95,12 @@ if __name__ == "__main__":
         elif trial <= (trials*(sched["phases"][1])):
             env = np.array(sched["states"][1])
 
-        state = env.copy() * 0.0
-
         model.reset_activity()
         model.update_output_pre()
         MC_output = np.empty((timesteps, model.MC.N), dtype=np.float32)
         PFCd_PPC_output = np.empty((timesteps, model.PFCd_PPC.N), dtype=np.float32)
         PL_output = np.empty((timesteps, model.PL.N), dtype=np.float32)
-        state_t = np.empty((timesteps, len(state)), dtype=np.float32)
+        state_t = np.empty((timesteps, len(env)), dtype=np.float32)
         DLS_output_1 = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
         DLS_output_2 = np.empty((timesteps, model.BG_dl.Str2.N), dtype=np.float32)
         DMS_output_1 = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
@@ -119,10 +117,10 @@ if __name__ == "__main__":
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
         W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(state)), dtype=np.float32)
-        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(state)), dtype=np.float32)
-        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(state)), dtype=np.float32)
-        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(state)), dtype=np.float32)
+        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(env)), dtype=np.float32)
+        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(env)), dtype=np.float32)
+        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(env)), dtype=np.float32)
+        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(env)), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         MC = model.MC
@@ -138,38 +136,23 @@ if __name__ == "__main__":
         DA_1 = model.SNpc.SNpco_1
         DA_2 = model.SNpc.SNpco_2
         DA_3 = model.VTA
-        inp = state.copy()
+        inp = env.copy()
 
         for t in range(timesteps):
-
-            # if t < 50:
-            #     model.SNpc.SNpco_1.baseline = 0.1
-            #     model.SNpc.SNpco_2.baseline = 0.1
-            #     model.VTA.baseline = 0.1
-
-            # elif t == 50:
-            #     model.SNpc.SNpco_1.baseline = parameters.baseline["SNpco"]
-            #     model.SNpc.SNpco_2.baseline = parameters.baseline["SNpco"]
-            #     model.VTA.baseline = parameters.baseline["VTA"]
             
             if t < 50:
-                inp = np.zeros_like(state)
+                inp = np.zeros_like(env)
                 
-            elif t >= 50:
-                if np.any(inp[2:4] == 1.0):
-                    inp *= 1.0
-
-                else:
-                    inp = state.copy()
+            elif t == 50:
+                inp = env.copy()
 
             model.step(inp)
 
             action = MC.output.copy()
-            attention = PFCd_PPC.output.copy()
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
             MC_output[t] = action
-            PFCd_PPC_output[t] = attention
+            PFCd_PPC_output[t] = PFCd_PPC.output
             PL_output[t] = PL.output
             state_t[t] = inp.copy()
             DLS_output_1[t] = DLS_1.output
@@ -188,22 +171,12 @@ if __name__ == "__main__":
             W_Mani_DMS_1[t] = model.Ws["Mani_DMS_1"]
             W_Mani_DMS_2[t] = model.Ws["Mani_DMS_2"]
 
-            if np.any(attention >= PFCd_PPC.threshold):
-                attention_winner = np.argmax(attention)
-
-                if env[attention_winner] == 1.0:
-                    state[0:2] = 0.0
-                    state[attention_winner] = 1.0
-
-            else:
-                state[0:2] = 0.0
-
             if t >= 100 and np.any(action >= MC.threshold):
                 action_winner = np.argmax(action)
 
-                if state[action_winner] == 1.0:
-                    state[2:4] = 0.0
-                    state[2 + action_winner] = 1.0
+                if env[action_winner] == 1.0:
+                    env[2:4] = 0.0
+                    env[2 + action_winner] = 1.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
@@ -218,7 +191,7 @@ if __name__ == "__main__":
             "DLS_output_1": DLS_output_1.copy(),
             "DLS_output_2": DLS_output_2.copy(),
             "Action": MC_output.copy(),
-            "Attention": PFCd_PPC_output.copy(),
+            "PFCd_PPC": PFCd_PPC_output.copy(),
             "PL_output": PL_output.copy(),
             "DA_timeline": DA_timeline,
             "W_BLA_IC": W_BLA_IC,
@@ -243,7 +216,7 @@ if __name__ == "__main__":
     seed_col = ["Seed"]
     trial_col = ["Trial"]
     timestep_col = ["Timestep"]
-    state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
+    state_cols = [f"Input_{i}" for i in range(len(env.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
     NAc_1_cols = [f"NAc_1_Unit_{i}" for i in range(model.BG_v.Str1.N)]
     NAc_2_cols = [f"NAc_2_Unit_{i}" for i in range(model.BG_v.Str2.N)]

@@ -78,7 +78,7 @@ EOF
 
         echo "Running TRAINING simulation seed=$seed"
 
-        python ${SRC}/Model_Simulation.py \
+        python ${SRC}/Instrumental_learning.py \
             -d scheduling.json \
             -s $seed \
             -l $lesion_pre
