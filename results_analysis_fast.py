@@ -58,13 +58,13 @@ if __name__ == '__main__':
     args = parse_args()
     parameters = Parameters()
     BASE_DIR = Path(__file__).resolve().parent
-    if Path(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json").exists():
-        parameters.load(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json", mode="json")
+    if Path(f"{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed1/prm_file.json").exists():
+        parameters.load(f"{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed1/prm_file.json", mode="json")
         print('Imported parameters succesfully')
     else:
         raise ValueError('Parameters file not found')
         
-    files = glob.glob(f"{BASE_DIR}/testings/testing_{str(args.id)}/test_seed*/Test_Simulation.csv")
+    files = glob.glob(f"{BASE_DIR}/PIT_testing/PIT_testing_{str(args.id)}/pit_test_seed*/PIT_Test_Simulation.csv")
     
     thr = parameters.threshold["MC"]
     dfs = [pd.read_csv(f) for f in files]
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     
     pvals = {}
     
-    for phase in ["ND", "D"]:
+    for phase in ["Baseline", "Instrumental Transfer"]:
         sub = stats_df[stats_df["Phase"] == phase]
         
         t, p = ttest_rel(sub["Lever"], sub["Chain"])
@@ -118,7 +118,7 @@ if __name__ == '__main__':
             
     fig, ax = plt.subplots()
     
-    sns.barplot(df, x="Phase", y="freq", hue="Decision", errorbar="sd", order=["ND", "D"])
+    sns.barplot(df, x="Phase", y="freq", hue="Decision", errorbar="sd", order=["Baseline", "Instrumental Transfer"])
     
     # -------------------------
     # add significance markers
@@ -127,11 +127,11 @@ if __name__ == '__main__':
     offset = y_max * 0.08
     
     # x positions inside each phase group (Seaborn default hue spacing)
-    phase_positions = {"ND": 0, "D": 1}
+    phase_positions = {"Baseline": 0, "Instrumental Transfer": 1}
     
     hue_offset = {"Lever": -0.2, "Chain": 0.2}
     
-    for i, phase in enumerate(["ND", "D"]):
+    for i, phase in enumerate(["Baseline", "Instrumental Transfer"]):
         
         star = p_to_stars(pvals[phase])
         

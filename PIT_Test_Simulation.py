@@ -285,7 +285,7 @@ if __name__ == "__main__":
         dfs.append(df_new)
 
     df = pd.concat(dfs, ignore_index=True)
-    csv_path = "Test_Simulation.csv"
+    csv_path = "PIT_Test_Simulation.csv"
 
     if os.path.exists(csv_path):
         df.to_csv(csv_path, mode="a", header=False, index=False)
