@@ -130,12 +130,9 @@
         "PFCd_PPC": 0.4
     },
     "Matrices_scalars": {
-        "Mani_DLS": 0.0,
-        "Mani_DMS": 0.0,
-        "Light_DLS": 0.0,
-        "Light_DMS": 0.0,
-        "Mani_BLA_IC": 5.0,
-        "Light_BLA_IC": 5.0,
+        "Inp_DLS": 0.0,
+        "Inp_DMS": 0.0,
+        "Inp_BLA_IC": 5.0,
         "Food_PPN": 4.0,
         "Food_BLA_IC": 5.0,
         "Food_LH": 1.0,

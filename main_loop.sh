@@ -40,11 +40,12 @@ for condition in "${conditions[@]}"; do
     echo "ID          = $id"
     echo "======================================"
 
-    TRAIN_DIR="${SRC}/trainings/training_${id}"
-    TEST_DIR="${SRC}/testings/testing_${id}"
+    INST_DIR="${SRC}/instrumental_training/instrumental_training_${id}"
+    PAV_DIR="${SRC}/pavlovian_training/pavlovian_training_${id}"
+    PIT_DIR="${SRC}/PIT_testing/PIT_testing_${id}"
 
     # ==========================================
-    # TRAINING SCHEDULING
+    # INSTRUMENTAL SCHEDULING
     # ==========================================
 
     scheduling=$(cat << EOF
@@ -52,8 +53,8 @@ for condition in "${conditions[@]}"; do
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     ],
     "phases": [0.5, 1.0]
 }
@@ -61,12 +62,12 @@ EOF
 )
 
 # # ==========================================
-#     # TRAINING LOOP
+#     # INSTRUMENTAL TRAINING LOOP
 #     # ==========================================
 
     for seed in $(seq $seed_start 1 $seed_end); do
 
-        SIM="${TRAIN_DIR}/sim_seed${seed}"
+        SIM="${INST_DIR}/inst_sim_seed${seed}"
 
         mkdir -p "$SIM"
 
@@ -76,7 +77,7 @@ EOF
 
         echo "$scheduling" > scheduling.json
 
-        echo "Running TRAINING simulation seed=$seed"
+        echo "Running INSTRUMENTAL simulation seed=$seed"
 
         python ${SRC}/Instrumental_learning.py \
             -d scheduling.json \
@@ -87,8 +88,8 @@ EOF
 
     done
 
-# ==========================================
-    # TEST SCHEDULING
+    # ==========================================
+    # PAVLOVIAN SCHEDULING
     # ==========================================
 
     scheduling=$(cat << EOF
@@ -96,8 +97,52 @@ EOF
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    ],
+    "phases": [0.5, 1.0]
+}
+EOF
+)
+
+# # ==========================================
+#     # PAVLOVIAN TRAINING LOOP
+#     # ==========================================
+
+    for seed in $(seq $seed_start 1 $seed_end); do
+
+        SIM="${PAV_DIR}/pav_sim_seed${seed}"
+
+        mkdir -p "$SIM"
+
+        cd "$SIM"
+
+        cp "$CURR_DIR/prm_file.json" "$SIM/"
+
+        echo "$scheduling" > scheduling.json
+
+        echo "Running PAVLOVIAN simulation seed=$seed"
+
+        python ${SRC}/Pavlovian_Conditioning.py \
+            -d scheduling.json \
+            -s $seed \
+            -l $lesion_pre
+
+        cd "$CURR_DIR"
+
+    done
+
+# ==========================================
+    # PIT SCHEDULING
+    # ==========================================
+
+    scheduling=$(cat << EOF
+{
+    "trials": 100,
+    "timesteps": 1000,
+    "states": [
+        [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     ],
     "phases": [0.5, 1.0]
 }
@@ -105,12 +150,12 @@ EOF
 )
 
     # ==========================================
-    # TEST LOOP
+    # PIT TEST LOOP
     # ==========================================
 
     for seed in $(seq $seed_start 1 $seed_end); do
 
-        SIM="${TEST_DIR}/test_seed${seed}"
+        SIM="${PIT_DIR}/pit_test_seed${seed}"
 
         mkdir -p "$SIM"
 
@@ -118,9 +163,9 @@ EOF
 
         echo "$scheduling" > scheduling.json
 
-        echo "Running TEST simulation seed=$seed"
+        echo "Running PIT test simulation seed=$seed"
 
-        python ${SRC}/Test_Simulation.py \
+        python ${SRC}/PIT_Test_Simulation.py \
             -d scheduling.json \
             -i $id \
             -s $seed \

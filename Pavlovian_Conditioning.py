@@ -18,7 +18,7 @@ from params import Parameters
 from scheduling import Scheduling
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="BLA_IC simulation")
+    parser = argparse.ArgumentParser(description="Pavlovian simulation")
     parser.add_argument(
         "-d",
         "--scheduling",
@@ -65,7 +65,8 @@ if __name__ == "__main__":
     parameters.scheduling = scheduling._params_to_dict()
     parameters.seed = args.seed
         
-    model = Model(parameters, phase="pavlovian")
+    model = joblib.load(f'{BASE_DIR}/instrumental_training/instrumental_training_{str(args.id)}/inst_sim_seed{int(args.seed)}/Inst_Model_{int(args.seed)}.joblib')
+    model.parameters = parameters
     
     if args.lesion == "BLA":
         model.BLA_IC.lesion = True
@@ -117,10 +118,10 @@ if __name__ == "__main__":
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
         W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(env)), dtype=np.float32)
-        W_Mani_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(env)), dtype=np.float32)
-        W_Mani_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(env)), dtype=np.float32)
-        W_Mani_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(env)), dtype=np.float32)
+        W_Inp_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(env)), dtype=np.float32)
+        W_Inp_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(env)), dtype=np.float32)
+        W_Inp_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(env)), dtype=np.float32)
+        W_Inp_DMS_2 = np.empty((timesteps, model.BG_dm.Str2.N, len(env)), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         MC = model.MC
@@ -148,11 +149,11 @@ if __name__ == "__main__":
 
             model.step(inp)
 
-            action = MC.output.copy()
+            attention = PFCd_PPC.output.copy()
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
-            MC_output[t] = action
-            PFCd_PPC_output[t] = PFCd_PPC.output
+            MC_output[t] = MC.output
+            PFCd_PPC_output[t] = attention
             PL_output[t] = PL.output
             state_t[t] = inp.copy()
             DLS_output_1[t] = DLS_1.output
@@ -166,17 +167,17 @@ if __name__ == "__main__":
             W_BLA_IC[t] = BLA_IC.W
             W_BLA_IC_NAc_1[t] = model.Ws["BLA_IC_NAc_1"]
             W_BLA_IC_NAc_2[t] = model.Ws["BLA_IC_NAc_2"]
-            W_Mani_DLS_1[t] = model.Ws["Mani_DLS_1"]
-            W_Mani_DLS_2[t] = model.Ws["Mani_DLS_2"]
-            W_Mani_DMS_1[t] = model.Ws["Mani_DMS_1"]
-            W_Mani_DMS_2[t] = model.Ws["Mani_DMS_2"]
+            W_Inp_DLS_1[t] = model.Ws["Inp_DLS_1"]
+            W_Inp_DLS_2[t] = model.Ws["Inp_DLS_2"]
+            W_Inp_DMS_1[t] = model.Ws["Inp_DMS_1"]
+            W_Inp_DMS_2[t] = model.Ws["Inp_DMS_2"]
 
-            if t >= 100 and np.any(action >= MC.threshold):
-                action_winner = np.argmax(action)
+            if t >= 100 and np.any(attention >= PFCd_PPC.threshold):
+                attention_winner = np.argmax(attention)
 
-                if env[action_winner] == 1.0:
-                    env[2:4] = 0.0
-                    env[2 + action_winner] = 1.0
+                if env[attention_winner] == 1.0:
+                    env[4:6] = 0.0
+                    env[attention_winner + 4] = 1.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
@@ -196,11 +197,11 @@ if __name__ == "__main__":
             "DA_timeline": DA_timeline,
             "W_BLA_IC": W_BLA_IC,
             "W_BLA_IC_NAc_1": W_BLA_IC_NAc_1,
-            "W_Mani_DLS_1": W_Mani_DLS_1,
-            "W_Mani_DMS_1": W_Mani_DMS_1,
+            "W_Inp_DLS_1": W_Inp_DLS_1,
+            "W_Inp_DMS_1": W_Inp_DMS_1,
             "W_BLA_IC_NAc_2": W_BLA_IC_NAc_2,
-            "W_Mani_DLS_2": W_Mani_DLS_2,
-            "W_Mani_DMS_2": W_Mani_DMS_2
+            "W_Inp_DLS_2": W_Inp_DLS_2,
+            "W_Inp_DMS_2": W_Inp_DMS_2
         }
 
         results.append(result)
@@ -239,14 +240,14 @@ if __name__ == "__main__":
         for y in range(model.Ws["BLA_IC_NAc_1"].shape[1])
     ]
     W_cols_3 = [
-        f"Mani_DLS_1_W{x}_{y}"
-        for x in range(model.Ws["Mani_DLS_1"].shape[0])
-        for y in range(model.Ws["Mani_DLS_1"].shape[1])
+        f"Inp_DLS_1_W{x}_{y}"
+        for x in range(model.Ws["Inp_DLS_1"].shape[0])
+        for y in range(model.Ws["Inp_DLS_1"].shape[1])
     ]
     W_cols_4 = [
-        f"Mani_DMS_1_W{x}_{y}"
-        for x in range(model.Ws["Mani_DMS_1"].shape[0])
-        for y in range(model.Ws["Mani_DMS_1"].shape[1])
+        f"Inp_DMS_1_W{x}_{y}"
+        for x in range(model.Ws["Inp_DMS_1"].shape[0])
+        for y in range(model.Ws["Inp_DMS_1"].shape[1])
     ]
     W_cols_5 = [
         f"BLA_IC_NAc_2_W{x}_{y}"
@@ -254,14 +255,14 @@ if __name__ == "__main__":
         for y in range(model.Ws["BLA_IC_NAc_2"].shape[1])
     ]
     W_cols_6 = [
-        f"Mani_DLS_2_W{x}_{y}"
-        for x in range(model.Ws["Mani_DLS_2"].shape[0])
-        for y in range(model.Ws["Mani_DLS_2"].shape[1])
+        f"Inp_DLS_2_W{x}_{y}"
+        for x in range(model.Ws["Inp_DLS_2"].shape[0])
+        for y in range(model.Ws["Inp_DLS_2"].shape[1])
     ]
     W_cols_7 = [
-        f"Mani_DMS_2_W{x}_{y}"
-        for x in range(model.Ws["Mani_DMS_2"].shape[0])
-        for y in range(model.Ws["Mani_DMS_2"].shape[1])
+        f"Inp_DMS_2_W{x}_{y}"
+        for x in range(model.Ws["Inp_DMS_2"].shape[0])
+        for y in range(model.Ws["Inp_DMS_2"].shape[1])
     ]
 
     cols = (
@@ -300,14 +301,14 @@ if __name__ == "__main__":
         dfs.append(df_new)
 
     df = pd.concat(dfs, ignore_index=True)
-    csv_path = "Model_Simulation.csv"
+    csv_path = "Pavlovian_Simulation.csv"
 
     if os.path.exists(csv_path):
         df.to_csv(csv_path, mode="a", header=False, index=False)
     else:
         df.to_csv(csv_path, index=False)
         
-    model_path = f'Model_{int(parameters.seed)}.joblib'
+    model_path = f'Pav_Model_{int(parameters.seed)}.joblib'
     joblib.dump(model, model_path)
     print(
         f"File {str(csv_path)} saved succesfully"

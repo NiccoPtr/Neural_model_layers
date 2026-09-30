@@ -69,7 +69,7 @@ if __name__ == "__main__":
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
-    model = joblib.load(f'{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed{int(args.seed)}/Model_{int(args.seed)}.joblib')
+    model = joblib.load(f'{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed{int(args.seed)}/Pav_Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     
     if args.lesion == "BLA":
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             phase = 2
 
         state = env.copy()
-        state[0:4] = 0.0
+        state[2:6] = 0.0
 
         model.reset_activity()
         model.update_output_pre()
@@ -132,8 +132,8 @@ if __name__ == "__main__":
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
-        W_Mani_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(state)), dtype=np.float32)
-        W_Mani_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(state)), dtype=np.float32)
+        W_Inp_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(state)), dtype=np.float32)
+        W_Inp_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(state)), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
 
         MC = model.MC
@@ -175,18 +175,18 @@ if __name__ == "__main__":
             DA_timeline[t] = da
             W_BLA_IC[t] = BLA_IC.W
             W_BLA_IC_NAc[t] = model.Ws["BLA_IC_NAc_1"]
-            W_Mani_DLS[t] = model.Ws["Mani_DLS_1"]
-            W_Mani_DMS[t] = model.Ws["Mani_DMS_1"]
+            W_Inp_DLS[t] = model.Ws["Inp_DLS_1"]
+            W_Inp_DMS[t] = model.Ws["Inp_DMS_1"]
 
             if np.any(attention >= PFCd_PPC.threshold):
                 attention_winner = np.argmax(attention)
 
-                if env[attention_winner] == 1.0:
-                    state[0:2] = 0.0
-                    state[attention_winner] = 1.0
+                if env[attention_winner + 2] == 1.0:
+                    state[2:4] = 0.0
+                    state[attention_winner + 2] = 1.0
 
             else:
-                state[0:2] = 0.0
+                state[2:4] = 0.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
@@ -205,8 +205,8 @@ if __name__ == "__main__":
             "DA_timeline": DA_timeline.copy(),
             "W_BLA_IC": W_BLA_IC,
             "W_BLA_IC_NAc": W_BLA_IC_NAc,
-            "W_Mani_DLS": W_Mani_DLS,
-            "W_Mani_DMS": W_Mani_DMS,
+            "W_Inp_DLS": W_Inp_DLS,
+            "W_Inp_DMS": W_Inp_DMS,
         }
         
         results.append(result)
@@ -243,14 +243,14 @@ if __name__ == "__main__":
         for y in range(model.Ws["BLA_IC_NAc_1"].shape[1])
     ]
     W_cols_3 = [
-        f"Mani_DLS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DLS_1"].shape[0])
-        for y in range(model.Ws["Mani_DLS_1"].shape[1])
+        f"Inp_DLS_W{x}_{y}"
+        for x in range(model.Ws["Inp_DLS_1"].shape[0])
+        for y in range(model.Ws["Inp_DLS_1"].shape[1])
     ]
     W_cols_4 = [
-        f"Mani_DMS_W{x}_{y}"
-        for x in range(model.Ws["Mani_DMS_1"].shape[0])
-        for y in range(model.Ws["Mani_DMS_1"].shape[1])
+        f"Inp_DMS_W{x}_{y}"
+        for x in range(model.Ws["Inp_DMS_1"].shape[0])
+        for y in range(model.Ws["Inp_DMS_1"].shape[1])
     ]
 
     cols = (

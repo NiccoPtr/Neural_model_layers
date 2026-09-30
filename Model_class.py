@@ -6,10 +6,9 @@ from Layer_types import (BG_v2, BLA_IC_Layer, Leaky_onset_units_exc, Leaky_units
 
 class Model:
 
-    def __init__(self, parameters, phase):
+    def __init__(self, parameters):
 
         self.parameters = parameters
-        self.phase = phase
 
         rng = np.random.RandomState(self.parameters.seed)
 
@@ -262,46 +261,30 @@ class Model:
         self.Ws = {
             "inp_BLA_IC": np.array(
                 [
-                    [1.0 * self.parameters.Matrices_scalars['Light_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0 * self.parameters.Matrices_scalars['Light_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0 , 0.0, 1.0 * self.parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0, 0.0 , 0.0],
-                    [0.0 , 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Mani_BLA_IC'], 0.0, 0.0, 0.0 , 0.0],
+                    [1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0 , 0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0 , 0.0],
+                    [0.0 , 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0 , 0.0],
                     [0.0 , 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
                     [0.0 , 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0 , -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC']]
                 ]
             ),
-            "Mani_DLS_1": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            "Inp_DLS_1": np.array(
+                [[0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
-            * self.parameters.Matrices_scalars["Mani_DLS"],
-            "Mani_DLS_2": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            * self.parameters.Matrices_scalars["Inp_DLS"],
+            "Inp_DLS_2": np.array(
+                [[0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
-            * self.parameters.Matrices_scalars["Mani_DLS"],
-            "Mani_DMS_1": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            * self.parameters.Matrices_scalars["Inp_DLS"],
+            "Inp_DMS_1": np.array(
+                [[1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
-            * self.parameters.Matrices_scalars["Mani_DMS"],
-            "Mani_DMS_2": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            * self.parameters.Matrices_scalars["Inp_DMS"],
+            "Inp_DMS_2": np.array(
+                [[1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             )
-            * self.parameters.Matrices_scalars["Mani_DMS"],
-            "Light_DLS_1": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-            )
-            * self.parameters.Matrices_scalars["Light_DLS"],
-            "Light_DLS_2": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-            )
-            * self.parameters.Matrices_scalars["Light_DLS"],
-            "Light_DMS_1": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-            )
-            * self.parameters.Matrices_scalars["Light_DMS"],
-            "Light_DMS_2": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-            )
-            * self.parameters.Matrices_scalars["Light_DMS"],
+            * self.parameters.Matrices_scalars["Inp_DMS"],
             "Food_PPN": np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_PPN"],
             "Food_LH": np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
@@ -367,17 +350,11 @@ class Model:
         """
 
         self.Ws_learn_masks = {
-            "Mani_DLS": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            "Inp_DLS": np.array(
+                [[1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             ),
-            "Mani_DMS": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
-            ),
-            "Light_DLS": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-            ),
-            "Light_DMS": np.array(
-                [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+            "Inp_DMS": np.array(
+                [[1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
             ),
             "BLA_IC_NAc": np.array([[0.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]]),
         }
@@ -473,21 +450,21 @@ class Model:
         self.Ws["BLA_IC_NAc_2"] += delta_W_BLA_IC_NAc_2
         self.Ws["BLA_IC_NAc_2"] = np.maximum(self.Ws["BLA_IC_NAc_2"], 0.0)
 
-        delta_W_Mani_DMS_1 = self.delta_Str_learn_1(
-            self.parameters.Str_Learn["eta_DMS_1"],
-            self.SNpco_output_pre_1,
-            self.DMS_output_pre_1 * -1,
-            _input_,
-            self.parameters.Str_Learn["theta_DA_DMS_1"],
-            self.parameters.Str_Learn["theta_DMS_1"],
-            self.parameters.Str_Learn["theta_inp_DMS_1"],
-            self.Ws_learn_masks["Mani_DMS"],
-            self.parameters.Str_Learn["max_W_DMS"],
-            self.Ws["Mani_DMS_1"],
-        )
-        self.Ws["Mani_DMS_1"] += delta_W_Mani_DMS_1
+        delta_W_Inp_DMS_1 = self.delta_Str_learn_1(
+                self.parameters.Str_Learn["eta_DMS_1"],
+                self.SNpco_output_pre_1,
+                self.DMS_output_pre_1 * -1,
+                _input_,
+                self.parameters.Str_Learn["theta_DA_DMS_1"],
+                self.parameters.Str_Learn["theta_DMS_1"],
+                self.parameters.Str_Learn["theta_inp_DMS_1"],
+                self.Ws_learn_masks["Inp_DMS"],
+                self.parameters.Str_Learn["max_W_DMS"],
+                self.Ws["Inp_DMS_1"],
+            )
+        self.Ws["Inp_DMS_1"] += delta_W_Inp_DMS_1
 
-        delta_W_Mani_DMS_2 = self.delta_Str_learn_2(
+        delta_W_Inp_DMS_2 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_DMS_2"],
             self.SNpco_output_pre_1,
             self.DMS_output_pre_2 * -1,
@@ -495,14 +472,14 @@ class Model:
             self.parameters.Str_Learn["theta_DA_DMS_2"],
             self.parameters.Str_Learn["theta_DMS_2"],
             self.parameters.Str_Learn["theta_inp_DMS_2"],
-            self.Ws_learn_masks["Mani_DMS"],
+            self.Ws_learn_masks["Inp_DMS"],
             self.parameters.Str_Learn["max_W_DMS"],
-            self.Ws["Mani_DMS_2"],
+            self.Ws["Inp_DMS_2"],
         )
-        self.Ws["Mani_DMS_2"] += delta_W_Mani_DMS_2
-        self.Ws["Mani_DMS_2"] = np.maximum(self.Ws["Mani_DMS_2"], 0.0)
+        self.Ws["Inp_DMS_2"] += delta_W_Inp_DMS_2
+        self.Ws["Inp_DMS_2"] = np.maximum(self.Ws["Inp_DMS_2"], 0.0)
 
-        delta_W_Mani_DLS_1 = self.delta_Str_learn_1(
+        delta_W_Inp_DLS_1 = self.delta_Str_learn_1(
             self.parameters.Str_Learn["eta_DLS_1"],
             self.SNpco_output_pre_2,
             self.DLS_output_pre_1 * -1,
@@ -510,13 +487,13 @@ class Model:
             self.parameters.Str_Learn["theta_DA_DLS_1"],
             self.parameters.Str_Learn["theta_DLS_1"],
             self.parameters.Str_Learn["theta_inp_DLS_1"],
-            self.Ws_learn_masks["Mani_DLS"],
+            self.Ws_learn_masks["Inp_DLS"],
             self.parameters.Str_Learn["max_W_DLS"],
-            self.Ws["Mani_DLS_1"],
+            self.Ws["Inp_DLS_1"],
         )
-        self.Ws["Mani_DLS_1"] += delta_W_Mani_DLS_1
+        self.Ws["Inp_DLS_1"] += delta_W_Inp_DLS_1
 
-        delta_W_Mani_DLS_2 = self.delta_Str_learn_2(
+        delta_W_Inp_DLS_2 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_DLS_2"],
             self.SNpco_output_pre_2,
             self.DLS_output_pre_2 * -1,
@@ -524,70 +501,12 @@ class Model:
             self.parameters.Str_Learn["theta_DA_DLS_2"],
             self.parameters.Str_Learn["theta_DLS_2"],
             self.parameters.Str_Learn["theta_inp_DLS_2"],
-            self.Ws_learn_masks["Mani_DLS"],
+            self.Ws_learn_masks["Inp_DLS"],
             self.parameters.Str_Learn["max_W_DLS"],
-            self.Ws["Mani_DLS_2"],
+            self.Ws["Inp_DLS_2"],
         )
-        self.Ws["Mani_DLS_2"] += delta_W_Mani_DLS_2
-        self.Ws["Mani_DLS_2"] = np.maximum(self.Ws["Mani_DLS_2"], 0.0)
-
-        delta_W_Light_DMS_1 = self.delta_Str_learn_1(
-            self.parameters.Str_Learn["eta_DMS_1"],
-            self.SNpco_output_pre_1,
-            self.DMS_output_pre_1 * -1,
-            _input_,
-            self.parameters.Str_Learn["theta_DA_DMS_1"],
-            self.parameters.Str_Learn["theta_DMS_1"],
-            self.parameters.Str_Learn["theta_inp_DMS_1"],
-            self.Ws_learn_masks["Light_DMS"],
-            self.parameters.Str_Learn["max_W_DMS"],
-            self.Ws["Light_DMS_1"],
-        )
-        self.Ws["Light_DMS_1"] += delta_W_Light_DMS_1
-
-        delta_W_Light_DMS_2 = self.delta_Str_learn_2(
-            self.parameters.Str_Learn["eta_DMS_2"],
-            self.SNpco_output_pre_1,
-            self.DMS_output_pre_2 * -1,
-            _input_,
-            self.parameters.Str_Learn["theta_DA_DMS_2"],
-            self.parameters.Str_Learn["theta_DMS_2"],
-            self.parameters.Str_Learn["theta_inp_DMS_2"],
-            self.Ws_learn_masks["Light_DMS"],
-            self.parameters.Str_Learn["max_W_DMS"],
-            self.Ws["Light_DMS_2"],
-        )
-        self.Ws["Light_DMS_2"] += delta_W_Light_DMS_2
-        self.Ws["Light_DMS_2"] = np.maximum(self.Ws["Light_DMS_2"], 0.0)
-
-        delta_W_Light_DLS_1 = self.delta_Str_learn_1(
-            self.parameters.Str_Learn["eta_DLS_1"],
-            self.SNpco_output_pre_2,
-            self.DLS_output_pre_1 * -1,
-            _input_,
-            self.parameters.Str_Learn["theta_DA_DLS_1"],
-            self.parameters.Str_Learn["theta_DLS_1"],
-            self.parameters.Str_Learn["theta_inp_DLS_1"],
-            self.Ws_learn_masks["Light_DLS"],
-            self.parameters.Str_Learn["max_W_DLS"],
-            self.Ws["Light_DLS_1"],
-        )
-        self.Ws["Light_DLS_1"] += delta_W_Light_DLS_1
-
-        delta_W_Light_DLS_2 = self.delta_Str_learn_2(
-            self.parameters.Str_Learn["eta_DLS_2"],
-            self.SNpco_output_pre_2,
-            self.DLS_output_pre_2 * -1,
-            _input_,
-            self.parameters.Str_Learn["theta_DA_DLS_2"],
-            self.parameters.Str_Learn["theta_DLS_2"],
-            self.parameters.Str_Learn["theta_inp_DLS_2"],
-            self.Ws_learn_masks["Light_DLS"],
-            self.parameters.Str_Learn["max_W_DLS"],
-            self.Ws["Light_DLS_2"],
-        )
-        self.Ws["Light_DLS_2"] += delta_W_Light_DLS_2
-        self.Ws["Light_DLS_2"] = np.maximum(self.Ws["Light_DLS_2"], 0.0)
+        self.Ws["Inp_DLS_2"] += delta_W_Inp_DLS_2
+        self.Ws["Inp_DLS_2"] = np.maximum(self.Ws["Inp_DLS_2"], 0.0)
 
     def update_output_pre(self):
         """
@@ -644,179 +563,54 @@ class Model:
 
         self.BLA_IC.step(np.dot(self.Ws["inp_BLA_IC"], _input_))
 
-        if self.phase == "instrumental":
+        self.BG_dm.step(
+                (
+                    self.parameters.DA_values["Y_DMS_1"]
+                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
+                )
+                * np.dot(self.Ws["Inp_DMS_1"], _input_),
+                (1/(
+                    self.parameters.DA_values["Y_DMS_2"]
+                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
+                ))
+                * np.dot(self.Ws["Inp_DMS_2"], _input_),
+                (
+                    self.parameters.DA_values["Y_DMS_1"]
+                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
+                )
+                * np.dot(self.Ws["PFCd_PPC_DMS_1"], self.PFCd_PPC_output_pre),
+                (1/(
+                    self.parameters.DA_values["Y_DMS_2"]
+                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
+                ))
+                * np.dot(self.Ws["PFCd_PPC_DMS_2"], self.PFCd_PPC_output_pre),
+                np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
+            )
+
+        self.BG_dl.step(
+            (
+                self.parameters.DA_values["Y_DLS_1"]
+                + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
+            )
+            * np.dot(self.Ws["Inp_DLS_1"], _input_),
+            (1/(
+                self.parameters.DA_values["Y_DLS_2"]
+                + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
+            ))
+            * np.dot(self.Ws["Inp_DLS_2"], _input_),
+            (
+                self.parameters.DA_values["Y_DLS_1"]
+                + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
+            )
+            * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
+            (1/(
+                self.parameters.DA_values["Y_DLS_2"]
+                + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
+            ))
+            * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
+            np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
+        )
         
-            self.BG_dm.step(
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["Mani_DMS_1"], _input_),
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["Mani_DMS_2"], _input_),
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["PFCd_PPC_DMS_1"], self.PFCd_PPC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["PFCd_PPC_DMS_2"], self.PFCd_PPC_output_pre),
-                np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
-            )
-
-            self.BG_dl.step(
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["Mani_DLS_1"], _input_),
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["Mani_DLS_2"], _input_),
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
-                np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
-            )
-
-        elif self.phase == "pavlovian":
-        
-            self.BG_dm.step(
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["Light_DMS_1"], _input_),
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["Light_DMS_2"], _input_),
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["PFCd_PPC_DMS_1"], self.PFCd_PPC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["PFCd_PPC_DMS_2"], self.PFCd_PPC_output_pre),
-                np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
-            )
-
-            self.BG_dl.step(
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["Light_DLS_1"], _input_),
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["Light_DLS_2"], _input_),
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
-                np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
-            )
-
-        elif self.phase == "PIT":
-
-            self.BG_dm.step(
-                ((
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["Light_DMS_1"], _input_) +
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["Mani_DMS_1"], _input_)),
-                ((1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["Light_DMS_2"], _input_) +
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["Mani_DMS_2"], _input_)),
-                (
-                    self.parameters.DA_values["Y_DMS_1"]
-                    + (self.parameters.DA_values["delta_DMS_1"] * self.SNpco_output_pre_1)
-                )
-                * np.dot(self.Ws["PFCd_PPC_DMS_1"], self.PFCd_PPC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DMS_2"]
-                    + (self.parameters.DA_values["delta_DMS_2"] * self.SNpco_output_pre_1)
-                ))
-                * np.dot(self.Ws["PFCd_PPC_DMS_2"], self.PFCd_PPC_output_pre),
-                np.dot(self.Ws["PFCd_PPC_STNdm"], self.PFCd_PPC_output_pre),
-            )
-            
-            self.BG_dl.step(
-                ((
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["Light_DLS_1"], _input_) +
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["Mani_DLS_1"], _input_)),
-                ((1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["Light_DLS_2"], _input_) +
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["Mani_DLS_2"], _input_)),
-                (
-                    self.parameters.DA_values["Y_DLS_1"]
-                    + (self.parameters.DA_values["delta_DLS_1"] * self.SNpco_output_pre_2)
-                )
-                * np.dot(self.Ws["MC_DLS_1"], self.MC_output_pre),
-                (1/(
-                    self.parameters.DA_values["Y_DLS_2"]
-                    + (self.parameters.DA_values["delta_DLS_2"] * self.SNpco_output_pre_2)
-                ))
-                * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
-                np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
-            )
-
-        else:
-            raise ValueError("Invalid phase. Must be 'instrumental', 'pavlovian' or 'PIT'.")
-
         self.PPN.step(
             np.dot(self.Ws["Food_PPN"], _input_)
             + np.dot(self.Ws["BLA_IC_PPN"], self.BLA_IC_output_pre)
