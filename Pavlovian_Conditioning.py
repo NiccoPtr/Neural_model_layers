@@ -49,6 +49,9 @@ if __name__ == "__main__":
     parameters = Parameters()
 
     BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
+
+    INST_DIR = DATA_DIR / "instrumental_training"
 
     # Full path to the JSON file
     prm_file = BASE_DIR / "prm_file.json"
@@ -65,7 +68,7 @@ if __name__ == "__main__":
     parameters.scheduling = scheduling._params_to_dict()
     parameters.seed = args.seed
         
-    model = joblib.load(f'{BASE_DIR}/instrumental_training/instrumental_training_{str(args.id)}/inst_sim_seed{int(args.seed)}/Inst_Model_{int(args.seed)}.joblib')
+    model = joblib.load(f'{INST_DIR}/instrumental_training_{str(args.id)}/inst_sim_seed{int(args.seed)}/Inst_Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     
     if args.lesion == "BLA":

@@ -58,13 +58,21 @@ if __name__ == '__main__':
     args = parse_args()
     parameters = Parameters()
     BASE_DIR = Path(__file__).resolve().parent
-    if Path(f"{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed1/prm_file.json").exists():
-        parameters.load(f"{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed1/prm_file.json", mode="json")
-        print('Imported parameters succesfully')
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
+
+    INST_DIR = DATA_DIR / "instrumental_training"
+    PIT_DIR = DATA_DIR / "PIT_"
+    RESULTS_DIR = DATA_DIR / "results"
+
+    param_file = INST_DIR / f"instrumental_training_{args.id}" / "inst_sim_seed1" / "prm_file.json"
+
+    if param_file.exists():
+        parameters.load(param_file, mode="json")
+        print("Imported parameters successfully")
     else:
-        raise ValueError('Parameters file not found')
-        
-    files = glob.glob(f"{BASE_DIR}/PIT_testing/PIT_testing_{str(args.id)}/pit_test_seed*/PIT_Test_Simulation.csv")
+        raise ValueError(f"Parameters file not found: {param_file}")
+
+    files = glob.glob(str(PIT_DIR / f"PIT_testing_{args.id}" / "pit_test_seed*" / "PIT_Test_Simulation.csv"))
     
     thr = parameters.threshold["MC"]
     dfs = [pd.read_csv(f) for f in files]
@@ -147,10 +155,10 @@ if __name__ == '__main__':
     ax.set_ylim(0, y_max + offset * 4)
 
     if args.save_plot == 'yes':
-        save_dir = f"results/simulation_ID_{args.id}"
-        os.makedirs(save_dir, exist_ok=True)
-        
-        plot_path = os.path.join(save_dir, f"analysis_ID_{args.id}_barplot.png")
+        save_dir = RESULTS_DIR / f"simulation_ID_{args.id}"
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+        plot_path = save_dir / f"analysis_ID_{args.id}_barplot.png"
         fig.savefig(plot_path, dpi=300, bbox_inches="tight")
         
     elif args.save_plot == 'show':

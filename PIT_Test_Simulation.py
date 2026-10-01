@@ -50,6 +50,9 @@ if __name__ == "__main__":
     args = parse_args()
     parameters = Parameters()
     BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
+
+    TRAIN_DIR = DATA_DIR / "pavlovian_training"
     
     # Full path to the JSON file
     prm_file = BASE_DIR / "prm_file.json"
@@ -69,7 +72,7 @@ if __name__ == "__main__":
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
-    model = joblib.load(f'{BASE_DIR}/pavlovian_training/pavlovian_training_{str(args.id)}/pav_sim_seed{int(args.seed)}/Pav_Model_{int(args.seed)}.joblib')
+    model = joblib.load(f'{TRAIN_DIR}/pavlovian_training_{str(args.id)}/pav_sim_seed{int(args.seed)}/Pav_Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     
     if args.lesion == "BLA":
