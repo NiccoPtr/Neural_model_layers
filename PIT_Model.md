@@ -48,3 +48,18 @@
 
 
 
+# 
+
+# Specific PIT brain areas
+
+
+
+Main areas:
+
+
+
+* Basolateral amygdala (BLA) → encodes/uses the specific predicted outcome.
+* Nucleus accumbens shell (NAc shell) → translates that outcome-specific information into increased instrumental responding.
+* VTA dopamine system also contributes.
+* Dorsomedial striatum (DMS) has also been implicated in specific PIT.
+
