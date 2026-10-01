@@ -6,18 +6,18 @@ set -e
 
 conditions=(
     "None None 00"
-    "NAc None NAc_pre_1"
-    "None NAc NAc_post_1"
-    "BLA None BLA_pre_1"
-    "None BLA BLA_post_1"
-    "DMS None DMS_pre_1"
-    "None DMS DMS_post_1"
-    "PL None PL_pre_1"
-    "None PL PL_post_1"
-    "BLA BLA BLA_pre_post_00"
-    "DMS DMS DMS_pre_post_00"
-    "NAc NAc NAc_pre_post_00"
-    "PL PL PL_pre_post_00"
+    # "NAc None NAc_pre_1"
+    # "None NAc NAc_post_1"
+    # "BLA None BLA_pre_1"
+    # "None BLA BLA_post_1"
+    # "DMS None DMS_pre_1"
+    # "None DMS DMS_post_1"
+    # "PL None PL_pre_1"
+    # "None PL PL_post_1"
+    # "BLA BLA BLA_pre_post_00"
+    # "DMS DMS DMS_pre_post_00"
+    # "NAc NAc NAc_pre_post_00"
+    # "PL PL PL_pre_post_00"
 )
 
 seed_start=1
