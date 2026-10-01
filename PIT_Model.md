@@ -40,6 +40,30 @@
 
 
 
+* Phase 3\_B --> PIT Test
+
+
+
+&#x09;	- Extinction phase, Reward\_1/2 won't be delivered in case of successful actions
+
+&#x09;	- Attention will guide action toward the Manipulanda\_1/2
+
+&#x09;	- Each 1/3 of the trials will have a condition:
+
+&#x09;		
+
+&#x09;		- One manipulanda (Lever) and no Lights
+
+&#x09;		- One manipulanda (Lever) and congruent Light
+
+&#x09;		- One manipulanda (Lever) and incongruent Light
+
+
+
+&#x09;			-Swap from Lever to Chain between subjects, not within
+
+
+
 #### Expected results:
 
 
