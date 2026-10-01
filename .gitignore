@@ -1,0 +1,8 @@
+results/
+pavlovian_training/
+instrumental_training/
+PIT_testing/
+__pycache__/
+.vscode/
+GPr_testing/
+verification/
