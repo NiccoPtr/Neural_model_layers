@@ -40,6 +40,10 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "model_v2"
+    TEST_DIR = DATA_DIR / "testings"
+    VER_DIR = DATA_DIR / "verification"
+    
     fin_results = []
     single_trials = []
     
@@ -47,7 +51,7 @@ if __name__ == '__main__':
     for seed in range(((args.seeds_max + 1) - args.seeds), args.seeds_max + 1):
         
         print(f'Reading file with seed {seed}')
-        df = pd.read_csv(f"{BASE_DIR}/testings/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
+        df = pd.read_csv(f"{TEST_DIR}/testing_{str(args.id)}/test_seed{seed}/Test_Simulation.csv")
         ver_single_seed = {}
         
         print('Starting data extraction')
@@ -171,7 +175,7 @@ if __name__ == '__main__':
     std_1 = np.std(tot_1)
     
     print('Creating .txt results file')
-    output_path = f"verification/verification_results_{str(args.id)}.txt"
+    output_path = f"{VER_DIR}/verification_results_{str(args.id)}.txt"
 
     with open(output_path, "w") as f:
         f.write("Verification Test results\n")

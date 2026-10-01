@@ -6,14 +6,14 @@ set -e
 
 conditions=(
     "None None 00"
-#    "NAc None NAc_pre_1"
-#    "None NAc NAc_post_1"
-#    "BLA None BLA_pre_1"
-#    "None BLA BLA_post_1"
-#    "DMS None DMS_pre_1"
-#    "None DMS DMS_post_1"
-#    "PL None PL_pre_1"
-#    "None PL PL_post_1"
+    "NAc None NAc_pre_1"
+    "None NAc NAc_post_1"
+    "BLA None BLA_pre_1"
+    "None BLA BLA_post_1"
+    "DMS None DMS_pre_1"
+    "None DMS DMS_post_1"
+    "PL None PL_pre_1"
+    "None PL PL_post_1"
     "BLA BLA BLA_pre_post_00"
     "DMS DMS DMS_pre_post_00"
     "NAc NAc NAc_pre_post_00"
@@ -28,6 +28,7 @@ export PYTHONPATH=$SRC
 export PATH=$PATH:$SRC
 
 CURR_DIR="$SRC"
+DATA_DIR="${SRC}/../CNR_model_data/model_v2"
 
 for condition in "${conditions[@]}"; do
 
@@ -39,9 +40,9 @@ for condition in "${conditions[@]}"; do
     echo "POST lesion = $lesion_post"
     echo "ID          = $id"
     echo "======================================"
-
-    TRAIN_DIR="${SRC}/trainings/training_${id}"
-    TEST_DIR="${SRC}/testings/testing_${id}"
+    
+    TRAIN_DIR="${DATA_DIR}/trainings/training_${id}"
+    TEST_DIR="${DATA_DIR}/testings/testing_${id}"
 
     # ==========================================
     # TRAINING SCHEDULING

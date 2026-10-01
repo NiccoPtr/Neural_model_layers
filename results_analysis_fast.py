@@ -7,7 +7,6 @@ Created on Thu May 21 08:07:18 2026
 
 import argparse
 import glob
-import os
 
 import numpy as np
 import pandas as pd
@@ -58,13 +57,21 @@ if __name__ == '__main__':
     args = parse_args()
     parameters = Parameters()
     BASE_DIR = Path(__file__).resolve().parent
-    if Path(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json").exists():
-        parameters.load(f"{BASE_DIR}/trainings/training_{str(args.id)}/sim_seed1/prm_file.json", mode="json")
-        print('Imported parameters succesfully')
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "model_v2"
+
+    TRAIN_DIR = DATA_DIR / "trainings"
+    TEST_DIR = DATA_DIR / "testings"
+    RESULTS_DIR = DATA_DIR / "results"
+
+    param_file = TRAIN_DIR / f"training_{args.id}" / "sim_seed1" / "prm_file.json"
+
+    if param_file.exists():
+        parameters.load(param_file, mode="json")
+        print("Imported parameters successfully")
     else:
-        raise ValueError('Parameters file not found')
+        raise ValueError(f"Parameters file not found: {param_file}")
         
-    files = glob.glob(f"{BASE_DIR}/testings/testing_{str(args.id)}/test_seed*/Test_Simulation.csv")
+    files = glob.glob(str(TEST_DIR / f"testing_{args.id}" / "test_seed*" / "Test_Simulation.csv"))
     
     thr = parameters.threshold["MC"]
     dfs = [pd.read_csv(f) for f in files]
@@ -147,10 +154,10 @@ if __name__ == '__main__':
     ax.set_ylim(0, y_max + offset * 4)
 
     if args.save_plot == 'yes':
-        save_dir = f"results/simulation_ID_{args.id}"
-        os.makedirs(save_dir, exist_ok=True)
-        
-        plot_path = os.path.join(save_dir, f"analysis_ID_{args.id}_barplot.png")
+        save_dir = RESULTS_DIR / f"simulation_ID_{args.id}"
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+        plot_path = save_dir / f"analysis_ID_{args.id}_barplot.png"
         fig.savefig(plot_path, dpi=300, bbox_inches="tight")
         
     elif args.save_plot == 'show':
