@@ -28,6 +28,7 @@ export PYTHONPATH=$SRC
 export PATH=$PATH:$SRC
 
 CURR_DIR="$SRC"
+DATA_DIR="${SRC}/../CNR_model_data/PIT"
 
 for condition in "${conditions[@]}"; do
 
@@ -40,9 +41,9 @@ for condition in "${conditions[@]}"; do
     echo "ID          = $id"
     echo "======================================"
 
-    INST_DIR="${SRC}/instrumental_training/instrumental_training_${id}"
-    PAV_DIR="${SRC}/pavlovian_training/pavlovian_training_${id}"
-    PIT_DIR="${SRC}/PIT_testing/PIT_testing_${id}"
+    INST_DIR="${DATA_DIR}/instrumental_training/instrumental_training_${id}"
+    PAV_DIR="${DATA_DIR}/pavlovian_training/pavlovian_training_${id}"
+    PIT_DIR="${DATA_DIR}/PIT_testing/PIT_testing_${id}"
 
     # ==========================================
     # INSTRUMENTAL SCHEDULING

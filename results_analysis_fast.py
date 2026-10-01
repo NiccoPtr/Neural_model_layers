@@ -61,7 +61,7 @@ if __name__ == '__main__':
     DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
 
     INST_DIR = DATA_DIR / "instrumental_training"
-    PIT_DIR = DATA_DIR / "PIT_"
+    PIT_DIR = DATA_DIR / "PIT_testing"
     RESULTS_DIR = DATA_DIR / "results"
 
     param_file = INST_DIR / f"instrumental_training_{args.id}" / "inst_sim_seed1" / "prm_file.json"
