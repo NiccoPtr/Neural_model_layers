@@ -36,7 +36,7 @@
 
 &#x09;	- 1/3 of the trial will be without Light\_1/2 presentation
 
-&#x09;	- The remaining 2/3 will be divided into 50% presentation of Light\_1/2 within the first 100 steps of the trial
+&#x09;	- The remaining 2/3 will be divided into 50% presentation of Light\_1/2
 
 
 
@@ -50,7 +50,7 @@
 
 &#x09;	- Each 1/3 of the trials will have a condition:
 
-&#x09;		
+&#x09;
 
 &#x09;		- One manipulanda (Lever) and no Lights
 
@@ -60,7 +60,7 @@
 
 
 
-&#x09;			-Swap from Lever to Chain between subjects, not within
+&#x09;			- Swap from Lever to Chain between subjects, not within
 
 
 
@@ -68,13 +68,15 @@
 
 
 
-* We expect a 50-50 choice of either Manipulanda\_1/2 during the first 1/3 of the PIT Test, meanwhile a bias toward the Manipulanda associated with the same Reward of the presented Light during the remaining 2/3 of the PIT Test
+* 3 --> We expect a 50-50 choice of either Manipulanda\_1/2 during the first 1/3 of the PIT Test, meanwhile a bias toward the Manipulanda associated with the same Reward of the presented Light during the remaining 2/3 of the PIT Test
 
 
+
+* 3\_B --> Condition one will result in 50-50 choice of either manipulanda\_1/2, Condition two will result in increased choice of manipulanda congruent to the Light, Condition three will result in slightly decreased choice of manipulanda incongruent to the Light
 
 # 
 
-# Specific PIT brain areas
+# Specific PIT brain areas (check for lesions)
 
 
 
