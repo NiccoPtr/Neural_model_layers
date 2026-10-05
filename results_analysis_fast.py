@@ -88,9 +88,8 @@ if __name__ == '__main__':
     )
     
     df.replace(
-        {"Decision": {0: "Lever", 1: "Chain", 2: "None"}, "Phase": {1: "ND", 2: "D"}}, inplace=True
+        {"Decision": {0: "Lever", 1: "Chain", 2: "None"}, "Phase": {1: "BS", 2: "C", 3: "IC"}}, inplace=True
     )
-    
     
     df = (
         df.groupby(["Seed", "Phase"])["Decision"]
@@ -118,7 +117,7 @@ if __name__ == '__main__':
     
     pvals = {}
     
-    for phase in ["Baseline", "Instrumental Transfer"]:
+    for phase in ["BS", "C", "IC"]:
         sub = stats_df[stats_df["Phase"] == phase]
         
         t, p = ttest_rel(sub["Lever"], sub["Chain"])
@@ -126,7 +125,7 @@ if __name__ == '__main__':
             
     fig, ax = plt.subplots()
     
-    sns.barplot(df, x="Phase", y="freq", hue="Decision", errorbar="sd", order=["Baseline", "Instrumental Transfer"])
+    sns.barplot(df, x="Phase", y="Freq", hue="Decision", errorbar="sd", order=["BS", "C", "IC"])
     
     # -------------------------
     # add significance markers
@@ -135,11 +134,11 @@ if __name__ == '__main__':
     offset = y_max * 0.08
     
     # x positions inside each phase group (Seaborn default hue spacing)
-    phase_positions = {"Baseline": 0, "Instrumental Transfer": 1}
+    phase_positions = {"BS": 0, "C": 1, "IC": 2}
     
     hue_offset = {"Lever": -0.2, "Chain": 0.2}
     
-    for i, phase in enumerate(["Baseline", "Instrumental Transfer"]):
+    for i, phase in enumerate(["BS", "C", "IC"]):
         
         star = p_to_stars(pvals[phase])
         

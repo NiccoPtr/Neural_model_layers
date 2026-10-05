@@ -14,10 +14,10 @@ conditions=(
 #    "None DMS DMS_post_1"
 #    "PL None PL_pre_1"
 #    "None PL PL_post_1"
-    "BLA BLA BLA_pre_post_00"
-    "DMS DMS DMS_pre_post_00"
-    "NAc NAc NAc_pre_post_00"
-    "PL PL PL_pre_post_00"
+#    "BLA BLA BLA_pre_post_00"
+#    "DMS DMS DMS_pre_post_00"
+#    "NAc NAc NAc_pre_post_00"
+#    "PL PL PL_pre_post_00"
 )
 
 seed_start=1
@@ -98,8 +98,8 @@ EOF
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
     ],
     "phases": [0.5, 1.0]
 }
@@ -142,10 +142,11 @@ EOF
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     ],
-    "phases": [0.5, 1.0]
+    "phases": [0.33, 0.66, 1.0]
 }
 EOF
 )

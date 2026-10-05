@@ -149,14 +149,17 @@ if __name__ == "__main__":
                 
             elif t == 50:
                 inp = env.copy()
+                inp[4:6] = 0.0
+
+            elif t == 150:
+                inp = env.copy()
 
             model.step(inp)
 
-            attention = PFCd_PPC.output.copy()
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
             MC_output[t] = MC.output
-            PFCd_PPC_output[t] = attention
+            PFCd_PPC_output[t] = PFCd_PPC.output
             PL_output[t] = PL.output
             state_t[t] = inp.copy()
             DLS_output_1[t] = DLS_1.output
@@ -174,13 +177,6 @@ if __name__ == "__main__":
             W_Inp_DLS_2[t] = model.Ws["Inp_DLS_2"]
             W_Inp_DMS_1[t] = model.Ws["Inp_DMS_1"]
             W_Inp_DMS_2[t] = model.Ws["Inp_DMS_2"]
-
-            if t >= 100 and np.any(attention >= PFCd_PPC.threshold):
-                attention_winner = np.argmax(attention)
-
-                if env[attention_winner] == 1.0:
-                    env[4:6] = 0.0
-                    env[attention_winner + 4] = 1.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,

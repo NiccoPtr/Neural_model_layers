@@ -52,7 +52,7 @@ if __name__ == "__main__":
     BASE_DIR = Path(__file__).resolve().parent
     DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
 
-    TRAIN_DIR = DATA_DIR / "pavlovian_training"
+    PAV_DIR = DATA_DIR / "pavlovian_training"
     
     # Full path to the JSON file
     prm_file = BASE_DIR / "prm_file.json"
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     if len(scheduling.states) != len(scheduling.phases):
         raise ValueError("Input and Phases must have same length")
 
-    model = joblib.load(f'{TRAIN_DIR}/pavlovian_training_{str(args.id)}/pav_sim_seed{int(args.seed)}/Pav_Model_{int(args.seed)}.joblib')
+    model = joblib.load(f'{PAV_DIR}/pavlovian_training_{str(args.id)}/pav_sim_seed{int(args.seed)}/Pav_Model_{int(args.seed)}.joblib')
     model.parameters = parameters
     
     if args.lesion == "BLA":
@@ -113,8 +113,11 @@ if __name__ == "__main__":
             env = np.array(sched["states"][1])
             phase = 2
 
+        elif trial <= (trials*(sched["phases"][2])):
+            env = np.array(sched["states"][2])
+            phase = 3
+
         state = env.copy()
-        state[2:6] = 0.0
 
         model.reset_activity()
         model.update_output_pre()
@@ -155,11 +158,13 @@ if __name__ == "__main__":
             
             if t < 50:
                 inp = np.zeros_like(state)
-                env *= 0.0
 
-            elif t >= 50:
+            elif t == 50:
                 inp = state.copy()
-                env = np.array(sched["states"][phase - 1])
+                inp[2:8] = 0.0
+
+            elif t == 100:
+                inp = state.copy()
 
             model.step(inp, learning=False)
             action = MC.output.copy()
