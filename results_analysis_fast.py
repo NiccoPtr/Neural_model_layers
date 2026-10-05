@@ -105,14 +105,14 @@ if __name__ == '__main__':
         df,
         id_vars=["Seed", "Phase"],
         value_vars=["Lever", "Chain"],
-        value_name="freq",
+        value_name="Freq",
         var_name="Decision",
     )
     
     stats_df = df.pivot_table(
         index=["Seed", "Phase"],
         columns="Decision",
-        values="freq"
+        values="Freq"
     ).dropna().reset_index()
     
     pvals = {}
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # -------------------------
     # add significance markers
     # -------------------------
-    y_max = df["freq"].max()
+    y_max = df["Freq"].max()
     offset = y_max * 0.08
     
     # x positions inside each phase group (Seaborn default hue spacing)

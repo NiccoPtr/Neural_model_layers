@@ -20,6 +20,11 @@ from scheduling import Scheduling
 def parse_args():
     parser = argparse.ArgumentParser(description="Pavlovian simulation")
     parser.add_argument(
+            "-i",
+            "--id",
+            help="ID simulation",
+        )
+    parser.add_argument(
         "-d",
         "--scheduling",
         type=str,

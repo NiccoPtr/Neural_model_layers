@@ -126,6 +126,7 @@ EOF
 
         python ${SRC}/Pavlovian_Conditioning.py \
             -d scheduling.json \
+            -i $id \
             -s $seed \
             -l $lesion_pre
 

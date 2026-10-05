@@ -54,29 +54,29 @@ if __name__ == "__main__":
         #Matrices
         W_BLA_IC_NAc_1 = df_new.filter(like="BLA_IC_NAc_1_W").to_numpy()
         W_BLA_IC_NAc_2 = df_new.filter(like="BLA_IC_NAc_2_W").to_numpy()
-        W_Mani_DLS_1 = df_new.filter(like="Mani_DLS_1_W").to_numpy()
-        W_Mani_DLS_2 = df_new.filter(like="Mani_DLS_2_W").to_numpy()
-        W_Mani_DMS_1 = df_new.filter(like="Mani_DMS_1_W").to_numpy()
-        W_Mani_DMS_2 = df_new.filter(like="Mani_DMS_2_W").to_numpy()
+        W_Inp_DLS_1 = df_new.filter(like="Inp_DLS_1_W").to_numpy()
+        W_Inp_DLS_2 = df_new.filter(like="Inp_DLS_2_W").to_numpy()
+        W_Inp_DMS_1 = df_new.filter(like="Inp_DMS_1_W").to_numpy()
+        W_Inp_DMS_2 = df_new.filter(like="Inp_DMS_2_W").to_numpy()
 
         #Matrices reshape 
-        W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 4)
-        W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2.reshape(timesteps, 2, 4)
-        W_Mani_DLS_1 = W_Mani_DLS_1.reshape(timesteps, 2, 6)
-        W_Mani_DLS_2 = W_Mani_DLS_2.reshape(timesteps, 2, 6)
-        W_Mani_DMS_1 = W_Mani_DMS_1.reshape(timesteps, 2, 6)
-        W_Mani_DMS_2 = W_Mani_DMS_2.reshape(timesteps, 2, 6)
+        W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 6)
+        W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2.reshape(timesteps, 2, 6)
+        W_Inp_DLS_1 = W_Inp_DLS_1.reshape(timesteps, 2, 8)
+        W_Inp_DLS_2 = W_Inp_DLS_2.reshape(timesteps, 2, 8)
+        W_Inp_DMS_1 = W_Inp_DMS_1.reshape(timesteps, 2, 8)
+        W_Inp_DMS_2 = W_Inp_DMS_2.reshape(timesteps, 2, 8)
 
         #Isolate Matrices' connections of interest
-        rows, cols = np.ix_([0, 1], [2, 3])
+        rows, cols = np.ix_([0, 1], [4, 5])
         W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1[:, rows, cols]
         W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2[:, rows, cols]
 
-        rows, cols = np.ix_([0, 1], [0, 1])
-        W_Mani_DLS_1 = W_Mani_DLS_1[:, rows, cols]
-        W_Mani_DLS_2 = W_Mani_DLS_2[:, rows, cols]
-        W_Mani_DMS_1 = W_Mani_DMS_1[:, rows, cols]
-        W_Mani_DMS_2 = W_Mani_DMS_2[:, rows, cols]
+        rows, cols = np.ix_([0, 1], [2, 3])
+        W_Inp_DLS_1 = W_Inp_DLS_1[:, rows, cols]
+        W_Inp_DLS_2 = W_Inp_DLS_2[:, rows, cols]
+        W_Inp_DMS_1 = W_Inp_DMS_1[:, rows, cols]
+        W_Inp_DMS_2 = W_Inp_DMS_2[:, rows, cols]
         
         plt.close('all')
     
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         title_ax.axis("off")
 
         im = ax.imshow(
-            W_Mani_DLS_1.reshape(-1, 2 * 2).T,
+            W_Inp_DLS_1.reshape(-1, 2 * 2).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         title_ax.axis("off")
 
         im = ax.imshow(
-            W_Mani_DMS_1.reshape(-1, 2 * 2).T,
+            W_Inp_DMS_1.reshape(-1, 2 * 2).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         title_ax.axis("off")
 
         im = ax.imshow(
-            W_Mani_DLS_2.reshape(-1, 2 * 2).T,
+            W_Inp_DLS_2.reshape(-1, 2 * 2).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         title_ax.axis("off")
 
         im = ax.imshow(
-            W_Mani_DMS_2.reshape(-1, 2 * 2).T,
+            W_Inp_DMS_2.reshape(-1, 2 * 2).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -260,65 +260,61 @@ if __name__ == "__main__":
         
         plt.show()
 
-        if args.bla.lower() == 'yes':
+    if args.bla.lower() == 'yes':
 
-            # Matrix
-            W_BLA_IC = df_new.filter(like="BLA_IC_W").to_numpy()
-            W_BLA_IC = W_BLA_IC.reshape(timesteps, 6, 6)
+        # Matrix
+        W_BLA_IC = df_new.filter(like="BLA_IC_W").to_numpy()
+        W_BLA_IC = W_BLA_IC.reshape(timesteps, 6, 6)
 
-            # Plotting setup
-            fig = plt.figure(figsize=(14, 2.2))
-            gs = GridSpec(
-                1,
-                2,
-                width_ratios=[1, 6],
-                hspace=0.25
-            )
+        # Plotting setup
+        fig = plt.figure(figsize=(14, 2.2))
+        gs = GridSpec(
+            1,
+            2,
+            width_ratios=[1, 6],
+            hspace=0.25
+        )
 
-            # Title
-            title_ax = fig.add_subplot(gs[0, 0])
-            title_ax.text(
-                0.3,
-                0.5,
-                "Weights BLA_IC",
-                ha="center",
-                va="center",
-                fontsize=15
-            )
-            title_ax.axis("off")
+        # Title
+        title_ax = fig.add_subplot(gs[0, 0])
+        title_ax.text(
+            0.3,
+            0.5,
+            "Weights BLA_IC",
+            ha="center",
+            va="center",
+            fontsize=15
+        )
+        title_ax.axis("off")
 
-            # Weights plot
-            ax = fig.add_subplot(gs[0, 1])
+        # Weights plot
+        ax = fig.add_subplot(gs[0, 1])
 
-            im = ax.imshow(
-                W_BLA_IC.reshape(-1, 6 * 6).T,
-                interpolation="none",
-                aspect="auto",
-                vmin=0,
-                vmax=2,
-                cmap="YlOrRd"
-            )
+        im = ax.imshow(
+            W_BLA_IC.reshape(-1, 6 * 6).T,
+            interpolation="none",
+            aspect="auto",
+            vmin=0,
+            vmax=2,
+            cmap="YlOrRd"
+        )
 
-            ax.set_ylabel("Connections", fontsize=10)
-            ax.set_xlabel("Timestep")
-            ax.set_yticks(
-                np.arange(36),
-                [f"W_{j}_{i}" for j in range(6) for i in range(6)]
-            )
+        ax.set_ylabel("Connections", fontsize=10)
+        ax.set_xlabel("Timestep")
+        ax.set_yticks(
+            np.arange(36),
+            [f"W_{j}_{i}" for j in range(6) for i in range(6)]
+        )
 
-            ax.spines["top"].set_visible(False)
-            ax.spines["right"].set_visible(False)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
 
-            fig.colorbar(
-                im,
-                ax=ax,
-                fraction=0.02,
-                pad=0.02
-            )
+        fig.colorbar(
+            im,
+            ax=ax,
+            fraction=0.02,
+            pad=0.02
+        )
 
-            plt.show()
-
-
-
-
+        plt.show()
     

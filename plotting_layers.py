@@ -80,7 +80,7 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                  height_ratios=[2.5, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 3.5],
                   hspace=0.25
                   )
     
@@ -130,14 +130,18 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
     
-    ax.set_yticks(np.arange(6), ['Lever',
-                                 'Chain',
-                                 'Food_1',
-                                 'Food_2',
-                                 'Sat_1',
-                                 'Sat_2'],
-                  fontsize=10
-                  )
+    ax.set_yticks(np.arange(8), [
+        'Light_1',
+        'Light_2',
+        'Lever',
+        'Chain',
+        'Food_1',
+        'Food_2',
+        'Sat_1',
+        'Sat_2'],
+        fontsize=10
+        )
+                                 
     
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

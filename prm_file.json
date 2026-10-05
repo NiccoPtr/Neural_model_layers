@@ -189,12 +189,12 @@
         "max_W": 2
     },
     "Str_Learn": {
-        "eta_DLS_1": 0.25,
-        "eta_DLS_2": 0.25,
-        "eta_DMS_1": 0.25,
-        "eta_DMS_2": 0.25,
-        "eta_NAc_1": 0.25,
-        "eta_NAc_2": 0.25,
+        "eta_DLS_1": 0.2,
+        "eta_DLS_2": 0.2,
+        "eta_DMS_1": 0.2,
+        "eta_DMS_2": 0.2,
+        "eta_NAc_1": 0.2,
+        "eta_NAc_2": 0.2,
         "theta_DA_DLS_1": 0.6,
         "theta_DA_DLS_2": 0.6,
         "theta_DA_DMS_1": 0.6,
