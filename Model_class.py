@@ -412,13 +412,17 @@ class Model:
 
         return delta_W
 
-
-    def learning(self, _input_):
+    def learning_BLA(self):
         """
         Set learning for internal layers' and evironmental matrices
         """
 
         self.BLA_IC.learn(self.VTA_output_pre)
+
+    def learning_str(self, _input_):
+        """
+        Set learning for internal layers' and evironmental matrices
+        """
 
         delta_W_BLA_IC_NAc_1 = self.delta_Str_learn_2(
             self.parameters.Str_Learn["eta_NAc_1"],
@@ -555,7 +559,7 @@ class Model:
 
         self.PL_output_pre = self.PL.output.copy()
 
-    def step(self, _input_, learning=True):
+    def step(self, _input_, learning_str=True, learning_BLA=True):
         """
         Compute step for each layer using the output_pre values
         """
@@ -684,7 +688,10 @@ class Model:
             + np.dot(self.Ws["PFCd_PPC_MC"], self.PFCd_PPC_output_pre)
         )
 
-        if learning:
-            self.learning( _input_)
+        if learning_str:
+            self.learning_str( _input_)
+
+        if learning_BLA:
+            self.learning_BLA()
 
         self.update_output_pre()

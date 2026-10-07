@@ -5,7 +5,7 @@ set -e
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None 00"
+    "None None 02"
 #    "NAc None NAc_pre_1"
 #    "None NAc NAc_post_1"
 #    "BLA None BLA_pre_1"
@@ -20,8 +20,8 @@ conditions=(
 #    "PL PL PL_pre_post_00"
 )
 
-seed_start=1
-seed_end=10
+seed_start=31
+seed_end=60
 
 SRC=$(dirname "$0"| xargs realpath)
 export PYTHONPATH=$SRC
@@ -143,9 +143,9 @@ EOF
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     ],
     "phases": [0.33, 0.66, 1.0]
 }

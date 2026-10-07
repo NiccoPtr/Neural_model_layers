@@ -159,7 +159,7 @@ if __name__ == "__main__":
             elif t == 150:
                 inp = env.copy()
 
-            model.step(inp)
+            model.step(inp, learning_str=False)
 
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
 
