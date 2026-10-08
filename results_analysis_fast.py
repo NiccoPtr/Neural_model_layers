@@ -64,7 +64,10 @@ if __name__ == '__main__':
     PIT_DIR = DATA_DIR / "PIT_testing"
     RESULTS_DIR = DATA_DIR / "results"
 
-    param_file = INST_DIR / f"instrumental_training_{args.id}" / "inst_sim_seed31" / "prm_file.json"
+    param_file = INST_DIR / f"instrumental_training_{args.id}" / "inst_sim_seed1" / "prm_file.json"
+
+    if not param_file.exists():
+        param_file = INST_DIR / f"instrumental_training_{args.id}" / "inst_sim_seed31" / "prm_file.json"
 
     if param_file.exists():
         parameters.load(param_file, mode="json")
@@ -104,7 +107,7 @@ if __name__ == '__main__':
     df = pd.melt(
         df,
         id_vars=["Seed", "Phase"],
-        value_vars=["Lever", "Chain"],
+        value_vars=["Chain"],
         value_name="Freq",
         var_name="Decision",
     )
@@ -115,13 +118,13 @@ if __name__ == '__main__':
         values="Freq"
     ).dropna().reset_index()
     
-    pvals = {}
+    # pvals = {}
     
-    for phase in ["BS", "C", "IC"]:
-        sub = stats_df[stats_df["Phase"] == phase]
+    # for phase in ["BS", "C", "IC"]:
+    #     sub = stats_df[stats_df["Phase"] == phase]
         
-        t, p = ttest_rel(sub["Lever"], sub["Chain"])
-        pvals[phase] = p
+    #     t, p = ttest_rel(sub["Lever"], sub["Chain"])
+    #     pvals[phase] = p
             
     fig, ax = plt.subplots()
     
@@ -130,28 +133,28 @@ if __name__ == '__main__':
     # -------------------------
     # add significance markers
     # -------------------------
-    y_max = df["Freq"].max()
-    offset = y_max * 0.08
+    # y_max = df["Freq"].max()
+    # offset = y_max * 0.08
     
-    # x positions inside each phase group (Seaborn default hue spacing)
-    phase_positions = {"BS": 0, "C": 1, "IC": 2}
+    # # x positions inside each phase group (Seaborn default hue spacing)
+    # phase_positions = {"BS": 0, "C": 1, "IC": 2}
     
-    hue_offset = {"Lever": -0.2, "Chain": 0.2}
+    # hue_offset = {"Lever": 0.0, "Chain": 0.2}
     
-    for i, phase in enumerate(["BS", "C", "IC"]):
+    # for i, phase in enumerate(["BS", "C", "IC"]):
         
-        star = p_to_stars(pvals[phase])
+    #     star = p_to_stars(pvals[phase])
         
-        x1 = phase_positions[phase] + hue_offset["Lever"]
-        x2 = phase_positions[phase] + hue_offset["Chain"]
+    #     x1 = phase_positions[phase] + hue_offset["Lever"]
+    #     x2 = phase_positions[phase] + hue_offset["Chain"]
         
-        y = y_max + offset * (i + 1)
+    #     y = y_max + offset * (i + 1)
     
-        ax.plot([x1, x2], [y, y], lw=1.5, c="black")
-        ax.text((x1 + x2) / 2, y + offset * 0.2, star,
-                ha="center", va="bottom")
+    #     ax.plot([x1, x2], [y, y], lw=1.5, c="black")
+    #     ax.text((x1 + x2) / 2, y + offset * 0.2, star,
+    #             ha="center", va="bottom")
     
-    ax.set_ylim(0, y_max + offset * 4)
+    # ax.set_ylim(0, y_max + offset * 4)
 
     if args.save_plot == 'yes':
         save_dir = RESULTS_DIR / f"simulation_ID_{args.id}"
