@@ -161,10 +161,6 @@ if __name__ == "__main__":
 
             elif t == 50:
                 inp = state.copy()
-                inp[2:8] = 0.0
-
-            elif t == 100:
-                inp = state.copy()
 
             model.step(inp, learning_str=False, learning_BLA=False)
             action = MC.output.copy()
