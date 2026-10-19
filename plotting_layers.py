@@ -59,10 +59,20 @@ if __name__ == "__main__":
     state = df_new.filter(like='Input').to_numpy()
     
     plt.close('all')
+    labels = [
+            'Light_1', 
+            'Light_2', 
+            'Lever', 
+            'Chain', 
+            'Food_1', 
+            'Food_2', 
+            'Sat_1', 
+            'Sat_2'
+        ]
     
     #Plotting set up
     plots = [
-        ('BLA_IC', [(BLA_IC[:, i], f'Unit_{i+1}') for i in range(6)], (-0.1, 1.2)),
+        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(6)], (-0.1, 1.2)),
         ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
