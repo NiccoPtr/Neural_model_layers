@@ -89,6 +89,9 @@ if __name__ == "__main__":
     elif args.lesion == "PL":
         model.PL.lesion = True
 
+    elif args.lesion == "VTA":
+        model.VTA.lesion = True
+
     else:
         model.BLA_IC.lesion = False
         model.BG_v.Str1.lesion = False
@@ -96,6 +99,7 @@ if __name__ == "__main__":
         model.BG_dm.Str1.lesion = False
         model.BG_dm.Str2.lesion = False
         model.PL.lesion = False
+        model.VTA.lesion = False
 
     sched = parameters.scheduling
     timesteps = sched["timesteps"]

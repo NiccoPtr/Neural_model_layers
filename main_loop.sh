@@ -5,19 +5,22 @@ set -e
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-#    "None None 02"
+    "None None 04"
 #    "NAc None NAc_pre_1"
-    "None NAc NAc_post_1"
+#    "None NAc NAc_post_1"
 #    "BLA None BLA_pre_1"
-    "None BLA BLA_post_1"
+#    "None BLA BLA_post_1"
 #    "DMS None DMS_pre_1"
 #    "None DMS DMS_post_1"
 #    "PL None PL_pre_1"
 #    "None PL PL_post_1"
-    "BLA BLA BLA_pre_post_01"
-#    "DMS DMS DMS_pre_post_00"
-    "NAc NAc NAc_pre_post_01"
-#    "PL PL PL_pre_post_00"
+#    "VTA None VTA_pre_1"
+#    "None VTA VTA_post_1"
+#    "BLA BLA BLA_pre_post_01"
+#    "DMS DMS DMS_pre_post_01"
+#    "NAc NAc NAc_pre_post_01"
+#    "PL PL PL_pre_post_01"
+#    "VTA VTA VTA_pre_post_01"
 )
 
 seed_start=1
@@ -143,9 +146,9 @@ EOF
     "trials": 100,
     "timesteps": 1000,
     "states": [
-        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     ],
     "phases": [0.33, 0.66, 1.0]
 }
@@ -163,6 +166,8 @@ EOF
         mkdir -p "$SIM"
 
         cd "$SIM"
+
+        cp "$CURR_DIR/prm_file.json" "$SIM/"
 
         echo "$scheduling" > scheduling.json
 
@@ -185,6 +190,6 @@ EOF
     python ${SRC}/results_analysis_fast.py \
         -p yes \
         -i $id \
-        -d Lever
+        -d Chain
 
 done

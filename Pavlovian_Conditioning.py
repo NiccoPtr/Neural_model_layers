@@ -90,6 +90,9 @@ if __name__ == "__main__":
     elif args.lesion == "PL":
         model.PL.lesion = True
 
+    elif args.lesion == "VTA":
+        model.VTA.lesion = True
+
     sched = parameters.scheduling
     timesteps = sched["timesteps"]
     trials = sched["trials"]
