@@ -9,9 +9,11 @@ from Layer_types import Leaky_onset_units_exc
 import numpy as np
 
 class CeA():
-    def __init__(self, parameters, rng):
+    def __init__(self, parameters, rng, BLA_IC = (1.0, 0.0, 0.0)):
 
         self.parameters = parameters
+
+        self.BLA_IC = np.array(BLA_IC)
         
         self.CeA = Leaky_onset_units_exc(
             self.parameters.N["CeA"],
@@ -23,7 +25,7 @@ class CeA():
         )
         
         self.Ws = {
-            "Inp_CeA": np.ones(8),
+            "Inp_CeA": np.ones(9),
             "BLA_IC_CeA": np.ones(3) * self.parameters.Matrices_scalars["BLA_IC_CeA"],
         }
 
@@ -59,26 +61,33 @@ class CeA():
         
         return delta_W_inp_str
 
-    def learning(self, parameters, da, inp):
+    def learning(self, da, inp):
 
-        self.delta_W_CS_CeA = self.delta_Str_learn(parameters.Str_Learn["eta_CeA"],
+        self.delta_W_CS_CeA = self.delta_Str_learn(self.parameters.Str_Learn["eta_CeA"],
                                            da,
                                            self.CeA.output,
                                            inp,
-                                           parameters.Str_Learn["theta_DA_CeA"],
-                                           parameters.Str_Learn["theta_CeA"],
-                                           parameters.Str_Learn["theta_inp_CeA"],
+                                           self.parameters.Str_Learn["theta_DA_CeA"],
+                                           self.parameters.Str_Learn["theta_CeA"],
+                                           self.parameters.Str_Learn["theta_inp_CeA"],
                                            self.W_learn_mask,
-                                           parameters.Str_Learn["max_W_CeA"],
+                                           self.parameters.Str_Learn["max_W_CeA"],
                                            self.Ws["Inp_CeA"]
                                            )
         
         self.Ws['Inp_CeA'] += self.delta_W_CS_CeA
 
-    def step(self, da, inp, BLA_IC = (1.0, 0.0, 0.0), learn = True):
+    def step(self, da, inp, learn = True):
+
+        # print(f"Input: {inp}")
+        # print(f"Inp_CeA_connection: {self.Ws['Inp_CeA']}")
+        # print(f"BLA_IC_CeA_connection: {self.Ws['BLA_IC_CeA']}")
+        # print(f"Input_CeA_value: {np.dot(self.Ws['Inp_CeA'], inp)}")
+        # print(f"BLA_IC_CeA_value: {np.dot(self.Ws['BLA_IC_CeA'], self.BLA_IC)}")
+        # print(f"Total_Inp_CeA_value: {np.dot(self.Ws['Inp_CeA'], inp) + np.dot(self.Ws['BLA_IC_CeA'], self.BLA_IC)}")
 
         self.CeA.step(
-            np.dot(self.Ws['Inp_CeA'], inp) + np.dot(self.Ws['BLA_IC_CeA'], np.array(BLA_IC))
+            np.dot(self.Ws['Inp_CeA'], inp) + np.dot(self.Ws['BLA_IC_CeA'], self.BLA_IC)
         )
 
         if learn:
