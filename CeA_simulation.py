@@ -9,7 +9,7 @@ from Layer_types import Leaky_onset_units_exc
 import numpy as np
 
 class CeA():
-    def __init__(self, parameters, rng, BLA_IC = (1.0, 0.0, 0.0)):
+    def __init__(self, parameters, rng, BLA_IC = (0.0, 0.0, 0.0)):
 
         self.parameters = parameters
 
@@ -63,19 +63,19 @@ class CeA():
 
     def learning(self, da, inp):
 
-        self.delta_W_CS_CeA = self.delta_Str_learn(self.parameters.Str_Learn["eta_CeA"],
+        self.delta_W_CS_CeA = self.delta_Str_learn(self.parameters.CeA_Learn["eta_c"],
                                            da,
                                            self.CeA.output,
                                            inp,
-                                           self.parameters.Str_Learn["theta_DA_CeA"],
-                                           self.parameters.Str_Learn["theta_CeA"],
-                                           self.parameters.Str_Learn["theta_inp_CeA"],
+                                           self.parameters.CeA_Learn["theta_DA"],
+                                           self.parameters.CeA_Learn["theta_CeA"],
+                                           self.parameters.CeA_Learn["theta_inp_CeA"],
                                            self.W_learn_mask,
-                                           self.parameters.Str_Learn["max_W_CeA"],
+                                           self.parameters.CeA_Learn["max_W"],
                                            self.Ws["Inp_CeA"]
                                            )
-        
-        self.Ws['Inp_CeA'] += self.delta_W_CS_CeA
+
+        self.Ws['Inp_CeA'] += self.delta_W_CS_CeA.flatten()
 
     def step(self, da, inp, learn = True):
 

@@ -202,6 +202,15 @@
         "theta_DA": 0.36,
         "max_W": 2
     },
+    "CeA_Learn": {
+        "eta_c": 0.0,
+        "alpha_t": 80.0,
+        "tau_t": 80,
+        "theta_CeA": 0.36,
+        "theta_inp_CeA": 0.36,
+        "theta_DA": 0.36,
+        "max_W": 2
+    },
     "Str_Learn": {
         "eta_DLS_1": 0.2,
         "eta_DLS_2": 0.2,

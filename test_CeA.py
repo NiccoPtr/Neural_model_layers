@@ -26,7 +26,7 @@ def plotting(res):
     BLA_IC = np.array(res["BLA_IC_output"])
     inp_timeline = np.array(res["inp_timeline"])
     da_timeline = np.array(res["DA_timeline"])
-    W_inp_CeA_timeline = np.array(res["W_inp_CeA_timeline"])
+    W_inp_CeA_timeline = np.array(res["W_inp_CeA_timeline"][:, :3])
 
     # Plotting set up
     plots = [
@@ -79,8 +79,8 @@ def plotting(res):
         vmax=1,
     )
 
-    ax.set_ylabel("Connections")
-    ax.set_yticks(np.arange(9), [f"W_{j}_{i}" for j in range(1) for i in range(9)])
+    ax.set_ylabel("Input units")
+    ax.set_yticks(np.arange(9), ["Light_1", "Light_2", "Light_3", "Mani_1", "Mani_2", "Food_1", "Food_2", "Food_3", "G_Sat"], fontsize=8)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -156,7 +156,8 @@ def parse_args():
         "-d",
         "--dopamine",
         type=float,
-        default=0.0,
+        nargs=1,
+        default=(0.0),
         help="Insert dopamine for learning: float type",
     )
     
@@ -197,12 +198,13 @@ if __name__ == "__main__":
 
         else:
             inp = np.array(args.inp)
+            CeA_model.BLA_IC = np.array([1.0, 0.0, 0.0])
 
         if t < 100:
-            da = np.array([parameters.baseline["VTA"]])
+            da = np.array(parameters.baseline["VTA"])
         
-        elif 100 < t < 120:
-            da = np.array([1.0])
+        elif 100 <= t <= 120:
+            da = np.array(1.0)
 
         else:
             da = np.array(args.dopamine)
