@@ -196,14 +196,19 @@ if __name__ == "__main__":
         if t <= 50:
             inp *= 0.0
 
-        else:
+        elif 50 < t <= 70:
             inp = np.array(args.inp)
+            inp[5:7] *= 0.0
             CeA_model.BLA_IC = np.array([1.0, 0.0, 0.0])
 
-        if t < 100:
+        else:
+            inp = np.array(args.inp)
+            CeA_model.BLA_IC = np.array([0.0, 0.0, 0.0])
+
+        if t < 50:
             da = np.array(parameters.baseline["VTA"])
         
-        elif 100 <= t <= 120:
+        elif 50 <= t <= 70:
             da = np.array(1.0)
 
         else:

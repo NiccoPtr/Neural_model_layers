@@ -38,7 +38,8 @@ class PPN_SNpc():
             "Food_PPN": np.array([1.0, 1.0]) * parameters.Matrices_scalars["Food_PPN"],
             "PPN_SNpco": np.array([1.0]) * parameters.Matrices_scalars["PPN_SNpco"],
             "NAc_SNpci_1": np.ones(parameters.N["SNpc"]) * parameters.Matrices_scalars["NAc_1_SNpci_1"],
-            "DMS_SNpci_2": np.ones(parameters.N["SNpc"]) * parameters.Matrices_scalars["DMS_1_SNpci_2"]
+            "DMS_SNpci_2": np.ones(parameters.N["SNpc"]) * parameters.Matrices_scalars["DMS_1_SNpci_2"],
+            "CeA_SNpc": np.ones(parameters.N["SNpc"]) * parameters.Matrices_scalars["CeA_SNpci"],
             }
         
         self.PPN_output_pre = np.zeros(parameters.N['PPN'])
@@ -52,12 +53,13 @@ class PPN_SNpc():
         
         self.PPN_output_pre = self.PPN.output.copy()
         
-    def step(self, inp, NAc_inp, DMS_inp):
+    def step(self, inp, NAc_inp, DMS_inp, CeA_inp):
         
         self.PPN.step(np.dot(self.Ws['Food_PPN'], inp))
         self.SNpc.step(np.dot(self.Ws['NAc_SNpci_1'], NAc_inp),
                        np.dot(self.Ws['DMS_SNpci_2'], DMS_inp),
-                       np.dot(self.Ws['PPN_SNpco'], self.PPN_output_pre)
+                       np.dot(self.Ws['PPN_SNpco'], self.PPN_output_pre),
+                       np.dot(self.Ws['CeA_SNpc'], CeA_inp)
                        )
         
         self.update_output_pre()

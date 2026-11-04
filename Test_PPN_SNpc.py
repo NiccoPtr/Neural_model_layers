@@ -109,7 +109,13 @@ def parse_args():
         default=0.0,
         help="DMS input",
     )
-    
+    parser.add_argument(
+        "--CeA",
+        type=float,
+        default=0.0,
+        help="CeA input",
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -141,6 +147,7 @@ if __name__ == "__main__":
 
     DMS_inp = np.array(args.DMS) * -1
     NAc_inp = np.array(args.NAc) * -1
+    CeA_inp = np.array(args.CeA) * -1
 
     for t in range(timesteps):
 
@@ -150,7 +157,16 @@ if __name__ == "__main__":
         else:
             inp = np.array(args.food)
 
-        PPN_SNpc_model.step(inp, NAc_inp, DMS_inp)
+        if t <= 20:
+            CeA_inp *= 0.0
+
+        elif 20 <= t <= 40:
+            CeA_inp = np.array(args.CeA) * -1
+
+        else:
+            CeA_inp *= 0.0
+
+        PPN_SNpc_model.step(inp, NAc_inp, DMS_inp, CeA_inp)
          
         PPN_output.append(PPN_SNpc_model.PPN.output.copy())
         SNpci_1.append(PPN_SNpc_model.SNpc.output_SNpci_1_pre.copy())
@@ -175,6 +191,7 @@ if __name__ == "__main__":
               Input: {args.food}
               NAc: {args.NAc}
               DMS: {args.DMS}
+              CeA: {args.CeA}
               """)
         plotting(result)
         plt.show()

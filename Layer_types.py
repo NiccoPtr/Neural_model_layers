@@ -346,14 +346,14 @@ class SNpc_Layer:
         self.output_SNpci_1_pre *= 0
         self.output_SNpci_2_pre *= 0
         
-    def step(self, inp_NAc, inp_DMS, inp_PPN):
+    def step(self, inp_NAc, inp_DMS, inp_PPN, inp_CeA):
         
-        self.SNpci_1.step(inp_NAc)
+        self.SNpci_1.step(inp_NAc + inp_CeA)
         output_i_1 = self.SNpci_1.output.copy()
         self.SNpco_1.step(np.dot(self.SNpc_Ws['SNpci_1_SNpco_1_W'], self.output_SNpci_1_pre) + inp_PPN)
         self.output_1 = self.SNpco_1.output.copy()
         
-        self.SNpci_2.step(inp_DMS)
+        self.SNpci_2.step(inp_DMS + inp_CeA)
         output_i_2 = self.SNpci_2.output.copy()
         self.SNpco_2.step(np.dot(self.SNpc_Ws['SNpci_2_SNpco_2_W'], self.output_SNpci_2_pre) + inp_PPN)
         self.output_2 = self.SNpco_2.output.copy()
