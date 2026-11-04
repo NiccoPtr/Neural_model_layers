@@ -3,7 +3,6 @@ import numpy as np
 
 from Layer_types import (BG_v2, BLA_IC_Layer, Leaky_onset_units_exc, Leaky_units_exc, SNpc_Layer)
 
-
 class Model:
 
     def __init__(self, parameters):
@@ -43,6 +42,15 @@ class Model:
             self.parameters.threshold["VTA"],
         )
 
+        self.CeA = Leaky_onset_units_exc(
+                    self.parameters.N["CeA"],
+                    self.parameters.tau["CeA"][0],
+                    self.parameters.tau["CeA"][1],
+                    self.parameters.baseline["CeA"],
+                    rng,
+                    self.parameters.noise["CeA"],
+                )
+        
         self.BLA_IC = BLA_IC_Layer(
             self.parameters.N["BLA_IC"],
             self.parameters.tau["BLA_IC"][0],
@@ -193,6 +201,8 @@ class Model:
 
         self.BLA_IC_output_pre = np.zeros(self.parameters.N["BLA_IC"])
 
+        self.CeA_output_pre = np.zeros(self.parameters.N["CeA"])
+
         self.SNpco_output_pre_1 = np.zeros(self.parameters.N["SNpc"])
 
         self.SNpco_output_pre_2 = np.zeros(self.parameters.N["SNpc"])
@@ -242,6 +252,7 @@ class Model:
         self.LH.reset_activity()
         self.VTA.reset_activity()
         self.BLA_IC.reset_activity()
+        self.CeA.reset_activity()
         self.SNpc.reset_activity()
         self.BG_dl.reset_activity()
         self.MGV.reset_activity()
@@ -259,45 +270,59 @@ class Model:
         """
 
         self.Ws = {
-            "inp_BLA_IC": np.array(
+            "Inp_BLA_IC": np.array(
                 [
-                    [1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0 , 0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0, 0.0 , 0.0],
-                    [0.0 , 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Inp_BLA_IC'], 0.0, 0.0, 0.0 , 0.0],
-                    [0.0 , 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0, -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC'], 0.0],
-                    [0.0 , 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars['Food_BLA_IC'], 0.0 , -1.0 * self.parameters.Matrices_scalars['Sat_BLA_IC']]
+                    [1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"]],
                 ]
             ),
+            "Inp_CeA": np.array(
+                    [0.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["Mani_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["Mani_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     0.0 * self.parameters.Matrices_scalars["G_Sat_CeA"]]
+            ),
             "Inp_DLS_1": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DLS"],
             "Inp_DLS_2": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DLS"],
             "Inp_DMS_1": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DMS"],
             "Inp_DMS_2": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DMS"],
-            "Food_PPN": np.array([0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
+            "Food_PPN": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_PPN"],
-            "Food_LH": np.array([0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
+            "Food_LH": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_LH"],
             "PPN_SNpco": np.array([1.0]) * self.parameters.Matrices_scalars["PPN_SNpco"],
-            "BLA_IC_NAc_1": np.array([[0.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]])
+            "CeA_SNpci": np.array([1.0]) * self.parameters.Matrices_scalars["CeA_SNpci"],
+            "BLA_IC_NAc_1": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]])
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
-            "BLA_IC_NAc_2": np.array([[0.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]])
+            "BLA_IC_NAc_2": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]])
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
-            "BLA_IC_LH": np.array([0.0, 0.0, 0.0, 0.0, 1.0, 1.0])
+            "BLA_IC_LH": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0])
             * self.parameters.Matrices_scalars["BLA_IC_LH"],
-            "BLA_IC_PPN": np.array([0.0, 0.0, 0.0, 0.0, 1.0, 1.0])
-            * self.parameters.Matrices_scalars["BLA_IC_PPN"],
+            "BLA_IC_CeA": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0])
+            * self.parameters.Matrices_scalars["BLA_IC_CeA"],
             "LH_VTA": np.array([1.0]) * self.parameters.Matrices_scalars["LH_VTA"],
             "NAc_SNpci_1": np.ones(self.parameters.N["SNpc"])
             * self.parameters.Matrices_scalars["NAc_1_SNpci_1"],
@@ -355,6 +380,9 @@ class Model:
             ),
             "Inp_DMS": np.array(
                 [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+            ),
+            "Inp_CeA": np.array(
+                [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             ),
             "BLA_IC_NAc": np.array([[0.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]]),
         }
@@ -512,6 +540,21 @@ class Model:
         self.Ws["Inp_DLS_2"] += delta_W_Inp_DLS_2
         self.Ws["Inp_DLS_2"] = np.maximum(self.Ws["Inp_DLS_2"], 0.0)
 
+        delta_W_Inp_CeA = self.delta_Str_learn_1(
+            self.parameters.CeA_Learn["eta_c"],
+            self.VTA_output_pre,
+            self.CeA_output_pre * -1,
+            _input_,
+            self.parameters.CeA_Learn["theta_DA"],
+            self.parameters.CeA_Learn["theta_CeA"],
+            self.parameters.CeA_Learn["theta_inp_CeA"],
+            self.Ws_learn_masks["Inp_CeA"],
+            self.parameters.CeA_Learn["max_W"],
+            self.Ws["Inp_CeA"],
+        )
+
+        self.Ws["Inp_CeA"] += delta_W_Inp_CeA
+
     def update_output_pre(self):
         """
         Update ouput_pre values based on current values
@@ -524,6 +567,8 @@ class Model:
         self.VTA_output_pre = self.VTA.output.copy()
 
         self.BLA_IC_output_pre = self.BLA_IC.output.copy()
+
+        self.CeA_output_pre = self.CeA.output.copy()
 
         self.SNpco_output_pre_1 = self.SNpc.output_1.copy()
 
@@ -565,7 +610,7 @@ class Model:
         """
         _input_ = np.asanyarray(_input_)
 
-        self.BLA_IC.step(np.dot(self.Ws["inp_BLA_IC"], _input_))
+        self.BLA_IC.step(np.dot(self.Ws["Inp_BLA_IC"], _input_))
 
         self.BG_dm.step(
                 (
@@ -614,10 +659,14 @@ class Model:
             * np.dot(self.Ws["MC_DLS_2"], self.MC_output_pre),
             np.dot(self.Ws["MC_STNdl"], self.MC_output_pre),
         )
+
+        self.CeA.step(
+            np.dot(self.Ws["Inp_CeA"], _input_)
+            + np.dot(self.Ws["BLA_IC_CeA"], self.BLA_IC_output_pre)
+        )
         
         self.PPN.step(
             np.dot(self.Ws["Food_PPN"], _input_)
-            + np.dot(self.Ws["BLA_IC_PPN"], self.BLA_IC_output_pre)
         )
 
         self.LH.step(
