@@ -47,6 +47,7 @@ if __name__ == "__main__":
     PFCd_PPC = df_new.filter(like="PFCd_PPC_Unit").to_numpy()
     PL = df_new.filter(like="PL_Unit").to_numpy()
     BLA_IC = df_new.filter(like="BLA_IC_Unit").to_numpy()
+    CeA = df_new.filter(like="CeA_Unit").to_numpy()
     NAc_1 = df_new.filter(like="NAc_1_Unit").to_numpy() * -1
     NAc_2 = df_new.filter(like="NAc_2_Unit").to_numpy() * -1
     DMS_1 = df_new.filter(like="DMS_1_Unit").to_numpy() * -1
@@ -62,17 +63,18 @@ if __name__ == "__main__":
     labels = [
             'Light_1', 
             'Light_2', 
+            'Light_3',
             'Lever', 
             'Chain', 
             'Food_1', 
             'Food_2', 
-            'Sat_1', 
-            'Sat_2'
+            'Food_3',
         ]
     
     #Plotting set up
     plots = [
-        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(6)], (-0.1, 1.2)),
+        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(8)], (-0.1, 1.2)),
+        ('CeA', [(CeA[:], 'CeA_Unit')], (-0.1, 1.2)),
         ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
         ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[2.5, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 3.5],
+                  height_ratios=[2.5, 1.2, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 3.5],
                   hspace=0.25
                   )
     
@@ -140,15 +142,19 @@ if __name__ == "__main__":
         cmap='YlOrRd'
     )
     
-    ax.set_yticks(np.arange(8), [
+    ax.set_yticks(np.arange(12), [
         'Light_1',
         'Light_2',
+        'Light_3',
         'Lever',
         'Chain',
         'Food_1',
         'Food_2',
+        'Food_3',
+        'G_Sat',
         'Sat_1',
-        'Sat_2'],
+        'Sat_2',
+        'Sat_3'],
         fontsize=10
         )
                                  

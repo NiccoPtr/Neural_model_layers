@@ -272,14 +272,14 @@ class Model:
         self.Ws = {
             "Inp_BLA_IC": np.array(
                 [
-                    [1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"]],
+                    [1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"]],
                 ]
             ),
             "Inp_CeA": np.array(
@@ -291,33 +291,36 @@ class Model:
                      0.0 * self.parameters.Matrices_scalars["Food_CeA"],
                      0.0 * self.parameters.Matrices_scalars["Food_CeA"],
                      0.0 * self.parameters.Matrices_scalars["Food_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["G_Sat_CeA"]]
+                     0.0 * self.parameters.Matrices_scalars["G_Sat_CeA"],
+                     0.0,
+                     0.0,
+                     0.0]
             ),
             "Inp_DLS_1": np.array(
-                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DLS"],
             "Inp_DLS_2": np.array(
-                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DLS"],
             "Inp_DMS_1": np.array(
-                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DMS"],
             "Inp_DMS_2": np.array(
-                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             )
             * self.parameters.Matrices_scalars["Inp_DMS"],
-            "Food_PPN": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
+            "Food_PPN": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,0.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_PPN"],
-            "Food_LH": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
+            "Food_LH": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0])
             * self.parameters.Matrices_scalars["Food_LH"],
             "PPN_SNpco": np.array([1.0]) * self.parameters.Matrices_scalars["PPN_SNpco"],
             "CeA_SNpci": np.array([1.0]) * self.parameters.Matrices_scalars["CeA_SNpci"],
-            "BLA_IC_NAc_1": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]])
+            "BLA_IC_NAc_1": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0]])
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
-            "BLA_IC_NAc_2": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]])
+            "BLA_IC_NAc_2": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0]])
             * self.parameters.Matrices_scalars["BLA_IC_NAc"],
             "BLA_IC_LH": np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0])
             * self.parameters.Matrices_scalars["BLA_IC_LH"],
@@ -376,15 +379,15 @@ class Model:
 
         self.Ws_learn_masks = {
             "Inp_DLS": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             ),
             "Inp_DMS": np.array(
-                [[0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+                [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
             ),
             "Inp_CeA": np.array(
-                [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             ),
-            "BLA_IC_NAc": np.array([[0.0, 0.0, 0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]]),
+            "BLA_IC_NAc": np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0]]),
         }
 
     def delta_Str_learn_1(

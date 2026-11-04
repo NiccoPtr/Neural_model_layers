@@ -77,6 +77,9 @@ if __name__ == "__main__":
     
     if args.lesion == "BLA":
         model.BLA_IC.lesion = True
+
+    elif args.lesion == "CeA":
+        model.CeA.lesion = True
         
     elif args.lesion == "NAc":
         model.BG_v.Str1.lesion = True
@@ -94,6 +97,7 @@ if __name__ == "__main__":
 
     else:
         model.BLA_IC.lesion = False
+        model.CeA.lesion = False
         model.BG_v.Str1.lesion = False
         model.BG_v.Str2.lesion = False
         model.BG_dm.Str1.lesion = False
@@ -133,6 +137,7 @@ if __name__ == "__main__":
         DLS_output = np.empty((timesteps, model.BG_dl.Str1.N), dtype=np.float32)
         DMS_output = np.empty((timesteps, model.BG_dm.Str1.N), dtype=np.float32)
         BLA_IC_output = np.empty((timesteps, model.BLA_IC.N), dtype=np.float32)
+        CeA_output = np.empty((timesteps, model.CeA.N), dtype=np.float32)
         NAc_output = np.empty((timesteps, model.BG_v.Str1.N), dtype=np.float32)
         BGv_output = np.empty((timesteps, model.BG_v.GPi_SNpr.N), dtype=np.float32)
         BGdm_output = np.empty((timesteps, model.BG_dm.GPi_SNpr.N), dtype=np.float32)
@@ -142,6 +147,7 @@ if __name__ == "__main__":
         DM_output = np.empty((timesteps, model.DM.N), dtype=np.float32)
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
+        W_Inp_CeA = np.empty((timesteps, model.CeA.N, len(state)), dtype=np.float32)
         W_Inp_DLS = np.empty((timesteps, model.BG_dl.Str1.N, len(state)), dtype=np.float32)
         W_Inp_DMS = np.empty((timesteps, model.BG_dm.Str1.N, len(state)), dtype=np.float32)
         W_BLA_IC = np.empty((timesteps, model.BLA_IC.N, model.BLA_IC.N), dtype=np.float32)
@@ -153,6 +159,7 @@ if __name__ == "__main__":
         DMS = model.BG_dm.Str1
         DLS = model.BG_dl.Str1
         BLA_IC = model.BLA_IC
+        CeA = model.CeA
         DA_1 = model.SNpc.SNpco_1
         DA_2 = model.SNpc.SNpco_2
         DA_3 = model.VTA
@@ -179,10 +186,12 @@ if __name__ == "__main__":
             DLS_output[t] = DLS.output
             DMS_output[t] = DMS.output
             BLA_IC_output[t] = BLA_IC.output
+            CeA_output[t] = CeA.output
             NAc_output[t] = NAc.output
             DA_timeline[t] = da
             W_BLA_IC[t] = BLA_IC.W
             W_BLA_IC_NAc[t] = model.Ws["BLA_IC_NAc_1"]
+            W_Inp_CeA[t] = model.Ws["Inp_CeA"]
             W_Inp_DLS[t] = model.Ws["Inp_DLS_1"]
             W_Inp_DMS[t] = model.Ws["Inp_DMS_1"]
 
@@ -204,6 +213,7 @@ if __name__ == "__main__":
             "Env_timeline": env_t.copy(),
             "States_timeline": state_t.copy(),
             "BLA_IC_output": BLA_IC_output.copy(),
+            "CeA_output": CeA_output.copy(),
             "NAc_output": NAc_output.copy(),
             "DMS_output": DMS_output.copy(),
             "DLS_output": DLS_output.copy(),
@@ -213,6 +223,7 @@ if __name__ == "__main__":
             "DA_timeline": DA_timeline.copy(),
             "W_BLA_IC": W_BLA_IC,
             "W_BLA_IC_NAc": W_BLA_IC_NAc,
+            "W_Inp_CeA": W_Inp_CeA,
             "W_Inp_DLS": W_Inp_DLS,
             "W_Inp_DMS": W_Inp_DMS,
         }
@@ -233,6 +244,7 @@ if __name__ == "__main__":
     env_cols = [f"Env_{i}" for i in range(len(env.copy()))]
     state_cols = [f"Input_{i}" for i in range(len(state.copy()))]
     BLA_IC_cols = [f"BLA_IC_Unit_{i}" for i in range(model.BLA_IC.N)]
+    CeA_cols = [f"CeA_Unit_{i}" for i in range(model.CeA.N)]
     NAc_cols = [f"NAc_Unit_{i}" for i in range(model.BG_v.Str1.N)]
     DMS_cols = [f"DMS_Unit_{i}" for i in range(model.BG_dm.Str1.N)]
     DLS_cols = [f"DLS_Unit_{i}" for i in range(model.BG_dl.Str1.N)]
@@ -251,11 +263,15 @@ if __name__ == "__main__":
         for y in range(model.Ws["BLA_IC_NAc_1"].shape[1])
     ]
     W_cols_3 = [
+        f"Inp_CeA_W{x}"
+        for x in range(model.Ws["Inp_CeA"].shape[0])
+    ]
+    W_cols_4 = [
         f"Inp_DLS_W{x}_{y}"
         for x in range(model.Ws["Inp_DLS_1"].shape[0])
         for y in range(model.Ws["Inp_DLS_1"].shape[1])
     ]
-    W_cols_4 = [
+    W_cols_5 = [
         f"Inp_DMS_W{x}_{y}"
         for x in range(model.Ws["Inp_DMS_1"].shape[0])
         for y in range(model.Ws["Inp_DMS_1"].shape[1])
@@ -269,6 +285,7 @@ if __name__ == "__main__":
         + env_cols
         + state_cols
         + BLA_IC_cols
+        + CeA_cols
         + NAc_cols
         + DMS_cols
         + DLS_cols
@@ -280,6 +297,7 @@ if __name__ == "__main__":
         + W_cols_2
         + W_cols_3
         + W_cols_4
+        + W_cols_5
     )
     dfs = []
 

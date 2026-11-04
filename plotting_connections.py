@@ -25,8 +25,8 @@ def parse_args():
         help="Define trial to refer for plotting"
     )
     parser.add_argument(
-            '-b',
-            "--bla",
+            '-a',
+            "--amg",
             type=str,
             help="Specificy if you want to see BLA connections, 'yes' or 'no', if 'yes' is specified, only BLA connections will be plotted",
             default='no'
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     timesteps = len(df_new)
 
-    if args.bla.lower() == 'no':
+    if args.amg.lower() == 'no':
     
         #Matrices
         W_BLA_IC_NAc_1 = df_new.filter(like="BLA_IC_NAc_1_W").to_numpy()
@@ -60,19 +60,19 @@ if __name__ == "__main__":
         W_Inp_DMS_2 = df_new.filter(like="Inp_DMS_2_W").to_numpy()
 
         #Matrices reshape 
-        W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 6)
-        W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2.reshape(timesteps, 2, 6)
-        W_Inp_DLS_1 = W_Inp_DLS_1.reshape(timesteps, 2, 8)
-        W_Inp_DLS_2 = W_Inp_DLS_2.reshape(timesteps, 2, 8)
-        W_Inp_DMS_1 = W_Inp_DMS_1.reshape(timesteps, 2, 8)
-        W_Inp_DMS_2 = W_Inp_DMS_2.reshape(timesteps, 2, 8)
+        W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1.reshape(timesteps, 2, 8)
+        W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2.reshape(timesteps, 2, 8)
+        W_Inp_DLS_1 = W_Inp_DLS_1.reshape(timesteps, 2, 12)
+        W_Inp_DLS_2 = W_Inp_DLS_2.reshape(timesteps, 2, 12)
+        W_Inp_DMS_1 = W_Inp_DMS_1.reshape(timesteps, 2, 12)
+        W_Inp_DMS_2 = W_Inp_DMS_2.reshape(timesteps, 2, 12)
 
         #Isolate Matrices' connections of interest
-        rows, cols = np.ix_([0, 1], [4, 5])
+        rows, cols = np.ix_([0, 1], [5, 6])
         W_BLA_IC_NAc_1 = W_BLA_IC_NAc_1[:, rows, cols]
         W_BLA_IC_NAc_2 = W_BLA_IC_NAc_2[:, rows, cols]
 
-        rows, cols = np.ix_([0, 1], [2, 3])
+        rows, cols = np.ix_([0, 1], [3, 4])
         W_Inp_DLS_1 = W_Inp_DLS_1[:, rows, cols]
         W_Inp_DLS_2 = W_Inp_DLS_2[:, rows, cols]
         W_Inp_DMS_1 = W_Inp_DMS_1[:, rows, cols]
@@ -260,11 +260,11 @@ if __name__ == "__main__":
         
         plt.show()
 
-    if args.bla.lower() == 'yes':
+    if args.amg.lower() == 'yes':
 
         # Matrix
         W_BLA_IC = df_new.filter(like="BLA_IC_W").to_numpy()
-        W_BLA_IC = W_BLA_IC.reshape(timesteps, 6, 6)
+        W_BLA_IC = W_BLA_IC.reshape(timesteps, 8, 8)
 
         # Plotting setup
         fig = plt.figure(figsize=(14, 2.2))
@@ -291,7 +291,7 @@ if __name__ == "__main__":
         ax = fig.add_subplot(gs[0, 1])
 
         im = ax.imshow(
-            W_BLA_IC.reshape(-1, 6 * 6).T,
+            W_BLA_IC.reshape(-1, 8 * 8).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -302,8 +302,62 @@ if __name__ == "__main__":
         ax.set_ylabel("Connections", fontsize=10)
         ax.set_xlabel("Timestep")
         ax.set_yticks(
-            np.arange(36),
-            [f"W_{j}_{i}" for j in range(6) for i in range(6)]
+            np.arange(64),
+            [f"W_{j}_{i}" for j in range(8) for i in range(8)]
+        )
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        fig.colorbar(
+            im,
+            ax=ax,
+            fraction=0.02,
+            pad=0.02
+        )
+
+        # Matrix
+        W_Inp_CeA = df_new.filter(like="Inp_CeA_W").to_numpy()
+        W_Inp_CeA = W_Inp_CeA.reshape(timesteps, 1, 9)
+
+        # Plotting setup
+        fig = plt.figure(figsize=(14, 2.2))
+        gs = GridSpec(
+            1,
+            2,
+            width_ratios=[1, 6],
+            hspace=0.25
+        )
+
+        # Title
+        title_ax = fig.add_subplot(gs[0, 0])
+        title_ax.text(
+            0.3,
+            0.5,
+            "Weights Inp_CeA",
+            ha="center",
+            va="center",
+            fontsize=15
+        )
+        title_ax.axis("off")
+
+        # Weights plot
+        ax = fig.add_subplot(gs[0, 1])
+
+        im = ax.imshow(
+            W_Inp_CeA.reshape(-1, 1 * 9).T,
+            interpolation="none",
+            aspect="auto",
+            vmin=0,
+            vmax=2,
+            cmap="YlOrRd"
+        )
+
+        ax.set_ylabel("Connections", fontsize=10)
+        ax.set_xlabel("Timestep")
+        ax.set_yticks(
+            np.arange(9),
+            [f"W_{j}_{i}" for j in range(1) for i in range(9)]
         )
 
         ax.spines["top"].set_visible(False)
