@@ -277,9 +277,9 @@ class Model:
                     [0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Inp_BLA_IC"], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0, 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"], 0.0],
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters["Sat_BLA_IC"]],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters.Matrices_scalars["Sat_BLA_IC"], 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters.Matrices_scalars["Sat_BLA_IC"], 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 * self.parameters.Matrices_scalars["Food_BLA_IC"], 0.0, 0.0, 0.0, -1.0 *self.parameters.Matrices_scalars["Sat_BLA_IC"]],
                 ]
             ),
             "Inp_CeA": np.array(
@@ -556,7 +556,7 @@ class Model:
             self.Ws["Inp_CeA"],
         )
 
-        self.Ws["Inp_CeA"] += delta_W_Inp_CeA
+        self.Ws["Inp_CeA"] += delta_W_Inp_CeA.flatten()
 
     def update_output_pre(self):
         """
@@ -707,6 +707,7 @@ class Model:
             np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmin(self.NAc_output_pre_1)]),
             np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmin(self.DMS_output_pre_1)]),
             np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre),
+            np.dot(self.Ws["CeA_SNpci"], self.CeA_output_pre)
         )
 
         self.DM.step(

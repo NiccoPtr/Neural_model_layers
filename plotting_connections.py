@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
         # Matrix
         W_Inp_CeA = df_new.filter(like="Inp_CeA_W").to_numpy()
-        W_Inp_CeA = W_Inp_CeA.reshape(timesteps, 1, 9)
+        W_Inp_CeA = W_Inp_CeA.reshape(timesteps, 1, 12)
 
         # Plotting setup
         fig = plt.figure(figsize=(14, 2.2))
@@ -345,7 +345,7 @@ if __name__ == "__main__":
         ax = fig.add_subplot(gs[0, 1])
 
         im = ax.imshow(
-            W_Inp_CeA.reshape(-1, 1 * 9).T,
+            W_Inp_CeA.reshape(-1, 1 * 12).T,
             interpolation="none",
             aspect="auto",
             vmin=0,
@@ -356,8 +356,8 @@ if __name__ == "__main__":
         ax.set_ylabel("Connections", fontsize=10)
         ax.set_xlabel("Timestep")
         ax.set_yticks(
-            np.arange(9),
-            [f"W_{j}_{i}" for j in range(1) for i in range(9)]
+            np.arange(12),
+            [f"W_{j}_{i}" for j in range(1) for i in range(12)]
         )
 
         ax.spines["top"].set_visible(False)

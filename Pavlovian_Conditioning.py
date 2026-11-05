@@ -133,7 +133,7 @@ if __name__ == "__main__":
         DA_timeline = np.empty((timesteps, 3), dtype=np.float32)
         W_BLA_IC_NAc_1 = np.empty((timesteps, model.BG_v.Str1.N, model.BLA_IC.N), dtype=np.float32)
         W_BLA_IC_NAc_2 = np.empty((timesteps, model.BG_v.Str2.N, model.BLA_IC.N), dtype=np.float32)
-        W_Inp_CeA = np.empty((timesteps, model.CeA.N, len(state)), dtype=np.float32)
+        W_Inp_CeA = np.empty((timesteps, model.CeA.N, len(env)), dtype=np.float32)
         W_Inp_DLS_1 = np.empty((timesteps, model.BG_dl.Str1.N, len(env)), dtype=np.float32)
         W_Inp_DLS_2 = np.empty((timesteps, model.BG_dl.Str2.N, len(env)), dtype=np.float32)
         W_Inp_DMS_1 = np.empty((timesteps, model.BG_dm.Str1.N, len(env)), dtype=np.float32)
@@ -163,7 +163,7 @@ if __name__ == "__main__":
                 
             elif t == 50:
                 inp = env.copy()
-                inp[4:6] = 0.0
+                inp[5:7] = 0.0
 
             elif t == 150:
                 inp = env.copy()
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     ]
     W_cols_2 = [
         f"Inp_CeA_W{x}"
-        for x in range(model.Ws["Inp_CeA"].shape)
+        for x in range(model.Ws["Inp_CeA"].shape[0])
     ]
     W_cols_3 = [
         f"BLA_IC_NAc_1_W{x}_{y}"

@@ -92,7 +92,7 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[2.5, 1.2, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 3.5],
+                  height_ratios=[4.0, 1.2, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.8, 4.2],
                   hspace=0.25
                   )
     

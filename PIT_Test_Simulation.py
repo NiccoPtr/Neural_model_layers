@@ -198,12 +198,12 @@ if __name__ == "__main__":
             if np.any(attention >= PFCd_PPC.threshold):
                 attention_winner = np.argmax(attention)
 
-                if env[attention_winner + 2] == 1.0:
-                    state[2:4] = 0.0
-                    state[attention_winner + 2] = 1.0
+                if env[attention_winner + 3] == 1.0:
+                    state[3:5] = 0.0
+                    state[attention_winner + 3] = 1.0
 
             else:
-                state[2:4] = 0.0
+                state[3:5] = 0.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,

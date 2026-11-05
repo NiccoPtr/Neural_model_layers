@@ -155,7 +155,7 @@ if __name__ == "__main__":
                 inp = np.zeros_like(state)
                 
             elif t >= 50:
-                if np.any(inp[4:6] == 1.0):
+                if np.any(inp[5:7] == 1.0):
                     inp *= 1.0
 
                 else:
@@ -192,19 +192,19 @@ if __name__ == "__main__":
             if np.any(attention >= PFCd_PPC.threshold):
                 attention_winner = np.argmax(attention)
 
-                if env[attention_winner + 2] == 1.0:
-                    state[2:4] = 0.0
-                    state[attention_winner + 2] = 1.0
+                if env[attention_winner + 3] == 1.0:
+                    state[3:5] = 0.0
+                    state[attention_winner + 3] = 1.0
 
             else:
-                state[2:4] = 0.0
+                state[3:5] = 0.0
 
             if t >= 100 and np.any(action >= MC.threshold):
                 action_winner = np.argmax(action)
 
-                if state[action_winner + 2] == 1.0:
-                    state[4:6] = 0.0
-                    state[action_winner + 4] = 1.0
+                if state[action_winner + 3] == 1.0:
+                    state[5:7] = 0.0
+                    state[action_winner + 5] = 1.0
         
         result = {
             "Seed": np.ones(timesteps) * parameters.seed,
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     ]
     W_cols_2 = [
         f"Inp_CeA_W{x}"
-        for x in range(model.Ws["Inp_CeA"].shape)
+        for x in range(model.Ws["Inp_CeA"].shape[0])
     ]
     W_cols_3 = [
         f"BLA_IC_NAc_1_W{x}_{y}"
