@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from Layer_types import (BG_v2, BLA_IC_Layer, Leaky_onset_units_exc, Leaky_units_exc, SNpc_Layer)
+from Layer_types import (BG_v2, BLA_IC_Layer, Leaky_onset_units_exc, Leaky_onset_units_inh, Leaky_units_exc, SNpc_Layer)
 
 class Model:
 
@@ -42,7 +42,7 @@ class Model:
             self.parameters.threshold["VTA"],
         )
 
-        self.CeA = Leaky_onset_units_exc(
+        self.CeA = Leaky_onset_units_inh(
                     self.parameters.N["CeA"],
                     self.parameters.tau["CeA"][0],
                     self.parameters.tau["CeA"][1],
@@ -443,7 +443,7 @@ class Model:
 
         return delta_W
 
-    def learning_amg(self):
+    def learning_amg(self, _input_):
         """
         Set learning for internal layers' and evironmental matrices
         """
@@ -746,6 +746,6 @@ class Model:
             self.learning_str( _input_)
 
         if learning_amg:
-            self.learning_amg()
+            self.learning_amg(_input_)
 
         self.update_output_pre()
