@@ -443,12 +443,27 @@ class Model:
 
         return delta_W
 
-    def learning_BLA(self):
+    def learning_amg(self):
         """
         Set learning for internal layers' and evironmental matrices
         """
 
         self.BLA_IC.learn(self.VTA_output_pre)
+
+        delta_W_Inp_CeA = self.delta_Str_learn_1(
+            self.parameters.CeA_Learn["eta_c"],
+            self.VTA_output_pre,
+            self.CeA_output_pre * -1,
+            _input_,
+            self.parameters.CeA_Learn["theta_DA"],
+            self.parameters.CeA_Learn["theta_CeA"],
+            self.parameters.CeA_Learn["theta_inp_CeA"],
+            self.Ws_learn_masks["Inp_CeA"],
+            self.parameters.CeA_Learn["max_W"],
+            self.Ws["Inp_CeA"],
+        )
+
+        self.Ws["Inp_CeA"] += delta_W_Inp_CeA.flatten()
 
     def learning_str(self, _input_):
         """
@@ -543,20 +558,6 @@ class Model:
         self.Ws["Inp_DLS_2"] += delta_W_Inp_DLS_2
         self.Ws["Inp_DLS_2"] = np.maximum(self.Ws["Inp_DLS_2"], 0.0)
 
-        delta_W_Inp_CeA = self.delta_Str_learn_1(
-            self.parameters.CeA_Learn["eta_c"],
-            self.VTA_output_pre,
-            self.CeA_output_pre * -1,
-            _input_,
-            self.parameters.CeA_Learn["theta_DA"],
-            self.parameters.CeA_Learn["theta_CeA"],
-            self.parameters.CeA_Learn["theta_inp_CeA"],
-            self.Ws_learn_masks["Inp_CeA"],
-            self.parameters.CeA_Learn["max_W"],
-            self.Ws["Inp_CeA"],
-        )
-
-        self.Ws["Inp_CeA"] += delta_W_Inp_CeA.flatten()
 
     def update_output_pre(self):
         """
@@ -607,7 +608,7 @@ class Model:
 
         self.PL_output_pre = self.PL.output.copy()
 
-    def step(self, _input_, learning_str=True, learning_BLA=True):
+    def step(self, _input_, learning_str=True, learning_amg=True):
         """
         Compute step for each layer using the output_pre values
         """
@@ -744,7 +745,7 @@ class Model:
         if learning_str:
             self.learning_str( _input_)
 
-        if learning_BLA:
-            self.learning_BLA()
+        if learning_amg:
+            self.learning_amg()
 
         self.update_output_pre()
