@@ -47,7 +47,7 @@ if __name__ == "__main__":
     PFCd_PPC = df_new.filter(like="PFCd_PPC_Unit").to_numpy()
     PL = df_new.filter(like="PL_Unit").to_numpy()
     BLA_IC = df_new.filter(like="BLA_IC_Unit").to_numpy()
-    CeA = df_new.filter(like="CeA_Unit").to_numpy()
+    CeA = df_new.filter(like="CeA_Unit").to_numpy() * -1
     NAc = df_new.filter(like="NAc_Unit").to_numpy() * -1
     DMS = df_new.filter(like="DMS_Unit").to_numpy() * -1
     DLS = df_new.filter(like="DLS_Unit").to_numpy() * -1

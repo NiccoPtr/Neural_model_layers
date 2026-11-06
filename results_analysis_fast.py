@@ -173,7 +173,7 @@ if __name__ == "__main__":
             "Phase": {
                 1: "BS",
                 2: "Specific",
-                3: "General",
+                3: "Incongruent",
             },
         },
         inplace=True,
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         inplace=True,
     )
 
-    phase_order = ["BS", "Specific", "General"]
+    phase_order = ["BS", "Specific", "Incongruent"]
 
     plot_df["Phase"] = pd.Categorical(
         plot_df["Phase"],
@@ -224,8 +224,8 @@ if __name__ == "__main__":
 
     comparisons = [
         ("BS", "Specific"),
-        ("BS", "General"),
-        ("Specific", "General"),
+        ("BS", "Incongruent"),
+        ("Specific", "Incongruent"),
     ]
 
     pvals = {}
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     phase_positions = {
         "BS": 0,
         "Specific": 1,
-        "General": 2,
+        "Incongruent": 2,
     }
 
     for i, (phase1, phase2) in enumerate(comparisons):

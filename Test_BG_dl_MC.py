@@ -168,7 +168,7 @@ def parse_args():
         "--dopamine",
         type=float,
         default=0.0,
-        help="Insert dopamine for learnig: float type",
+        help="Insert dopamine for learning: float type",
     )
     
     return parser.parse_args()
@@ -180,9 +180,15 @@ if __name__ == "__main__":
     da = np.array(args.dopamine)
 
     parameters = Parameters()
-    if Path("prm_file.json").exists():
-        parameters.load("prm_file.json", mode="json")
-    parameters.seed = args.seed
+    BASE_DIR = Path(__file__).resolve().parent
+
+    prm_file = BASE_DIR / "prm_file.json"
+
+    if prm_file.exists():
+        parameters.load(prm_file, mode="json")
+        print("Imported parameters successfully")
+    else:
+        raise ValueError(f"Parameters file not found: {prm_file}")
 
     rng = np.random.RandomState(parameters.seed)
     CT_BG_model = CT_BG(parameters, rng)

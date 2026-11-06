@@ -173,7 +173,7 @@ if __name__ == "__main__":
             elif t == 50:
                 inp = state.copy()
 
-            model.step(inp, learning_str=False, learning_BLA=False)
+            model.step(inp, learning_str=False, learning_amg=False)
             action = MC.output.copy()
             attention = PFCd_PPC.output.copy()
             da = np.array([DA_1.output, DA_2.output, DA_3.output]).squeeze()
