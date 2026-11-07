@@ -283,15 +283,15 @@ class Model:
                 ]
             ),
             "Inp_CeA": np.array(
-                    [0.0 * self.parameters.Matrices_scalars["CS_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["CS_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["CS_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["Mani_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["Mani_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["Food_CeA"],
-                     0.0 * self.parameters.Matrices_scalars["G_Sat_CeA"],
+                    [1.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["CS_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["Mani_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["Mani_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     1.0 * self.parameters.Matrices_scalars["Food_CeA"],
+                     -1.0 * self.parameters.Matrices_scalars["G_Sat_CeA"],
                      0.0,
                      0.0,
                      0.0]
@@ -705,8 +705,8 @@ class Model:
         )
 
         self.SNpc.step(
-            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmax(self.NAc_output_pre_1)]),
-            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmax(self.DMS_output_pre_1)]),
+            np.dot(self.Ws["NAc_SNpci_1"], self.NAc_output_pre_1[np.argmin(self.NAc_output_pre_1)]),
+            np.dot(self.Ws["DMS_SNpci_2"], self.DMS_output_pre_1[np.argmin(self.DMS_output_pre_1)]),
             np.dot(self.Ws["PPN_SNpco"], self.PPN_output_pre),
             np.dot(self.Ws["CeA_SNpci"], self.CeA_output_pre)
         )

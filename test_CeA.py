@@ -212,7 +212,7 @@ if __name__ == "__main__":
             da = np.array(1.0)
 
         else:
-            da = np.array(args.dopamine)
+            da = np.array(parameters.baseline["VTA"])
 
         CeA_model.step(da, inp)
 

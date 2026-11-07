@@ -170,7 +170,7 @@ if __name__ == "__main__":
             if t < 50:
                 inp = np.zeros_like(state)
 
-            elif t == 50:
+            else:
                 inp = state.copy()
 
             model.step(inp, learning_str=False, learning_amg=False)
