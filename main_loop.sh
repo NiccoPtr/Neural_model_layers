@@ -5,7 +5,7 @@ set -e
 #Use AREA_pre/post_odd numbers for ID for Lesion simulation
 
 conditions=(
-    "None None Y"
+    "None None X"
 #    "NAc None NAc_pre_1"
 #    "None NAc NAc_post_1"
 #    "BLA None BLA_pre_1"
@@ -92,104 +92,104 @@ EOF
 
     done
 
-#     # ==========================================
-#     # PAVLOVIAN SCHEDULING
-#     # ==========================================
+    # ==========================================
+    # PAVLOVIAN SCHEDULING
+    # ==========================================
 
-#     scheduling=$(cat << EOF
-# {
-#     "trials": 100,
-#     "timesteps": 1000,
-#     "states": [
-#         [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#         [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#     ],
-#     "phases": [0.5, 1.0]
-# }
-# EOF
-# )
+    scheduling=$(cat << EOF
+{
+    "trials": 100,
+    "timesteps": 1000,
+    "states": [
+        [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    ],
+    "phases": [0.5, 1.0]
+}
+EOF
+)
 
-# # # ==========================================
-# #     # PAVLOVIAN TRAINING LOOP
-# #     # ==========================================
-
-#     for seed in $(seq $seed_start 1 $seed_end); do
-
-#         SIM="${PAV_DIR}/pav_sim_seed${seed}"
-
-#         mkdir -p "$SIM"
-
-#         cd "$SIM"
-
-#         cp "$CURR_DIR/prm_file.json" "$SIM/"
-
-#         echo "$scheduling" > scheduling.json
-
-#         echo "Running PAVLOVIAN simulation seed=$seed"
-
-#         python ${SRC}/Pavlovian_Conditioning.py \
-#             -d scheduling.json \
-#             -i $id \
-#             -s $seed \
-#             -l $lesion_pre
-
-#         cd "$CURR_DIR"
-
-#     done
-
-#     # ==========================================
-#     # PIT SCHEDULING
+# # ==========================================
+#     # PAVLOVIAN TRAINING LOOP
 #     # ==========================================
 
-#     scheduling=$(cat << EOF
-# {
-#     "trials": 100,
-#     "timesteps": 1000,
-#     "states": [
-#         [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#         [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#         [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#     ],
-#     "phases": [0.33, 0.66, 1.0]
-# }
-# EOF
-# )
+    for seed in $(seq $seed_start 1 $seed_end); do
 
-#     # ==========================================
-#     # PIT TEST LOOP
-#     # ==========================================
+        SIM="${PAV_DIR}/pav_sim_seed${seed}"
 
-#     for seed in $(seq $seed_start 1 $seed_end); do
+        mkdir -p "$SIM"
 
-#         SIM="${PIT_DIR}/pit_test_seed${seed}"
+        cd "$SIM"
 
-#         mkdir -p "$SIM"
+        cp "$CURR_DIR/prm_file.json" "$SIM/"
 
-#         cd "$SIM"
+        echo "$scheduling" > scheduling.json
 
-#         cp "$CURR_DIR/prm_file.json" "$SIM/"
+        echo "Running PAVLOVIAN simulation seed=$seed"
 
-#         echo "$scheduling" > scheduling.json
+        python ${SRC}/Pavlovian_Conditioning.py \
+            -d scheduling.json \
+            -i $id \
+            -s $seed \
+            -l $lesion_pre
 
-#         echo "Running PIT test simulation seed=$seed"
+        cd "$CURR_DIR"
 
-#         python ${SRC}/PIT_Test_Simulation.py \
-#             -d scheduling.json \
-#             -i $id \
-#             -s $seed \
-#             -l $lesion_post
+    done
 
-#         cd "$CURR_DIR"
+    # ==========================================
+    # PIT SCHEDULING
+    # ==========================================
 
-#     done
+    scheduling=$(cat << EOF
+{
+    "trials": 100,
+    "timesteps": 1000,
+    "states": [
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    ],
+    "phases": [0.33, 0.66, 1.0]
+}
+EOF
+)
 
-#     # ==========================================
-#     # ANALYSIS
-#     # ==========================================
+    # ==========================================
+    # PIT TEST LOOP
+    # ==========================================
 
-#     python ${SRC}/results_analysis_fast.py \
-#         -p yes \
-#         -i $id \
-#         -d Lever
+    for seed in $(seq $seed_start 1 $seed_end); do
 
- done
+        SIM="${PIT_DIR}/pit_test_seed${seed}"
+
+        mkdir -p "$SIM"
+
+        cd "$SIM"
+
+        cp "$CURR_DIR/prm_file.json" "$SIM/"
+
+        echo "$scheduling" > scheduling.json
+
+        echo "Running PIT test simulation seed=$seed"
+
+        python ${SRC}/PIT_Test_Simulation.py \
+            -d scheduling.json \
+            -i $id \
+            -s $seed \
+            -l $lesion_post
+
+        cd "$CURR_DIR"
+
+    done
+
+    # ==========================================
+    # ANALYSIS
+    # ==========================================
+
+    python ${SRC}/results_analysis_fast.py \
+        -p yes \
+        -i $id \
+        -d Lever
+
+  done
