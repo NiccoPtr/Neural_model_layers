@@ -1,0 +1,166 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed 11 Nov 2026
+
+@author: Nicc
+"""
+
+import argparse
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--csv",
+        type=str,
+        help="Path to CSV file"
+    )
+    parser.add_argument(
+        '-t',
+        "--trial",
+        type=int,
+        help="Define trial to refer for plotting"
+    )
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    df = pd.read_csv(args.csv)
+
+    if args.trial not in df['Trial'].values:
+        raise ValueError(f"Trial {args.trial} is not present, simulation contains {int(df['Trial'].iloc[-1])} Trials")
+            
+    #Create a 'df_new' that isolates those rows of interest for every column
+    #Take into account Seed and Trial specified by args  
+    df_new = df[
+        (df["Trial"] == args.trial)
+        ].sort_values("Timestep").copy()
+    
+    timesteps = len(df_new)
+    
+    #Layers
+    MC = df_new.filter(like="MC_Unit").to_numpy()
+    PFCd_PPC = df_new.filter(like="PFCd_PPC_Unit").to_numpy()
+    PL = df_new.filter(like="PL_Unit").to_numpy()
+    BLA_IC = df_new.filter(like="BLA_IC_Unit").to_numpy()
+    NAc_1 = df_new.filter(like="NAc_1_Unit").to_numpy() * -1
+    NAc_2 = df_new.filter(like="NAc_2_Unit").to_numpy() * -1
+    DMS_1 = df_new.filter(like="DMS_1_Unit").to_numpy() * -1
+    DMS_2 = df_new.filter(like="DMS_2_Unit").to_numpy() * -1
+    DLS_1 = df_new.filter(like="DLS_1_Unit").to_numpy() * -1
+    DLS_2 = df_new.filter(like="DLS_2_Unit").to_numpy() * -1
+    DA = df_new.filter(like="DA_Unit").to_numpy()
+    
+    #State
+    state = df_new.filter(like='Input').to_numpy()
+    
+    plt.close('all')
+    labels = [
+            'Light_1', 
+            'Light_2',
+            'Lever', 
+            'Chain', 
+            'Food_1', 
+            'Food_2'
+        ]
+    
+    #Plotting set up
+    plots = [
+        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(6)], (-0.1, 1.2)),
+        ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        # ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
+        ("DA", [(DA[:, i], ["SNpco_1", "SNpco_2", "VTA"][i]) for i in range(3)], (-0.1, 1.2))
+        ]
+    
+    n_rows = len(plots) + 1
+    fig = plt.figure(figsize=(14, 2.2 * n_rows))
+    gs = GridSpec(n_rows,
+                  2,
+                  width_ratios=[0.3, 8],
+                  height_ratios=[4.0, 1.2, 1.5, 1.5, 1.5, 1.5, 1.5, 1.8, 4.2],
+                  hspace=0.25
+                  )
+    
+    shared_ax = None
+    
+    #Plotting Layers
+    for i, (title, lines, ylim) in enumerate(plots):
+        title_ax = fig.add_subplot(gs[i, 0])
+        ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
+
+        if shared_ax is None:
+            shared_ax = ax
+
+        # Left column: titles only
+        title_ax.text(0.2, 0.5, title, ha="center", va="center", fontsize=15)
+        title_ax.axis("off")
+
+        # Right column: actual plot
+        for y, label in lines:
+            ax.plot(df_new["Timestep"], y, label=label)
+
+        ax.set_ylim(*ylim)
+        if i == 0:
+            ax.legend(loc="upper right", fontsize=8, frameon=False, bbox_to_anchor=(1.0, 1.5))
+        else:
+            ax.legend(loc="upper right", fontsize=8, frameon=False, bbox_to_anchor=(1.0, 1.15))
+
+        # Clean spines
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        ax.tick_params(labelbottom=False)
+        
+    #State plotting
+    title_ax = fig.add_subplot(gs[-1, 0])
+    ax = fig.add_subplot(gs[-1, 1], sharex=shared_ax)
+    
+    title_ax.text(0.2, 0.5, "State", ha="center", va="center", fontsize=15)
+    title_ax.axis("off")
+    
+    im = ax.imshow(
+        state.T,
+        interpolation="none",
+        aspect="auto",
+        vmin=0,
+        vmax=2,
+        cmap='YlOrRd'
+    )
+    
+    ax.set_yticks(np.arange(8), [
+        'Light_1',
+        'Light_2',
+        'Lever',
+        'Chain',
+        'Food_1',
+        'Food_2',
+        'Sat_1',
+        'Sat_2'],
+        fontsize=10
+        )
+                                 
+    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+    
+    # Shared x-axis
+    ax.set_xlabel("Timestep")
+    
+    xmin, xmax = shared_ax.get_xlim()
+    pad = 0.1 * (xmax - xmin)
+    shared_ax.set_xlim(xmin, xmax + pad)
+    
+    plt.show()
