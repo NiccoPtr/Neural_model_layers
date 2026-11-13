@@ -6,13 +6,22 @@ Created on Wed 11 Nov 2026
 """
 
 import argparse
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from params import Parameters
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i",
+        "--id",
+        type=str,
+        required=True,
+        help="Verification ID Number",
+    )
     parser.add_argument(
         "--csv",
         type=str,
@@ -29,6 +38,36 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
+    parameters = Parameters()
+
+    BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR.parent / "CNR_model_data" / "PIT"
+
+    INST_DIR = DATA_DIR / "instrumental_training"
+
+    param_file = (
+        INST_DIR
+        / f"instrumental_training_{args.id}"
+        / "inst_sim_seed1"
+        / "prm_file.json"
+    )
+
+    if not param_file.exists():
+        param_file = (
+            INST_DIR
+            / f"instrumental_training_{args.id}"
+            / "inst_sim_seed31"
+            / "prm_file.json"
+        )
+
+    if param_file.exists():
+        parameters.load(param_file, mode="json")
+        print("Imported parameters successfully")
+    else:
+        raise FileNotFoundError(
+            f"Parameters file not found: {param_file}"
+        )
+
     df = pd.read_csv(args.csv)
 
     if args.trial not in df['Trial'].values:
@@ -41,6 +80,10 @@ if __name__ == "__main__":
         ].sort_values("Timestep").copy()
     
     timesteps = len(df_new)
+
+    #Thresholds
+    action_threshold = parameters.thresholds["MC"]
+    attention_threshold = parameters.thresholds["PFCd_PPC"]
     
     #Layers
     MC = df_new.filter(like="MC_Unit").to_numpy()
@@ -70,17 +113,17 @@ if __name__ == "__main__":
     
     #Plotting set up
     plots = [
-        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(6)], (-0.1, 1.2)),
-        ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        # ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        # ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2)),
-        ("DA", [(DA[:, i], ["SNpco_1", "SNpco_2", "VTA"][i]) for i in range(3)], (-0.1, 1.2))
+        ('BLA_IC', [(BLA_IC[:, i], labels[i]) for i in range(6)], (-0.1, 1.2), None),
+        ('NAc_1', [(NAc_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        # ('NAc_2', [(NAc_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        ('DMS_1', [(DMS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        # ('DMS_2', [(DMS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        ('DLS_1', [(DLS_1[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        # ('DLS_2', [(DLS_2[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        ('MC', [(MC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), action_threshold),
+        ('PFCd_PPC', [(PFCd_PPC[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), attention_threshold),
+        ('PL', [(PL[:, i], f'Unit_{i+1}') for i in range(2)], (-0.1, 1.2), None),
+        ("DA", [(DA[:, i], ["SNpco_1", "SNpco_2", "VTA"][i]) for i in range(3)], (-0.1, 1.2), None)
         ]
     
     n_rows = len(plots) + 1
@@ -88,14 +131,14 @@ if __name__ == "__main__":
     gs = GridSpec(n_rows,
                   2,
                   width_ratios=[0.3, 8],
-                  height_ratios=[4.0, 1.2, 1.5, 1.5, 1.5, 1.5, 1.5, 1.8, 4.2],
+                  height_ratios=[4.0, 1.2, 1.8, 1.8, 2.5, 2.5, 1.8, 2.5, 4.5],
                   hspace=0.25
                   )
     
     shared_ax = None
     
     #Plotting Layers
-    for i, (title, lines, ylim) in enumerate(plots):
+    for i, (title, lines, ylim, threshold) in enumerate(plots):
         title_ax = fig.add_subplot(gs[i, 0])
         ax = fig.add_subplot(gs[i, 1], sharex=shared_ax)
 
@@ -109,6 +152,25 @@ if __name__ == "__main__":
         # Right column: actual plot
         for y, label in lines:
             ax.plot(df_new["Timestep"], y, label=label)
+
+        if threshold is not None:
+            ax.hlines(
+                y=threshold,
+                xmin=0,
+                xmax=1000,
+                color="black",
+                linestyle=":",
+                linewidth=1.5
+            )
+
+        if title != "BLA_IC" and title != "CeA":
+            ax.axvline(
+                x=50,
+                color="green",
+                linestyle="-",
+                linewidth=1.5,
+                alpha=0.8
+            )
 
         ax.set_ylim(*ylim)
         if i == 0:
@@ -147,7 +209,7 @@ if __name__ == "__main__":
         'Food_2',
         'Sat_1',
         'Sat_2'],
-        fontsize=10
+        fontsize=8
         )
                                  
     
